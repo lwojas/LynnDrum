@@ -156,6 +156,7 @@ Observations that matter for a faithful port: priority is **next > current > pre
 | S5 | Shuffle by period lengthening | PPQ-domain offset of odd steps | same musical result in a stateless clock |
 | S6 | Pattern RAM/backup buffer swap on pattern change (`copyBackupBufferToPattern`) | edits are committed immediately to the pattern; no "discard unsaved edits on pattern change" | desktop state model (confirm desired) |
 | S7 | Front-panel LEDs, MIDI-out, trigger-out | removed | n/a |
+| S8 | Tempo is an integer BPM (`seq_setBpm(uint16_t)`; also feeds LFO sync via `lfo_calcPhaseInc`) | float host tempo (e.g. 136.37) for the sequencer clock and LFO sync | host tempo is fractional; truncating would drift against the DAW grid. For reference-mode tests drive both with integer BPM (T0 stays exact). |
 
 ## 8. Tests
 

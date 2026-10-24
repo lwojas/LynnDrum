@@ -14,7 +14,7 @@ Order is chosen so that **correctness of the engine is established before any pl
 | D4 | Sequencer in first playable? | **Resolved: yes** (USP). See §1 stages S0–S3 and `lxr-sequencer.md`. |
 | D5 | Window | **Resolved:** fixed size is acceptable to start, but the layout is fluid from day one (`lxr-ui-architecture.md` §6). |
 | D6 | Transient sample licence | **Resolved:** keep and attribute (CC BY 4.0 as reported; verify page manually). |
-| D7 | `guideline.md` | Still outstanding; UI work can start from the mockup. |
+| D7 | `guidelines.md` | **Received and folded into the UI doc (§7).** Treated as inspiration; conflicts with engine behaviour are resolved in favour of the engine (§7.3). |
 | D8 | Pattern-change commit semantics (S6), roll granularity, per-track choke fix, free-run mode defaults | Open — decide when S1/S2 results are in. |
 
 ## 1. Phases, milestones, dependencies

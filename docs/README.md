@@ -1,6 +1,6 @@
 # LynnDrum — LXR-derived VST3 prototype: study documents
 
-Source: `Reference/lxr-desktop-app` (pinned at `a43cd4f`, 2026-10-23). UI input: `concept/stitch_lxr_02_vst_ui_design/` (no `guideline.md` yet).
+Source: `Reference/lxr-desktop-app` (pinned at `a43cd4f`, 2026-10-23). UI inputs: `concept/stitch_lxr_02_vst_ui_design/` (mockup) and `../guidelines.md` (design guideline; inspiration only, see `lxr-ui-architecture.md` §7).
 Scope of this stage: **study and plan only. No plugin code has been written. webdsp was not touched and was not read.**
 Revised 2026-10-24 after the first round of decisions (below).
 
@@ -75,4 +75,4 @@ Phase 1: the **host reference harness** (unmodified upstream DSP + CC handler + 
 Morph, kit/pattern-file import from real LXR devices, reverb, FX chains or tempo sync, aux/multi-out buses, float "plugin mode", native-rate (no resampler) mode, sample-accurate trigger offsets, external MIDI-clock/MTC sync, MIDI-record into patterns, any DSP or sequencer "improvement" before the reference is validated, and UI elements with no engine counterpart.
 
 ### Assumptions to validate before implementation
-1. Shipping firmware = this source with these build flags. 2. Half-wave FM (negative → 0) is real. 3. True I2S rate is 44 140 Hz (no hardware to measure — accept the code's claim). 4. `systick_ticks` = 0.25 ms (sequencer harness). 5. The CC-BY attribution requirements as reported (check the page manually). 6. JUCE 8 WebView behaves in the target hosts. 7. 7-bit parameter resolution is acceptable for automation. 8. Hosts provide usable `AudioPlayHead` data; free-run is the fallback. 9. `guideline.md` (still to come) does not change the UI scope materially.
+1. Shipping firmware = this source with these build flags. 2. Half-wave FM (negative → 0) is real. 3. True I2S rate is 44 140 Hz (no hardware to measure — accept the code's claim). 4. `systick_ticks` = 0.25 ms (sequencer harness). 5. The CC-BY attribution requirements as reported (check the page manually). 6. JUCE 8 WebView behaves in the target hosts. 7. 7-bit parameter resolution is acceptable for automation. 8. Hosts provide usable `AudioPlayHead` data; free-run is the fallback. 9. (Resolved) `guidelines.md` received; its conflicts with the engine are resolved in `lxr-ui-architecture.md` §7.3.
