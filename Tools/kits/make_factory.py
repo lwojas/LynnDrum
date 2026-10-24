@@ -32,13 +32,18 @@ INIT = kit(
 
 def variant(name, **tweaks): return tweaks
 
-TIGHT = kit(INIT,
+# Velocity > Volume is OFF in the engine by default, and then a step's velocity changes nothing (found 2026-10-25 while building the demo library): the ghost notes and
+# accents of the three patterned kits would play at full level. Switch it on for the kits whose patterns use velocity.
+VEL = {}
+for _v in (D1, D2, D3, SN, CY, HH): VEL.update(_v(Velocity_Volume=1))
+
+TIGHT = kit(INIT, VEL,
     D1(Coarse=33, Decay=24, Pitch_Mod=58, Pitch_Decay=30), D2(Coarse=50, Decay=22), D3(Coarse=60, Decay=20),
     SN(Decay=14, Noise_Osc_Mix=85, Filter_Freq=40), CY(Decay=50, Coarse=105), HH(Decay_closed=3, Decay_open=22, Filter_Freq=100))
-DEEP = kit(INIT,
+DEEP = kit(INIT, VEL,
     D1(Coarse=27, Decay=40, Pitch_Mod=40, Pitch_Decay=40), D2(Coarse=38, Decay=34), D3(Coarse=48, Decay=30),
     SN(Coarse=50, Decay=21, Noise_Osc_Mix=60, Filter_Freq=15), CY(Decay=66, Coarse=88, Mod_Osc_1_Freq=50), HH(Decay_closed=7, Decay_open=36, Filter_Freq=75))
-METAL = kit(INIT,
+METAL = kit(INIT, VEL,
     D1(FM_Amount=50, FM_Freq=70, Coarse=30, Decay=30, Pitch_Mod=45), D2(FM_Amount=70, FM_Freq=75, Coarse=48, Decay=24), D3(FM_Amount=80, FM_Freq=40, Coarse=66, Decay=22),
     SN(Waveform=3, Coarse=64, Noise_Osc_Mix=50, Decay=15, Pitch_Mod=0), CY(Wave_1=3, Wave_2=2, Wave_3=3, Coarse=85, Mod_Osc_1_Gain=127, Mod_Osc_1_Freq=80, Mod_Osc_2_Freq=40, Decay=64, Filter_Freq=70),
     HH(Wave_1=2, Wave_2=3, Wave_3=3, Coarse=75, Mod_Osc_1_Gain=127, Mod_Osc_2_Gain=127, Filter_Freq=100, Decay_closed=4, Decay_open=28))

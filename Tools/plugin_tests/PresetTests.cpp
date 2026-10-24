@@ -48,6 +48,40 @@ int main()
         }
         CHECK (p.bridge().songState().entries[0] == 0 && p.bridge().songState().entries[1] == 1 && p.bridge().songState().entries[2] == lynn::kSongLoop && !p.bridge().songState().enabled, "Metal Broken song");
         
+        // ---- the demo library (Tools/kits/library, documentation in each preset's "meta") ------------------------------------
+        {
+            int library = 0; bool complete = true;
+            for (auto& e : pm.entries())
+                if (e.factory && e.meta.isObject())
+                {
+                    ++library;
+                    for (const char* k : { "category", "level", "character", "technique", "voices", "key", "bpm", "demonstrates", "patterns", "order" })
+                        if (e.meta[juce::Identifier (k)].isVoid()) { complete = false; std::printf ("FAIL: %s has no meta.%s\n", e.name.toRawUTF8(), k); ++failures; }
+                    if (e.meta["demonstrates"].toString().length() < 40) { complete = false; std::printf ("FAIL: %s: 'demonstrates' is too short\n", e.name.toRawUTF8()); ++failures; }
+                }
+            CHECK (library >= 35 && complete, "demo library: %d presets with documentation", library);
+            int iTight = names.indexOf ("Tight 4/4"), iWare = names.indexOf ("Warehouse Pulse"), iLast = names.indexOf ("Ring Mod Throws");
+            CHECK (iTight > 0 && iWare > iTight && iLast > iWare, "starters sort before the library, the library keeps its authored order (%d %d %d)", iTight, iWare, iLast);
+
+            pm.load ("Warehouse Pulse", true);
+            CHECK (pm.currentName() == "Warehouse Pulse" && countSteps (p.bridge().pattern (0)) > 0 && countSteps (p.bridge().pattern (1)) > 0, "library preset loads with two patterns");
+            {   // pattern 2 carries the phrase-ending locks on the last kick and the last snare
+                const auto& k = p.bridge().pattern (1).tracks[0]; const auto& s3 = p.bridge().pattern (1).tracks[3];
+                CHECK (k.length == 32 && k.lockPar1[28] == def ("velod1").par && k.lockVal1[28] == 11 && k.note[28] == 63, "library kick lock: decay 11, note +3 on the phrase-ending kick");
+                CHECK (s3.lockPar1[28] == def ("filter_freq_4").par && s3.lockPar2[28] == def ("velod4").par, "library snare locks");
+                CHECK (p.bridge().pattern (0).tracks[0].lockPar1[28] == lynn::kNoLock, "pattern 1 is the plain version (no locks)");
+            }
+            pm.load ("Concrete Roller", true);
+            CHECK (p.bridge().pattern (0).tracks[5].length == 12 && p.bridge().pattern (1).tracks[1].length == 10, "polymeter: track lengths 12 and 10 arrive");
+            pm.load ("Foggy Dub", true);
+            CHECK (paramValue (p, def ("fx_type")) == 4 && paramValue (p, def ("audio_out2")) == 6, "Foggy Dub: delay FX and drum 2 routed to the FX bus");
+            pm.load ("Swing Lab", true);
+            CHECK (p.bridge().pattern (0).shuffle == 0 && p.bridge().pattern (4).shuffle > 55 && p.bridge().pattern (4).shuffle < 70, "Swing Lab: five patterns, straight to triplet shuffle");
+            pm.load ("Probability Garden", true);
+            { int low = 0; for (auto& t : p.bridge().pattern (0).tracks) for (int i = 0; i < lynn::kSteps; ++i) if (t.on[(size_t) i] && t.prob[(size_t) i] < 100) ++low; CHECK (low > 10, "Probability Garden has optional steps (%d)", low); }
+            pm.load ("Tight 4/4", true);
+        }
+
         // ---- dirty tracking ------------------------------------------------------------------------------------------
         auto* kickDecay = p.apvts.getParameter ("velod1");
         kickDecay->setValueNotifyingHost (kickDecay->convertTo0to1 (3.0f));

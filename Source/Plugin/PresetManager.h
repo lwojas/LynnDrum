@@ -13,7 +13,9 @@ class LynnDrumProcessor;
 class PresetManager final : private juce::AudioProcessorValueTreeState::Listener
 {
 public:
-    struct Entry { juce::String name; bool factory = false; juce::File file; juce::String resource; };
+    // `meta` is the optional documentation object of a preset document (category, level, what it demonstrates, ...): never used for sound, only shown by the browser.
+    // `order` is meta.order; presets without it (the starters) sort first, then the library in the order its author gave.
+    struct Entry { juce::String name; bool factory = false; juce::File file; juce::String resource; juce::var meta; int order = 50; };
 
     explicit PresetManager (LynnDrumProcessor&);
     ~PresetManager() override;

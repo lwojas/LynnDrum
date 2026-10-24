@@ -52,9 +52,11 @@ void PresetManager::rescan()
         const auto doc = juce::JSON::parse (juce::String::fromUTF8 (data, size));
         if (!doc.isObject()) continue;
         Entry e; e.name = doc["name"].toString(); e.factory = true; e.resource = BinaryData::namedResourceList[i];
+        e.meta = doc["meta"]; if (e.meta.isObject() && ! e.meta["order"].isVoid()) e.order = (int) e.meta["order"];
         if (e.name.isNotEmpty()) list.push_back (e);
     }
-    std::stable_sort (list.begin(), list.end(), [] (const Entry& a, const Entry& b) { return a.name == "Init" ? b.name != "Init" : (b.name != "Init" && a.name.compareIgnoreCase (b.name) < 0); });
+    std::stable_sort (list.begin(), list.end(), [] (const Entry& a, const Entry& b)
+                      { if (a.name == "Init" || b.name == "Init") return a.name == "Init" && b.name != "Init"; return a.order != b.order ? a.order < b.order : a.name.compareIgnoreCase (b.name) < 0; });
     auto dir = userDirectory();
     if (dir.isDirectory())
     {
@@ -64,7 +66,7 @@ void PresetManager::rescan()
         {
             const auto doc = juce::JSON::parse (f);
             if (!doc.isObject()) continue;
-            Entry e; e.name = doc["name"].toString(); e.file = f;
+            Entry e; e.name = doc["name"].toString(); e.file = f; e.meta = doc["meta"];
             if (e.name.isNotEmpty()) list.push_back (e);
         }
     }

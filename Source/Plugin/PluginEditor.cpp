@@ -146,7 +146,9 @@ juce::var LynnDrumEditor::presetsJson (bool withItems) const
     juce::Array<juce::var> items;
     for (const auto& e : proc.presetManager().entries())
     {
-        auto* o = new juce::DynamicObject(); o->setProperty ("name", e.name); o->setProperty ("factory", e.factory); items.add (juce::var (o));
+        auto* o = new juce::DynamicObject(); o->setProperty ("name", e.name); o->setProperty ("factory", e.factory);
+        if (e.meta.isObject()) o->setProperty ("meta", e.meta);                                 // documentation of library presets, shown by the browser
+        items.add (juce::var (o));
     }
     if (withItems) root->setProperty ("items", items);
     root->setProperty ("current", proc.presetManager().currentName());

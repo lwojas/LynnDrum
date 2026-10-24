@@ -10,7 +10,12 @@ export interface ParamHandle {
   end(): void
   subscribe(cb: () => void): () => void
 }
-export interface PresetInfo { name: string; factory: boolean }
+/** Documentation object of a library preset (the optional `meta` of a .lynnpreset): never used for sound, shown by the preset browser */
+export interface PresetMeta {
+  category?: string; level?: 1 | 2 | 3; character?: string; technique?: string; secondary?: string[]; voices?: string; key?: string; bpm?: number
+  length?: string; swing?: string; demonstrates?: string; patterns?: string[]
+}
+export interface PresetInfo { name: string; factory: boolean; meta?: PresetMeta }
 export interface PresetState { items?: PresetInfo[]; current: string; factory: boolean; dirty: boolean }
 export interface Bridge {
   readonly isMock: boolean
