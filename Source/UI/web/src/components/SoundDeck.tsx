@@ -2,24 +2,25 @@ import React from 'react'
 import { useStore } from '../store'
 import { TRACKS } from '../model'
 import { SOUND_PARAMS, ParamDef } from '../params.generated'
+import { Matrix } from './Matrix'
 import { EnvGraph, FilterGraph } from './Graphs'
 import { Ctl, Knob, Select, Switch } from './controls'
 import { audition, isAuto, onAutoChange, setAuto } from '../audition'
 
 const VOICE_GROUP = ['Drum 1', 'Drum 2', 'Drum 3', 'Snare', 'Cymbal', 'Hi-hat', 'Hi-hat']
 
-type Module = 'osc' | 'filter' | 'env' | 'lfo' | 'out'
+type Module = 'osc' | 'filter' | 'env' | 'lfo' | 'out' | 'click'
 const MODULES: { key: Module; title: string; accent: string }[] = [
   { key: 'osc', title: '1. OSC & FM CORE', accent: '#ff7728' },
   { key: 'filter', title: '2. FILTER (SVF)', accent: '#00e5ff' },
   { key: 'env', title: '3. ENVELOPES', accent: '#2fe278' },
-  { key: 'lfo', title: '4. LFO & VELOCITY', accent: '#a855f7' },
 ]
 function moduleOf(d: ParamDef): Module {
   const n = d.name
   if (/^(Filter|Resonance)/.test(n)) return 'filter'
   if (/^(Attack|Decay|Amp Slope|Repeat|Pitch)/.test(n)) return 'env'
   if (/^(LFO|Velocity)/.test(n)) return 'lfo'
+  if (/^Click/.test(n)) return 'click'
   if (/^(Volume|Pan|Drive|Sample Rate|Audio Out)/.test(n)) return 'out'
   return 'osc'
 }
@@ -72,12 +73,28 @@ function AuditionBar({ voice }: { voice: number }) {
   )
 }
 
+type Tab = 'main' | 'mod' | 'click' | 'route'
+const TABS: { key: Tab; label: string }[] = [
+  { key: 'main', label: 'MAIN SYNTH' }, { key: 'mod', label: 'MOD MATRIX' }, { key: 'click', label: 'CLICK' }, { key: 'route', label: 'KIT ROUTING' },
+]
+const MOD_COLS = [
+  { name: 'LFO Wave', label: 'LFO WAVE', w: 84 }, { name: 'LFO Rate', label: 'RATE', w: 52 }, { name: 'LFO Amount', label: 'AMOUNT', w: 52 }, { name: 'LFO Phase', label: 'PHASE', w: 52 },
+  { name: 'LFO Target', label: 'TARGET', w: 92 }, { name: 'LFO Target Voice', label: 'T.VOICE', w: 52 }, { name: 'LFO Sync', label: 'SYNC', w: 60 }, { name: 'LFO Retrigger', label: 'RETRIG', w: 72 },
+  { name: 'Velocity > Volume', label: 'VEL>VOL', w: 70 }, { name: 'Velocity Amount', label: 'VEL AMT', w: 52 }, { name: 'Velocity Target', label: 'VEL TARGET', w: 92 },
+]
+const CLICK_COLS = [{ name: 'Click Type', label: 'TYPE', w: 100 }, { name: 'Click Level', label: 'LEVEL', w: 60 }, { name: 'Click Pitch', label: 'PITCH', w: 60 }]
+const ROUTE_COLS = [
+  { name: 'Audio Out', label: 'OUTPUT', w: 96 }, { name: 'Volume', label: 'VOLUME', w: 60 }, { name: 'Pan', label: 'PAN', w: 52 },
+  { name: 'Drive', label: 'DRIVE', w: 52 }, { name: 'Sample Rate Reducer', label: 'SRR', w: 60 },
+]
+
 export function SoundDeck() {
   const { voice } = useStore()
+  const [tab, setTab] = React.useState<Tab>('main')
   const t = TRACKS[voice]
-  const defs = SOUND_PARAMS.filter(d => d.group === VOICE_GROUP[voice] && !hidden(voice, d))
   const vn = Math.min(voice, 5) + 1
   const decayId = voice === 5 ? 'velod6_closed' : voice === 6 ? 'velod6_open' : `velod${vn}`
+  const defs = SOUND_PARAMS.filter(d => d.group === VOICE_GROUP[voice] && !hidden(voice, d))
   const by = (m: Module) => defs.filter(d => moduleOf(d) === m)
   return (
     <section className="flex-1 min-w-0 min-h-0 p-3 flex flex-col gap-3 overflow-y-auto">
@@ -88,17 +105,33 @@ export function SoundDeck() {
         <span className="font-mono text-xs text-slate-400">ALGORITHM: {t.algo}</span>
         <AuditionBar voice={voice} />
         <div className="flex-1" />
-        <div className="flex gap-3 items-end">
-          {by('out').map(d => <Ctl key={d.id} id={d.id} accent="#ff7728" />)}
+        <div className="flex gap-1">
+          {TABS.map(x => <button key={x.key} onClick={() => setTab(x.key)}
+            className={`px-2.5 py-1 rounded text-[10px] font-mono font-bold tracking-wider border ${tab === x.key ? 'bg-synth-cyan/20 border-synth-cyan text-synth-cyan' : 'border-synth-border text-slate-400 hover:text-slate-200'}`}>{x.label}</button>)}
         </div>
       </div>
-      <div className="grid gap-3 shrink-0" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))' }}>
-        {MODULES.map(m => <Panel key={m.key} title={m.title} accent={m.accent}>
-          {m.key === 'filter' && <FilterGraph n={vn} />}
-          {m.key === 'env' && <EnvGraph n={vn} decayId={decayId} />}
-          <Group defs={by(m.key)} accent={m.accent} /></Panel>)}
-      </div>
-      <FxStrip />
+      {tab === 'main' && <>
+        <div className="flex gap-3 items-end shrink-0">{by('out').map(d => <Ctl key={d.id} id={d.id} accent="#ff7728" />)}</div>
+        <div className="grid gap-3 shrink-0" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))' }}>
+          {MODULES.map(m => <Panel key={m.key} title={m.title} accent={m.accent}>
+            {m.key === 'filter' && <FilterGraph n={vn} />}
+            {m.key === 'env' && <EnvGraph n={vn} decayId={decayId} />}
+            <Group defs={by(m.key)} accent={m.accent} /></Panel>)}
+        </div>
+      </>}
+      {tab === 'mod' && <>
+        <Matrix cols={MOD_COLS} accent="#a855f7" />
+        <div className="text-[10px] font-mono text-slate-500">One LFO per voice. TARGET is the parameter it modulates, on the voice chosen by T.VOICE. VEL TARGET is what note velocity controls besides volume. Click a voice tag to select it.</div>
+      </>}
+      {tab === 'click' && <>
+        <Matrix cols={CLICK_COLS} accent="#ff7728" />
+        <div className="text-[10px] font-mono text-slate-500">The transient generator layers a short sample-based click on each voice. Level 0 turns it off.</div>
+      </>}
+      {tab === 'route' && <>
+        <Matrix cols={ROUTE_COLS} accent="#00e5ff" />
+        <div className="flex gap-3 items-end shrink-0"><Ctl id={SOUND_PARAMS.find(p => p.group === 'Global')!.id} accent="#00e5ff" /></div>
+        <FxStrip />
+      </>}
     </section>
   )
 }

@@ -57,7 +57,7 @@ Result: **233 automatable sound parameters** (Drum 1/2/3 37 each, Snare 36, Cymb
 UI: knob (vertical drag, shift = fine, double-click = default, bipolar arcs for ±63 params), select, switch; the sound deck shows the five groups of the selected voice (OSC & FM, Filter, Envelopes, LFO & velocity, output row) and the global FX bus strip. CH and OH both edit the Hi-hat group (open/closed decay each shown for its own track).
 
 Tests added: generated table vs engine (mod-target count, defaults in range), all 233 parameters driven to both ends of their domain with all voices triggered stays finite and bounded, hosted-bundle test (Drum 1 / Volume = 0 silences the kick), pluginval level 5.
-Not done: filter / envelope graphs (needs analytic curves of the real SVF/EG), MOD MATRIX / SAMPLE / KIT ROUTING tabs, parameter value text in dB/Hz (raw 0-127 shown), kit save/load (P6), solo.
+Not done: kit-per-pattern, LXR kit import.
 
 ## Presets and state (P6, 2026-10-24)
 
@@ -117,3 +117,8 @@ capture of the engine's output.
 muted track stays silent even if soloed. The bridge sends the *effective* mute (`muted || (any solo && !soloed)`) to the firmware's
 per-track mute, so no sequencer change is needed. Solo is a session setting: it is not saved in presets or plugin state, and it
 does not affect the audition buttons or keys.
+
+**Sound-deck tabs.** MAIN SYNTH (osc, filter, envelopes with graphs), MOD MATRIX (every voice's LFO and velocity routing in one
+table), CLICK (transient type/level/pitch per voice) and KIT ROUTING (audio output, volume, pan, drive and sample-rate reducer per
+voice, the global reducer, and the FX bus). The matrix tabs show the six sound voices (the two hi-hat tracks share one voice);
+clicking a voice tag selects it. Cells are the same controls as the main tab, so automation and p-locks are unaffected.
