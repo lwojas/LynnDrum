@@ -108,3 +108,7 @@ Slopes show curve shape (`lin` at centre, ±%), repeat shows `off`/`N×`, LFO ph
 attribute set directly on the step pad DOM node, the meter is a `<canvas>` driven by `requestAnimationFrame`, and low-rate values
 (BPM, running, active/pending pattern, song position) are read through `useSyncExternalStore` selectors so only the affected
 components re-render.
+
+**Sound-deck graphs.** The Filter panel draws an idealised 2-pole response (type, cutoff and Q from the engine tables); the Envelopes
+panel draws the amp attack/decay with the slope shaper. Both are visual aids (SVG, redrawn only when a parameter changes), not a
+capture of the engine's output.
