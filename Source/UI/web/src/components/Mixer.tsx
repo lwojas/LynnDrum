@@ -11,9 +11,9 @@ function Strip({ t }: { t: number }) {
   const info = TRACKS[t]
   const [val, set, handle] = useParam('fader' + (t + 1))
   const sel = voice === t
-  const muted = bank.mutes[t]
+  const muted = bank.mutes[t], solo = bank.solos[t], anySolo = bank.solos.some(Boolean)
   return (
-    <div className={`flex flex-col items-stretch min-w-0 flex-1 rounded-lg border p-1.5 gap-1.5 bg-synth-surface/60 ${sel ? 'border-synth-amber shadow-glow-amber' : 'border-synth-border'}`}>
+    <div className={`flex flex-col items-stretch min-w-0 flex-1 rounded-lg border p-1.5 gap-1.5 bg-synth-surface/60 ${sel ? 'border-synth-amber shadow-glow-amber' : 'border-synth-border'} ${anySolo && !solo ? 'opacity-60' : ''}`}>
       <button onClick={() => { setVoice(t); audition(t) }}
         className={`rounded px-0 py-1 text-[10px] font-extrabold font-mono text-center ${sel ? 'bg-synth-amber text-black' : 'bg-synth-border text-slate-200'}`}>{info.tag}</button>
       <div className="text-center text-[9px] font-mono text-slate-400 truncate">{info.role}</div>
@@ -24,6 +24,8 @@ function Strip({ t }: { t: number }) {
           className="w-7 h-5 rounded text-[10px] border bg-synth-panel text-synth-emerald border-synth-border hover:bg-synth-emerald hover:text-black">▶</button>
         <button title="Mute (stops this track's sequencer triggers)" onClick={() => sendG(['mute', t, muted ? 0 : 1])}
           className={`w-7 h-5 rounded text-[10px] font-mono border ${muted ? 'bg-synth-red text-black border-synth-red' : 'bg-synth-panel text-slate-300 border-synth-border'}`}>M</button>
+        <button title="Solo (only soloed tracks play from the sequencer; mute still wins; not saved in presets)" onClick={() => sendG(['solo', t, solo ? 0 : 1])}
+          className={`w-7 h-5 rounded text-[10px] font-mono border ${solo ? 'bg-synth-amber text-black border-synth-amber' : 'bg-synth-panel text-slate-300 border-synth-border'}`}>S</button>
       </div>
     </div>
   )

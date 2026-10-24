@@ -70,6 +70,8 @@ public:
     // ---- message thread -------------------------------------------------------------------------------------------
     const UiPattern& pattern (int p) const noexcept { return bank[(size_t) p]; }
     bool muted (int track) const noexcept { return ((mutes >> track) & 1) != 0; }
+    bool soloed (int track) const noexcept { return ((solos >> track) & 1) != 0; }     // solo is a session setting: not saved in presets or state
+    bool audible (int track) const noexcept { return !muted (track) && (solos == 0 || soloed (track)); }
     const UiSong& songState() const noexcept { return song; }
     bool used (int p) const noexcept { return !bank[(size_t) p].isEmpty(); }
 
@@ -114,6 +116,7 @@ private:
     std::array<UiPattern, kPatterns> bank;
     UiSong song;
     std::uint8_t mutes = 0;
+    std::uint8_t solos = 0;
     std::atomic<std::uint32_t> edits { 0 };                  // bumped by every UI edit (preset dirty tracking)
     std::atomic<std::uint64_t> playheadWord { 0 };           // 7 x 8 bit step index, bit 56 running
     std::atomic<std::uint32_t> patternWord { 0 };            // active | pending << 8 | songPosition << 16

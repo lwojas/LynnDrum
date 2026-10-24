@@ -85,7 +85,7 @@ function mockBridge(): Bridge {
   demo(0, [0, 4, 8, 12], 110); demo(3, [4, 12], 105); demo(5, [0, 2, 4, 6, 8, 10, 12, 14], 80); demo(6, [14], 90)
   bank[1] = applyCmd(applyCmd(emptyPattern(), ['step', 0, 0, 1]), ['step', 3, 4, 1])
   const song = Array(64).fill(SONG_END); song[0] = 0; song[1] = 1; song[2] = 65
-  let songMode = false; const mutes = Array(NUM_TRACKS).fill(false)
+  let songMode = false; const mutes = Array(NUM_TRACKS).fill(false), solos = Array(NUM_TRACKS).fill(false)
   let active = 0, pending = 0
   let running = true; const bpm = 120
   const listeners = new Set<(p: Playhead) => void>()
@@ -113,7 +113,7 @@ function mockBridge(): Bridge {
     async savePreset(n) { if (!items.some(i => i.name === n)) items = [...items, { name: n, factory: false }]; cur = n; curF = false; dirty = false; push(); return true },
     async deletePreset(n) { items = items.filter(i => i.factory || i.name !== n); push(); return true },
     onPreset(cb) { pl.add(cb); return () => pl.delete(cb) }, onPresetLoaded(cb) { ll.add(cb); return () => ll.delete(cb) },
-    async getState() { return { pattern: bank[0], bpm, running, used: bank.map(p => JSON.stringify(p) !== JSON.stringify(emptyPattern())), song, songMode, mutes } },
+    async getState() { return { pattern: bank[0], bpm, running, used: bank.map(p => JSON.stringify(p) !== JSON.stringify(emptyPattern())), song, songMode, mutes, solos } },
     async getPattern(p) { return bank[p] },
     async euclid(l, s, r) { const out = Array(64).fill(0); for (let i = 0; i < l; i++) out[(i + r) % l] = Math.floor(((i + 1) * s) / l) > Math.floor((i * s) / l) ? 1 : 0; return out },     // dev stand-in (the plugin uses the firmware's generator)
     cmd(c) {
@@ -121,6 +121,7 @@ function mockBridge(): Bridge {
       if (name !== 'euclid' && PATTERN_LEVEL.has(name)) { const p = a[0]; bank[p] = applyCmd(bank[p], [name, ...a.slice(1)] as any) }
       else if (name === 'euclid') { const [p, t, l, st, r] = a; const x = emptyPattern().tracks[0]; const o = bank[p]; const bits: number[] = Array(64).fill(0); for (let i = 0; i < l; i++) bits[(i + r) % l] = Math.floor(((i + 1) * st) / l) > Math.floor((i * st) / l) ? 1 : 0; const tr = { ...o.tracks[t], length: l, on: bits.map(b => !!b) }; void x; bank[p] = { ...o, tracks: o.tracks.map((q, i) => (i === t ? tr : q)) } }
       else if (name === 'mute') mutes[a[0]] = !!a[1]
+      else if (name === 'solo') solos[a[0]] = !!a[1]
       else if (name === 'clearPattern') bank[a[0]] = emptyPattern()
       else if (name === 'copyPattern') bank[a[1]] = JSON.parse(JSON.stringify(bank[a[0]]))
       else if (name === 'selectPattern') { pending = a[0]; if (!running) active = a[0] }

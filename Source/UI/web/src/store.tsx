@@ -21,7 +21,7 @@ interface Store {
 const Ctx = createContext<Store | null>(null)
 export const useStore = () => useContext(Ctx)!
 
-const emptyBank = (): BankInfo => ({ used: Array(64).fill(false), song: Array(64).fill(SONG_END), songMode: false, mutes: Array(NUM_TRACKS).fill(false) })
+const emptyBank = (): BankInfo => ({ used: Array(64).fill(false), song: Array(64).fill(SONG_END), songMode: false, mutes: Array(NUM_TRACKS).fill(false), solos: Array(NUM_TRACKS).fill(false) })
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [pattern, setPattern] = useState<Pattern>(emptyPattern())
@@ -36,7 +36,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const view = useRef(0); view.current = viewPat
 
   const loadView = useCallback((p: number) => { bridge.getPattern(p).then(x => { if (view.current === p) setPattern(x) }) }, [])
-  const refreshBank = useCallback(() => bridge.getState().then(s => { setBank({ used: s.used, song: s.song, songMode: s.songMode, mutes: s.mutes }); seedTelemetry(s.running, s.bpm) }), [])
+  const refreshBank = useCallback(() => bridge.getState().then(s => { setBank({ used: s.used, song: s.song, songMode: s.songMode, mutes: s.mutes, solos: s.solos ?? Array(NUM_TRACKS).fill(false) }); seedTelemetry(s.running, s.bpm) }), [])
   const setViewPat = useCallback((p: number) => { view.current = p; setViewPatState(p); setBar(0); loadView(p) }, [loadView])
 
   useEffect(() => { refreshBank(); loadView(0) }, [])
@@ -61,6 +61,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, [loadView])
   const sendG = useCallback((c: GlobalCmd) => {
     bridge.cmd(c as any)
+    if (c[0] === 'solo') setBank(b => ({ ...b, solos: b.solos.map((m, i) => (i === c[1] ? !!c[2] : m)) }))
     if (c[0] === 'mute') setBank(b => ({ ...b, mutes: b.mutes.map((m, i) => (i === c[1] ? !!c[2] : m)) }))
     else if (c[0] === 'songMode') setBank(b => ({ ...b, songMode: !!c[1] }))
     else if (c[0] === 'songSet') setBank(b => ({ ...b, song: b.song.map((e, i) => (i === c[1] ? c[2] : e)) }))

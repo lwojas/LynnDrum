@@ -83,6 +83,7 @@ export const PATTERN_LEVEL = new Set(['euclid', 'stepLock', 'step', 'stepVol', '
 /** commands with explicit arguments, sent as they are */
 export type GlobalCmd =
   | ['mute', track: number, on: number]
+  | ['solo', track: number, on: number]
   | ['clearPattern', pat: number]
   | ['copyPattern', src: number, dst: number]
   | ['selectPattern', pat: number]
@@ -93,5 +94,5 @@ export type GlobalCmd =
 export const SONG_END = 64, SONG_LOOP = 65
 
 export interface Playhead { running: boolean; steps: number[]; bpm: number; peakL?: number; peakR?: number; activePattern?: number; pendingPattern?: number; songPosition?: number }
-export interface BankInfo { used: boolean[]; song: number[]; songMode: boolean; mutes: boolean[] }
+export interface BankInfo { used: boolean[]; song: number[]; songMode: boolean; mutes: boolean[]; solos: boolean[] }
 export interface PluginState extends BankInfo { pattern: Pattern; bpm: number; running: boolean }

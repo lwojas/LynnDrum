@@ -165,6 +165,11 @@ static void bridgeTests()
     b.applyUiCommand ({ 5, 1, 2, 1 }, "copyTrack"); b.drain (h);
     b.applyUiCommand ({ 3, 1 }, "mute"); b.drain (h);
     CHECK (b.muted (3) && !b.muted (2), "mute mirror");
+    CHECK (b.audible (2) && !b.audible (3), "audible: only the muted track is silent");
+    b.applyUiCommand ({ 2, 1 }, "solo"); b.applyUiCommand ({ 3, 1 }, "solo"); b.drain (h);
+    CHECK (b.audible (2) && !b.audible (3) && !b.audible (0) && b.soloed (2), "solo silences non-soloed tracks, mute still wins over solo");
+    b.applyUiCommand ({ 2, 0 }, "solo"); b.applyUiCommand ({ 3, 0 }, "solo"); b.drain (h);
+    CHECK (b.audible (0) && b.audible (2) && !b.audible (3) && !b.soloed (2), "clearing solos restores the user mutes");
 
     // pattern select while stopped is immediate; song entries/mode reach the sequencer
     b.applyUiCommand ({ 5 }, "selectPattern"); b.drain (h);

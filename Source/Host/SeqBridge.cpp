@@ -63,7 +63,7 @@ void SeqBridge::editStep (int p, int t, int i)
     push (c);
 }
 void SeqBridge::editLength (int p, int t) { SeqCommand c; c.type = SeqCommand::Length; c.pat = (std::uint8_t) p; c.track = (std::uint8_t) t; c.value = bank[(size_t) p].tracks[(size_t) t].length; push (c); }
-void SeqBridge::editMute (int t) { SeqCommand c; c.type = SeqCommand::Mute; c.track = (std::uint8_t) t; c.value = muted (t) ? 1 : 0; push (c); }
+void SeqBridge::editMute (int t) { SeqCommand c; c.type = SeqCommand::Mute; c.track = (std::uint8_t) t; c.value = audible (t) ? 0 : 1; push (c); }
 void SeqBridge::editShuffle (int p) { SeqCommand c; c.type = SeqCommand::Shuffle; c.pat = (std::uint8_t) p; c.value = bank[(size_t) p].shuffle; push (c); }
 void SeqBridge::audition (int t, int vel)
 {
@@ -150,6 +150,9 @@ bool SeqBridge::applyUiCommand (const std::vector<double>& a, const std::string&
     }
     if (n == "trackLength") { const int t = at (1, 0, kTracks - 1); if (p < 0 || t < 0) return false; bank[(size_t) p].tracks[(size_t) t].length = val (2, 1, 64); editLength (p, t); return true; }
     if (n == "shuffle") { if (p < 0) return false; bank[(size_t) p].shuffle = val (1, 0, 127); editShuffle (p); return true; }
+    if (n == "solo") { const int t = at (0, 0, kTracks - 1); if (t < 0) return false; const std::uint8_t before = solos; solos = (std::uint8_t) ((solos & ~(1 << t)) | ((a.size() > 1 && a[1] != 0) ? (1 << t) : 0));
+                       if (before != solos) for (int i = 0; i < kTracks; ++i) editMute (i);       // solo changes every track's effective mute
+                       return true; }
     if (n == "mute") { const int t = at (0, 0, kTracks - 1); if (t < 0) return false; mutes = (std::uint8_t) ((mutes & ~(1 << t)) | ((a.size() > 1 && a[1] != 0) ? (1 << t) : 0)); editMute (t); return true; }
     if (n == "clearTrack")
     {

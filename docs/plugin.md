@@ -112,3 +112,8 @@ components re-render.
 **Sound-deck graphs.** The Filter panel draws an idealised 2-pole response (type, cutoff and Q from the engine tables); the Envelopes
 panel draws the amp attack/decay with the slope shaper. Both are visual aids (SVG, redrawn only when a parameter changes), not a
 capture of the engine's output.
+
+**Solo.** Each mixer strip has an `S` button next to `M`. While any track is soloed, only soloed tracks play from the sequencer; a
+muted track stays silent even if soloed. The bridge sends the *effective* mute (`muted || (any solo && !soloed)`) to the firmware's
+per-track mute, so no sequencer change is needed. Solo is a session setting: it is not saved in presets or plugin state, and it
+does not affect the audition buttons or keys.

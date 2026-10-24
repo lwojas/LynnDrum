@@ -169,11 +169,11 @@ juce::var LynnDrumEditor::stateJson() const
 {
     auto* root = new juce::DynamicObject();
     root->setProperty ("pattern", patternJson (0));
-    juce::Array<juce::var> used, song, mutes;
+    juce::Array<juce::var> used, song, mutes, solos;
     for (int p = 0; p < lynn::kPatterns; ++p) used.add (proc.bridge().used (p));
     for (auto e : proc.bridge().songState().entries) song.add ((int) e);
-    for (int t = 0; t < lynn::kTracks; ++t) mutes.add (proc.bridge().muted (t));
-    root->setProperty ("used", used); root->setProperty ("song", song); root->setProperty ("songMode", proc.bridge().songState().enabled); root->setProperty ("mutes", mutes);
+    for (int t = 0; t < lynn::kTracks; ++t) { mutes.add (proc.bridge().muted (t)); solos.add (proc.bridge().soloed (t)); }
+    root->setProperty ("used", used); root->setProperty ("song", song); root->setProperty ("songMode", proc.bridge().songState().enabled); root->setProperty ("mutes", mutes); root->setProperty ("solos", solos);
     root->setProperty ("bpm", proc.shownBpm());
     root->setProperty ("running", proc.bridge().readPlayhead().running);
     return juce::var (root);
