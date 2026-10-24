@@ -8,15 +8,18 @@ namespace
 juce::var trackJson (const lynn::UiTrack& t)
 {
     auto* o = new juce::DynamicObject();
-    juce::Array<juce::var> on, vol, prob, note, flam, shift;
+    juce::Array<juce::var> on, vol, prob, note, flam, shift, lp1, lv1, lp2, lv2;
     for (int i = 0; i < lynn::kSteps; ++i)
     {
         const size_t k = (size_t) i;
         on.add (t.on[k] != 0); vol.add ((int) t.vol[k]); prob.add ((int) t.prob[k]);
         note.add ((int) t.note[k]); flam.add ((int) t.flam[k]); shift.add ((int) t.shift[k]);
+        lp1.add (t.lockPar1[k] == lynn::kNoLock ? -1 : (int) t.lockPar1[k]); lv1.add ((int) t.lockVal1[k]);
+        lp2.add (t.lockPar2[k] == lynn::kNoLock ? -1 : (int) t.lockPar2[k]); lv2.add ((int) t.lockVal2[k]);
     }
     o->setProperty ("on", on); o->setProperty ("vol", vol); o->setProperty ("prob", prob);
     o->setProperty ("note", note); o->setProperty ("flam", flam); o->setProperty ("shift", shift);
+    o->setProperty ("lockPar1", lp1); o->setProperty ("lockVal1", lv1); o->setProperty ("lockPar2", lp2); o->setProperty ("lockVal2", lv2);
     o->setProperty ("length", (int) t.length);
     return juce::var (o);
 }

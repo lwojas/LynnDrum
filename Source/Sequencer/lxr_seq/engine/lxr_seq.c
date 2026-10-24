@@ -132,3 +132,10 @@ void lxrseq_start_at(LxrSeq* q, uint32_t absStep, unsigned sub, double remaining
 unsigned lxrseq_pending_pattern(const LxrSeq* q) { return q->m_seq_pendingPattern; }
 unsigned lxrseq_song_position(const LxrSeq* q) { return q->m_seq_songPositionPointer; }
 int lxrseq_song_mode(const LxrSeq* q) { return q->m_seq_songModeEnabled; }
+
+void lxrseq_get_plock(const LxrSeq* q, unsigned pat, unsigned t, unsigned st, unsigned slot, unsigned* dest, unsigned* value)
+{
+    const Step* s = &q->m_seq_patternSet.seq_subStepPattern[pat][t][st];
+    if (dest) *dest = slot == 1 ? s->param1Nr : s->param2Nr;
+    if (value) *value = slot == 1 ? s->param1Val : s->param2Val;
+}

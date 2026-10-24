@@ -187,6 +187,7 @@ with open(os.path.join(ROOT, 'Source/UI/web/src/params.generated.ts'), 'w') as f
         out.append(o)
     f.write('export const SOUND_PARAMS: ParamDef[] = ' + json.dumps(out, indent=0) + '\n')
     f.write('export const MOD_TARGETS: string[] = ' + json.dumps([t['label'] for t in targets]) + '\n')
+    f.write('/** PAR_* index of every mod target (index 0 = none); p-lock destinations use this list */\nexport const MOD_TARGET_PAR: number[] = ' + json.dumps([t['par'] for t in targets]) + '\n')
 import collections
 json.dump({'params': rows, 'targets': targets}, open(os.path.join(ROOT, 'Tools/params/params.json'), 'w'), indent=1)
 print(len(rows), 'sound parameters;', collections.Counter(r['group'] for r in rows), ';', len(targets), 'mod targets')

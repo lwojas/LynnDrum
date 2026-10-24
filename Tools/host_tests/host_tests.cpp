@@ -185,13 +185,47 @@ static void bridgeTests()
         CHECK (ba.readLevel().l == 0.f, "meter peak must reset after reading");
     }
 
+    // p-locks: command -> sequencer data (cortex destination numbering), clearing, and the audible effect (restore on the next trigger)
+    {
+        SeqBridge bl; EngineHost hl; hl.prepare (48000.0);
+        CHECK (bl.applyUiCommand ({ 3, 1, 9, 1, 88, 77 }, "stepLock"), "stepLock rejected");
+        CHECK (bl.applyUiCommand ({ 3, 1, 9, 2, 200, 5 }, "stepLock"), "stepLock rejected (CC2 range)");
+        CHECK (!bl.applyUiCommand ({ 3, 1, 9, 3, 88, 1 }, "stepLock") && !bl.applyUiCommand ({ 3, 1, 9, 1, 300, 1 }, "stepLock"), "bad slot / parameter accepted");
+        bl.drain (hl);
+        unsigned d = 0, v = 0;
+        lxrseq_get_plock (hl.sequencer(), 3, 1, 9, 1, &d, &v); CHECK (d == 89 && v == 77, "slot 1 stored as PAR+1 (%u,%u)", d, v);
+        lxrseq_get_plock (hl.sequencer(), 3, 1, 9, 2, &d, &v); CHECK (d == 200 && v == 5, "slot 2 (CC2 range) stored raw (%u,%u)", d, v);
+        bl.applyUiCommand ({ 3, 1, 9, 1, -1, 0 }, "stepLock"); bl.drain (hl);
+        lxrseq_get_plock (hl.sequencer(), 3, 1, 9, 1, &d, &v); CHECK (d == 0xff, "lock cleared (%u)", d);
+
+        // kick with Drum 1 "Pitch Mod" locked to 0 on step 1, none on step 9: the first hit has no pitch sweep (low start frequency), the
+        // second one is restored to the unlocked sound (voice volume is unsuitable here: the engine smooths it over ~100 ms)
+        auto run = [&] (bool locked, double& first, double& second)
+        {
+            EngineHost he; he.prepare (48000.0); SeqBridge be;
+            std::uint8_t k[LXR_KIT_BYTES]; lynn::params::fillDefaultKit (k); he.loadKit (k);
+            HostEvent sp; sp.type = HostEvent::Type::Param; sp.a = 50; sp.b = 5; float a_[64], b_[64]; he.process (a_, b_, 64, &sp, 1);     // short decay
+            for (int st : { 0, 8 }) { be.applyUiCommand ({ 0, 0, (double) st, 1 }, "step"); be.applyUiCommand ({ 0, 0, (double) st, 127 }, "stepVol"); }
+            if (locked) be.applyUiCommand ({ 0, 0, 0, 1, 74, 0 }, "stepLock");
+            be.drain (he); he.setTempo (120.0);
+            std::vector<float> o (48000 * 2), o2 (o.size());
+            HostEvent run; run.type = HostEvent::Type::SeqRun;
+            for (size_t pos = 0; pos < o.size(); pos += 256) he.process (o.data() + pos, o2.data() + pos, 256, pos == 0 ? &run : nullptr, pos == 0 ? 1 : 0);
+            auto zc = [&] (double t0, double t1) { int n = 0; size_t a = (size_t) (t0 * 48000), b = (size_t) (t1 * 48000), z0 = 0, z1 = 0; for (size_t i = a + 1; i < b; ++i) if (o[i - 1] < 0 && o[i] >= 0) { if (!n) z0 = i; z1 = i; ++n; } return n > 1 ? (n - 1) * 48000.0 / (double) (z1 - z0) : 0.0; };
+            first = zc (0.006, 0.020); second = zc (1.006, 1.020);                  // start frequency of each hit
+        };
+        double f0, s0, f1, s1; run (false, f0, s0); run (true, f1, s1);
+        std::printf ("p-lock: start frequency of the two hits unlocked %.0f / %.0f Hz, with the pitch-mod lock %.0f / %.0f Hz\n", f0, s0, f1, s1);
+        CHECK (f0 > 120 && std::fabs (f0 - s0) < 0.1 * f0 && f1 < 0.5 * f0 && std::fabs (s1 - s0) < 0.1 * s0, "p-lock must remove the sweep of the locked hit only and be restored for the next hit");
+    }
+
     // state round-trip: several patterns, a song, mutes
     b.applyUiCommand ({ 12, 4, 10, 1 }, "step"); b.applyUiCommand ({ 12, 4, 10, 3 }, "stepFlam"); b.applyUiCommand ({ 12, 4, 10, 11 }, "stepShift");
-    b.applyUiCommand ({ 12, 64 }, "shuffle");
+    b.applyUiCommand ({ 12, 64 }, "shuffle"); b.applyUiCommand ({ 12, 4, 10, 2, 114, 33 }, "stepLock");
     const std::string blob = b.serialize();
     SeqBridge c; CHECK (c.deserialize (reinterpret_cast<const std::uint8_t*> (blob.data()), blob.size()), "deserialize failed");
     CHECK (c.serialize() == blob, "state not stable through a round-trip");
-    CHECK (c.pattern (12).tracks[4].flam[10] == 3 && c.pattern (12).tracks[4].shift[10] == 11 && c.pattern (12).shuffle == 64 && c.pattern (5).tracks[3].length == 24 && c.pattern (63).tracks[6].on[0], "state content");
+    CHECK (c.pattern (12).tracks[4].lockPar2[10] == 114 && c.pattern (12).tracks[4].lockVal2[10] == 33 && c.pattern (12).tracks[4].lockPar1[10] == lynn::kNoLock && c.pattern (12).tracks[4].flam[10] == 3 && c.pattern (12).tracks[4].shift[10] == 11 && c.pattern (12).shuffle == 64 && c.pattern (5).tracks[3].length == 24 && c.pattern (63).tracks[6].on[0], "state content");
     CHECK (c.muted (3) && c.songState().enabled && c.songState().entries[1] == 2, "mutes and song in the state");
     CHECK (!c.deserialize (reinterpret_cast<const std::uint8_t*> (blob.data()), blob.size() - 1), "truncated state accepted");
     {   // restoring into a bridge whose engine already holds other data must make the engine match exactly (diff against the mirror)

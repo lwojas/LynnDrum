@@ -15,6 +15,8 @@ juce::var stepVar (int i, const lynn::UiTrack& t)
     if (t.note[k] != 60) o->setProperty ("note", (int) t.note[k]);
     if (t.flam[k] != 0) o->setProperty ("flam", (int) t.flam[k]);
     if (t.shift[k] != lynn::kShiftNone) o->setProperty ("shift", (int) t.shift[k]);
+    auto lock = [&] (const char* key, std::uint8_t par, std::uint8_t val) { if (par == lynn::kNoLock) return; juce::Array<juce::var> a; a.add ((int) par); a.add ((int) val); o->setProperty (key, a); };
+    lock ("lock1", t.lockPar1[k], t.lockVal1[k]); lock ("lock2", t.lockPar2[k], t.lockVal2[k]);
     return juce::var (o);
 }
 int clampi (const juce::var& v, int lo, int hi, int def) { return v.isVoid() ? def : juce::jlimit (lo, hi, (int) v); }
@@ -139,6 +141,12 @@ bool PresetManager::apply (const juce::var& doc)
                         tr.on[k] = 1; tr.vol[k] = (std::uint8_t) clampi (sv["vol"], 1, 127, 100); tr.prob[k] = (std::uint8_t) clampi (sv["prob"], 1, 100, 100);
                         tr.note[k] = (std::uint8_t) clampi (sv["note"], 0, 127, 60); tr.flam[k] = (std::uint8_t) clampi (sv["flam"], 0, 5, 0);
                         tr.shift[k] = (std::uint8_t) clampi (sv["shift"], 0, 14, lynn::kShiftNone);
+                        auto readLock = [&] (const char* key, std::array<std::uint8_t, lynn::kSteps>& par, std::array<std::uint8_t, lynn::kSteps>& val)
+                        {
+                            if (auto* a = sv[key].getArray(); a != nullptr && a->size() >= 2 && (int) (*a)[0] >= 0 && (int) (*a)[0] <= lynn::kMaxLockPar)
+                            { par[k] = (std::uint8_t) (int) (*a)[0]; val[k] = (std::uint8_t) clampi ((*a)[1], 0, 127, 0); }
+                        };
+                        readLock ("lock1", tr.lockPar1, tr.lockVal1); readLock ("lock2", tr.lockPar2, tr.lockVal2);
                     }
             }
     };

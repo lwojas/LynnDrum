@@ -23,13 +23,17 @@ constexpr int kPatterns = LXRSEQ_PATTERNS;
 constexpr int kSongLength = 64;
 constexpr int kSongEnd = 64, kSongLoop = 65;
 constexpr int kShiftNone = 7;
+constexpr std::uint8_t kNoLock = 255;
+constexpr int kMaxLockPar = 246;                          // END_OF_SOUND_PARAMETERS - 1
 
 struct UiTrack
 {
     std::array<std::uint8_t, kSteps> on {}, vol {}, prob {}, note {}, flam {}, shift {};
+    std::array<std::uint8_t, kSteps> lockPar1 {}, lockVal1 {}, lockPar2 {}, lockVal2 {};     // p-locks: PAR_* index (kNoLock = none) and value
     std::uint8_t length = 16;
-    UiTrack() { vol.fill (100); prob.fill (100); note.fill (60); shift.fill (kShiftNone); }
-    bool operator== (const UiTrack& o) const { return on == o.on && vol == o.vol && prob == o.prob && note == o.note && flam == o.flam && shift == o.shift && length == o.length; }
+    UiTrack() { vol.fill (100); prob.fill (100); note.fill (60); shift.fill (kShiftNone); lockPar1.fill (kNoLock); lockPar2.fill (kNoLock); }
+    bool operator== (const UiTrack& o) const { return on == o.on && vol == o.vol && prob == o.prob && note == o.note && flam == o.flam && shift == o.shift && length == o.length
+                                                    && lockPar1 == o.lockPar1 && lockVal1 == o.lockVal1 && lockPar2 == o.lockPar2 && lockVal2 == o.lockVal2; }
 };
 struct UiPattern
 {
@@ -51,6 +55,7 @@ struct SeqCommand
     enum Type : std::uint8_t { Step, Length, Mute, Shuffle, Audition, SelectPattern, SongMode, SongEntry };
     Type type = Step;
     std::uint8_t pat = 0, track = 0, idx = 0, on = 0, vol = 100, prob = 100, note = 60, flam = 0, shift = kShiftNone;
+    std::uint8_t lp1 = kNoLock, lv1 = 0, lp2 = kNoLock, lv2 = 0;      // p-lock slots of a Step command
     std::uint16_t value = 0;       // Length / Mute / Shuffle / SongMode / SongEntry payload
 };
 

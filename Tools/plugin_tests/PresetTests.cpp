@@ -42,6 +42,10 @@ int main()
         CHECK (countAll (p) == 0, "Init has an empty bank");
         pm.load ("Metal Broken", true);
         CHECK (countSteps (p.bridge().pattern (0)) == 30 && countSteps (p.bridge().pattern (1)) == 13 && countAll (p) == 43 && p.bridge().pattern (0).tracks[4].length == 32 && p.bridge().pattern (0).shuffle == 40, "Metal Broken bank content");
+        {   // the p-locks of the factory pattern arrived
+            const auto& k0 = p.bridge().pattern (0).tracks[0]; const auto& k3 = p.bridge().pattern (0).tracks[3];
+            CHECK (k0.lockPar1[10] == def ("fmamnt1").par && k0.lockVal1[10] == 110 && k0.lockPar2[10] == lynn::kNoLock && k3.lockPar1[12] == def ("filter_freq_4").par && k3.lockPar2[12] == def ("reso_4").par && k3.lockVal2[12] == 70, "factory p-locks");
+        }
         CHECK (p.bridge().songState().entries[0] == 0 && p.bridge().songState().entries[1] == 1 && p.bridge().songState().entries[2] == lynn::kSongLoop && !p.bridge().songState().enabled, "Metal Broken song");
         
         // ---- dirty tracking ------------------------------------------------------------------------------------------

@@ -17,6 +17,7 @@ export const TRACKS: TrackInfo[] = [
 
 export interface TrackPattern {
   on: boolean[]; vol: number[]; prob: number[]; note: number[]; flam: number[]; shift: number[]
+  lockPar1: number[]; lockVal1: number[]; lockPar2: number[]; lockVal2: number[]      // p-locks: PAR_* index or -1
   length: number            // 1..64 steps
 }
 export interface Pattern { tracks: TrackPattern[]; shuffle: number }
@@ -28,6 +29,7 @@ export function emptyTrack(): TrackPattern {
   return {
     on: Array(NUM_STEPS).fill(false), vol: Array(NUM_STEPS).fill(100), prob: Array(NUM_STEPS).fill(100),
     note: Array(NUM_STEPS).fill(60), flam: Array(NUM_STEPS).fill(0), shift: Array(NUM_STEPS).fill(SHIFT_NONE),
+    lockPar1: Array(NUM_STEPS).fill(-1), lockVal1: Array(NUM_STEPS).fill(0), lockPar2: Array(NUM_STEPS).fill(-1), lockVal2: Array(NUM_STEPS).fill(0),
     length: 16,
   }
 }
@@ -41,6 +43,7 @@ export type Cmd =
   | ['stepNote', track: number, idx: number, v: number]
   | ['stepFlam', track: number, idx: number, v: number]
   | ['stepShift', track: number, idx: number, v: number]
+  | ['stepLock', track: number, idx: number, slot: number, par: number, v: number]
   | ['trackLength', track: number, len: number]
   | ['clearTrack', track: number]
   | ['copyTrack', src: number, dst: number]
@@ -50,7 +53,8 @@ export function applyCmd(p: Pattern, c: Cmd): Pattern {
   const q: Pattern = { shuffle: p.shuffle, tracks: p.tracks.slice() }
   const edit = (t: number, f: (x: TrackPattern) => void) => {
     const x = { ...q.tracks[t], on: q.tracks[t].on.slice(), vol: q.tracks[t].vol.slice(), prob: q.tracks[t].prob.slice(),
-      note: q.tracks[t].note.slice(), flam: q.tracks[t].flam.slice(), shift: q.tracks[t].shift.slice() }
+      note: q.tracks[t].note.slice(), flam: q.tracks[t].flam.slice(), shift: q.tracks[t].shift.slice(),
+      lockPar1: q.tracks[t].lockPar1.slice(), lockVal1: q.tracks[t].lockVal1.slice(), lockPar2: q.tracks[t].lockPar2.slice(), lockVal2: q.tracks[t].lockVal2.slice() }
     f(x); q.tracks[t] = x
   }
   switch (c[0]) {
@@ -63,6 +67,7 @@ export function applyCmd(p: Pattern, c: Cmd): Pattern {
     case 'stepNote': edit(c[1], x => { x.note[c[2]] = c[3] }); break
     case 'stepFlam': edit(c[1], x => { x.flam[c[2]] = c[3] }); break
     case 'stepShift': edit(c[1], x => { x.shift[c[2]] = c[3] }); break
+    case 'stepLock': edit(c[1], x => { const [par, val] = c[3] === 1 ? [x.lockPar1, x.lockVal1] : [x.lockPar2, x.lockVal2]; par[c[2]] = c[4]; val[c[2]] = c[5] }); break
     case 'trackLength': edit(c[1], x => { x.length = c[2] }); break
     case 'clearTrack': q.tracks[c[1]] = { ...emptyTrack(), length: q.tracks[c[1]].length }; break
     case 'copyTrack': q.tracks[c[2]] = { ...q.tracks[c[1]] }; break
@@ -72,7 +77,7 @@ export function applyCmd(p: Pattern, c: Cmd): Pattern {
 }
 
 /** commands that address one pattern: the store inserts the viewed pattern's number after the name on the wire */
-export const PATTERN_LEVEL = new Set(['step', 'stepVol', 'stepProb', 'stepNote', 'stepFlam', 'stepShift', 'trackLength', 'clearTrack', 'copyTrack', 'shuffle'])
+export const PATTERN_LEVEL = new Set(['stepLock', 'step', 'stepVol', 'stepProb', 'stepNote', 'stepFlam', 'stepShift', 'trackLength', 'clearTrack', 'copyTrack', 'shuffle'])
 /** commands with explicit arguments, sent as they are */
 export type GlobalCmd =
   | ['mute', track: number, on: number]

@@ -44,6 +44,7 @@ void SeqBridge::editStep (int p, int t, int i)
     const auto& tr = bank[(size_t) p].tracks[(size_t) t]; const size_t k = (size_t) i;
     SeqCommand c; c.type = SeqCommand::Step; c.pat = (std::uint8_t) p; c.track = (std::uint8_t) t; c.idx = (std::uint8_t) i;
     c.on = tr.on[k]; c.vol = tr.vol[k]; c.prob = tr.prob[k]; c.note = tr.note[k]; c.flam = tr.flam[k]; c.shift = tr.shift[k];
+    c.lp1 = tr.lockPar1[k]; c.lv1 = tr.lockVal1[k]; c.lp2 = tr.lockPar2[k]; c.lv2 = tr.lockVal2[k];
     push (c);
 }
 void SeqBridge::editLength (int p, int t) { SeqCommand c; c.type = SeqCommand::Length; c.pat = (std::uint8_t) p; c.track = (std::uint8_t) t; c.value = bank[(size_t) p].tracks[(size_t) t].length; push (c); }
@@ -68,7 +69,8 @@ void SeqBridge::sendPattern (int p, const UiPattern* old)
             if (old)
             {
                 const auto& b = old->tracks[(size_t) t];
-                if (a.on[k] == b.on[k] && a.vol[k] == b.vol[k] && a.prob[k] == b.prob[k] && a.note[k] == b.note[k] && a.flam[k] == b.flam[k] && a.shift[k] == b.shift[k]) continue;
+                if (a.on[k] == b.on[k] && a.vol[k] == b.vol[k] && a.prob[k] == b.prob[k] && a.note[k] == b.note[k] && a.flam[k] == b.flam[k] && a.shift[k] == b.shift[k]
+                    && a.lockPar1[k] == b.lockPar1[k] && a.lockVal1[k] == b.lockVal1[k] && a.lockPar2[k] == b.lockPar2[k] && a.lockVal2[k] == b.lockVal2[k]) continue;
             }
             editStep (p, t, i);
         }
@@ -121,6 +123,16 @@ bool SeqBridge::applyUiCommand (const std::vector<double>& a, const std::string&
         else tr.shift[k] = val (3, 0, 14);
         editStep (p, t, i); return true;
     }
+    if (n == "stepLock")                                         // [pat, track, step, slot 1|2, par (-1 = none), value]
+    {
+        const int t = at (1, 0, kTracks - 1), i = at (2, 0, kSteps - 1), slot = at (3, 1, 2); if (p < 0 || t < 0 || i < 0 || slot < 0) return false;
+        const bool none = a.size() > 4 && a[4] < 0;
+        if (!none && at (4, 0, kMaxLockPar) < 0) return false;
+        auto& tr = bank[(size_t) p].tracks[(size_t) t]; const size_t k = (size_t) i;
+        auto& par = slot == 1 ? tr.lockPar1 : tr.lockPar2; auto& vl = slot == 1 ? tr.lockVal1 : tr.lockVal2;
+        par[k] = none ? kNoLock : (std::uint8_t) a[4]; vl[k] = val (5, 0, 127);
+        editStep (p, t, i); return true;
+    }
     if (n == "trackLength") { const int t = at (1, 0, kTracks - 1); if (p < 0 || t < 0) return false; bank[(size_t) p].tracks[(size_t) t].length = val (2, 1, 64); editLength (p, t); return true; }
     if (n == "shuffle") { if (p < 0) return false; bank[(size_t) p].shuffle = val (1, 0, 127); editShuffle (p); return true; }
     if (n == "mute") { const int t = at (0, 0, kTracks - 1); if (t < 0) return false; mutes = (std::uint8_t) ((mutes & ~(1 << t)) | ((a.size() > 1 && a[1] != 0) ? (1 << t) : 0)); editMute (t); return true; }
@@ -153,7 +165,7 @@ bool SeqBridge::applyUiCommand (const std::vector<double>& a, const std::string&
 // ---- state ----------------------------------------------------------------------------------------------------------------
 std::string SeqBridge::serialize() const
 {
-    std::string s; s.push_back (2); s.push_back (song.enabled ? 1 : 0); s.push_back ((char) mutes);
+    std::string s; s.push_back (3); s.push_back (song.enabled ? 1 : 0); s.push_back ((char) mutes);
     for (auto v : song.entries) s.push_back ((char) v);
     int count = 0; for (int p = 0; p < kPatterns; ++p) if (used (p)) ++count;
     s.push_back ((char) count);
@@ -165,7 +177,7 @@ std::string SeqBridge::serialize() const
         for (const auto& t : pt.tracks)
         {
             s.push_back ((char) t.length);
-            for (int i = 0; i < kSteps; ++i) { const size_t k = (size_t) i; for (std::uint8_t v : { t.on[k], t.vol[k], t.prob[k], t.note[k], t.flam[k], t.shift[k] }) s.push_back ((char) v); }
+            for (int i = 0; i < kSteps; ++i) { const size_t k = (size_t) i; for (std::uint8_t v : { t.on[k], t.vol[k], t.prob[k], t.note[k], t.flam[k], t.shift[k], t.lockPar1[k], t.lockVal1[k], t.lockPar2[k], t.lockVal2[k] }) s.push_back ((char) v); }
         }
     }
     return s;
@@ -173,7 +185,8 @@ std::string SeqBridge::serialize() const
 
 bool SeqBridge::deserialize (const std::uint8_t* d, size_t n)
 {
-    auto readTrack = [] (UiTrack& t, const std::uint8_t* d, size_t& o)
+    const bool v3 = n >= 1 && d[0] == 3;
+    auto readTrack = [v3] (UiTrack& t, const std::uint8_t* d, size_t& o)
     {
         t.length = std::clamp<std::uint8_t> (d[o++], 1, 64);
         for (int i = 0; i < kSteps; ++i)
@@ -181,6 +194,12 @@ bool SeqBridge::deserialize (const std::uint8_t* d, size_t n)
             const size_t k = (size_t) i;
             t.on[k] = d[o++] ? 1 : 0; t.vol[k] = std::clamp<std::uint8_t> (d[o++], 1, 127); t.prob[k] = std::clamp<std::uint8_t> (d[o++], 1, 100);
             t.note[k] = std::min<std::uint8_t> (d[o++], 127); t.flam[k] = std::min<std::uint8_t> (d[o++], 5); t.shift[k] = std::min<std::uint8_t> (d[o++], 14);
+            if (v3)
+            {
+                const std::uint8_t p1 = d[o++], v1 = d[o++], p2 = d[o++], v2 = d[o++];
+                t.lockPar1[k] = p1 <= kMaxLockPar ? p1 : kNoLock; t.lockVal1[k] = std::min<std::uint8_t> (v1, 127);
+                t.lockPar2[k] = p2 <= kMaxLockPar ? p2 : kNoLock; t.lockVal2[k] = std::min<std::uint8_t> (v2, 127);
+            }
         }
     };
     std::array<UiPattern, kPatterns> nb; UiSong ns; std::uint8_t nm = 0;
@@ -201,11 +220,11 @@ bool SeqBridge::deserialize (const std::uint8_t* d, size_t n)
         }
         setBank (nb, ns, nm); return true;
     }
-    if (n < 4 + (size_t) kSongLength || d[0] != 2) return false;
+    if (n < 4 + (size_t) kSongLength || (d[0] != 2 && d[0] != 3)) return false;
     ns.enabled = d[1] != 0; nm = d[2] & 0x7f;
     size_t o = 3; for (auto& e : ns.entries) e = std::min<std::uint8_t> (d[o++], kSongLoop);
     const int count = d[o++];
-    const size_t per = 2 + (size_t) kTracks * (1 + kSteps * 6);
+    const size_t per = 2 + (size_t) kTracks * (1 + kSteps * (v3 ? 10 : 6));
     if (count > kPatterns || n != o + (size_t) count * per) return false;
     for (int c = 0; c < count; ++c)
     {
@@ -232,6 +251,8 @@ void SeqBridge::drain (EngineHost& host) noexcept
                 lxrseq_set_main_step (q, c.pat, c.track, c.idx, c.on);
                 lxrseq_set_step (q, c.pat, c.track, c.idx, c.vol, c.prob, c.note);
                 lxrseq_set_step_timing (q, c.pat, c.track, c.idx, c.flam, c.shift);
+                lxrseq_set_plock (q, c.pat, c.track, c.idx, 1, c.lp1 == kNoLock ? 0xff : (c.lp1 < 127 ? c.lp1 + 1u : c.lp1), c.lv1);
+                lxrseq_set_plock (q, c.pat, c.track, c.idx, 2, c.lp2 == kNoLock ? 0xff : (c.lp2 < 127 ? c.lp2 + 1u : c.lp2), c.lv2);
                 break;
             case SeqCommand::Length:  lxrseq_set_track_length (q, c.pat, c.track, c.value); break;
             case SeqCommand::Mute:    lxrseq_set_mute (q, c.track, c.value); break;

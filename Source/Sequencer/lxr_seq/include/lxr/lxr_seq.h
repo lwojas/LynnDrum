@@ -58,6 +58,8 @@ void    lxrseq_set_main_step(LxrSeq*, unsigned pat, unsigned track, unsigned ste
 void    lxrseq_set_step(LxrSeq*, unsigned pat, unsigned track, unsigned step, unsigned vol, unsigned prob, unsigned note);
 void    lxrseq_set_step_timing(LxrSeq*, unsigned pat, unsigned track, unsigned step, unsigned flam, unsigned shift_index);
 void    lxrseq_set_plock(LxrSeq*, unsigned pat, unsigned track, unsigned step, unsigned slot, unsigned dest, unsigned value);
+/* read back a p-lock slot (1|2): destination number as stored (0xFF = none) and value */
+void    lxrseq_get_plock(const LxrSeq*, unsigned pat, unsigned track, unsigned step, unsigned slot, unsigned* dest, unsigned* value);
 void    lxrseq_set_track_length(LxrSeq*, unsigned pat, unsigned track, unsigned length);
 void    lxrseq_set_pattern_shuffle(LxrSeq*, unsigned pat, unsigned value);     /* 0..127, also applied now (as a pattern switch does) */
 void    lxrseq_clear_pattern(LxrSeq*, unsigned pat);

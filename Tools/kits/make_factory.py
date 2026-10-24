@@ -63,6 +63,13 @@ BROKEN = pat({0: [(0, 118), (3, 100), (7, 105), (10, 118), (13, 95)], 3: [(4, 10
               5: [(i, 90 if i % 4 == 0 else 65, 85) for i in range(16)], 6: [(6, 80), (15, 80, 60)], 2: [(11, 80, 50), (13, 70, 50)],
               4: [(0, 85)]}, shuffle=40, lengths={4: 32, 2: 12})
 
+def lock(p, track, step, slot, ident, value):
+    """attach a p-lock (parameter id from the generated table) to an existing step of a pattern"""
+    d = BY_ID[ident]; assert d['kind'] in ('int', 'choice', 'bool') and d['min'] <= value <= d['max'], ident
+    for st in p['tracks'][track]['steps']:
+        if st['i'] == step: st['lock%d' % slot] = [d['par'], value]; return p
+    raise KeyError((track, step))
+
 # variations (pattern 2 of each preset) and a song that uses them
 FOUR_FILL = pat({0: [(0, 118), (4, 112), (8, 118), (12, 112)], 3: [(4, 108), (12, 108), (13, 80), (14, 90), (15, 100)], 5: [(i, 80) for i in range(0, 16, 2)],
                  2: [(12, 95), (14, 100)], 4: [(0, 85)]})
@@ -70,6 +77,8 @@ BACK_B = pat({0: [(0, 118), (6, 100), (8, 105), (10, 112)], 3: [(4, 110), (12, 1
               6: [(6, 85), (14, 85)], 1: [(15, 80)]}, shuffle=24)
 BROKEN_B = pat({0: [(0, 118), (10, 105)], 3: [(8, 108), (15, 70, 70, 60, 2)], 5: [(i, 85) for i in range(0, 16, 4)], 6: [(2, 80), (10, 80)],
                 1: [(4, 85, 60), (6, 80, 60)], 4: [(0, 90)]}, shuffle=40, lengths={4: 32, 2: 12})
+lock(BROKEN, 0, 10, 1, 'fmamnt1', 110)                      # the second kick hit gets a metallic FM bite
+lock(BROKEN, 3, 12, 1, 'filter_freq_4', 60); lock(BROKEN, 3, 12, 2, 'reso_4', 70)   # and the backbeat snare a resonant filter sweep
 END, LOOP = 64, 65
 PRESETS = [('Init', INIT, [], None), ('Tight 4/4', TIGHT, [FOUR, FOUR_FILL], [0, 0, 0, 1, LOOP]),
            ('Deep Backbeat', DEEP, [BACK, BACK_B], [0, 0, 1, 0, LOOP]), ('Metal Broken', METAL, [BROKEN, BROKEN_B], [0, 1, LOOP])]
