@@ -3,6 +3,8 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <cmath>
 #include <cstdio>
+#include <vector>
+#include <initializer_list>
 #include "PluginProcessor.h"
 
 static int failures = 0;
@@ -105,6 +107,19 @@ int main()
         const double want[] = { 0.0, 3.0, 4.0, 7.0 };
         CHECK (r.onsets.size() >= 3, "song produced %zu kicks", r.onsets.size());
         for (size_t i = 0; i < 3 && i < r.onsets.size(); ++i) CHECK (std::fabs (r.onsets[i] - want[i]) < 0.04, "song kick %zu at %.3f, expected %.3f", i, r.onsets[i], want[i]);
+    }
+    {   // solo reaches the audio: soloing another (empty) track silences the kick, soloing the kick track or clearing the solo restores it
+        auto kicks = [&] (std::initializer_list<std::pair<const char*, std::vector<double>>> cmds) {
+            Run r; auto& b = r.p.bridge();
+            for (auto& c : cmds) b.applyUiCommand (c.second, c.first);
+            for (int i = 0; i < 4; ++i) r.step (false);                                           // apply the commands on the audio thread
+            r.onsets.clear(); r.t = 0; r.host.ppq = 0.0; r.host.playing = true; r.run (3.0);
+            return r.onsets.size(); };
+        CHECK (kicks ({}) >= 1, "baseline plays");
+        CHECK (kicks ({ { "solo", { 1, 1 } } }) == 0, "soloing another track must silence the kick");
+        CHECK (kicks ({ { "solo", { 0, 1 } } }) >= 1, "soloing the kick track keeps it");
+        CHECK (kicks ({ { "solo", { 1, 1 } }, { "solo", { 1, 0 } } }) >= 1, "clearing the solo restores the kick");
+        CHECK (kicks ({ { "solo", { 0, 1 } }, { "mute", { 0, 1 } } }) == 0, "mute wins over solo");
     }
     std::printf (failures ? "%d FAILURE(S)\n" : "transport tests passed\n", failures);
     return failures ? 1 : 0;
