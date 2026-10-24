@@ -29,7 +29,7 @@ const hidden = (voice: number, d: ParamDef) => (voice === 5 && d.name === 'Decay
 
 function Panel({ title, accent, children }: { title: string; accent: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-synth-border bg-synth-panel/70 p-3 flex flex-col min-h-0 min-w-0 overflow-auto">
+    <div className="rounded-xl border border-synth-border bg-synth-panel/70 p-3 flex flex-col min-w-0">
       <div className="font-extrabold font-mono text-xs tracking-wider border-b border-synth-border/70 pb-1.5 mb-2" style={{ color: accent }}>{title}</div>
       {children}
     </div>
@@ -80,7 +80,7 @@ export function SoundDeck() {
   const decayId = voice === 5 ? 'velod6_closed' : voice === 6 ? 'velod6_open' : `velod${vn}`
   const by = (m: Module) => defs.filter(d => moduleOf(d) === m)
   return (
-    <section className="flex-1 min-w-0 min-h-0 p-3 flex flex-col gap-3">
+    <section className="flex-1 min-w-0 min-h-0 p-3 flex flex-col gap-3 overflow-y-auto">
       <div className="flex items-center gap-4 flex-wrap shrink-0">
         <div className="rounded-lg border-2 border-synth-amber bg-synth-amber/10 px-4 py-2 font-extrabold font-mono text-synth-amber tracking-wider text-sm">
           ● VOICE {voice + 1}: {t.name} ({t.role})
@@ -92,7 +92,7 @@ export function SoundDeck() {
           {by('out').map(d => <Ctl key={d.id} id={d.id} accent="#ff7728" />)}
         </div>
       </div>
-      <div className="grid gap-3 flex-1 min-h-0" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gridAutoRows: 'minmax(0, 1fr)' }}>
+      <div className="grid gap-3 shrink-0" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))' }}>
         {MODULES.map(m => <Panel key={m.key} title={m.title} accent={m.accent}>
           {m.key === 'filter' && <FilterGraph n={vn} />}
           {m.key === 'env' && <EnvGraph n={vn} decayId={decayId} />}

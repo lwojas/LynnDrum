@@ -155,7 +155,7 @@ export function SequencerDeck() {
   const random = () => { for (let s = 0; s < NUM_STEPS; s++) send(['step', voice, s, s < tr.length && Math.random() < 0.3 ? 1 : 0]) }
   const btn = 'px-2 py-0.5 rounded bg-synth-surface hover:bg-synth-border border border-synth-border text-slate-300 disabled:opacity-40'
   return (
-    <footer className="shrink-0 bg-synth-panel border-t-2 border-synth-border p-3 flex flex-col gap-2" style={{ height: 'clamp(330px, 44%, 440px)' }}>
+    <footer className="shrink-0 bg-synth-panel border-t-2 border-synth-border p-3 flex flex-col gap-2" style={{ height: 'clamp(290px, 36%, 380px)' }}>
       <PatternBar />
       <div className="flex items-center justify-between gap-3 flex-wrap pb-1.5 border-b border-synth-border/70 text-[10px] font-mono">
         <div className="flex items-center gap-3">
