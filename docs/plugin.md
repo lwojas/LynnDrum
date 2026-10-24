@@ -26,19 +26,19 @@ build-lynn/Tools/host_tests/host_tests --demo demo.wav            # 4 bars of th
 - **Sequencer transport**: `Seq Sync = Host` follows `isPlaying`, tempo and PPQ position; `Free` uses `Seq Run` and `Tempo` and starts at step 0. In host mode a start, a locate/jump while playing and a loop wrap **re-anchor** the sequencer to the host's 16th-note grid (`lxrseq_start_at`: every track plays step `absolute_step % track_length`, sub-tick phase and swing parity included), so starting mid-song, jumping around and looping odd lengths stay phase-correct, also for polymetric tracks.
 - **Tempo (finding, deviation S8)**: the sequencer core computes `seq_deltaT = (1000*60)/bpm` with an **integer division**, so the LXR actually runs at `60000/floor(60000/bpm)` BPM (e.g. "87" is 87.1, "140" is 140.2). The host layer scales the injected clock by `hostBpm / thatEffectiveBpm`, so fractional host tempos land on the host grid with no drift. Measured: kick on every beat, 16 bars, tempos 87…140.0 at 44.1/48/96 kHz, any block size -> deviation from the host grid within two engine blocks (≈ 2.9 ms), no accumulation.
 - **MIDI map** (default): 36 Drum 1, 41 Drum 2, 43 Drum 3, 38 Snare, 49 Cymbal, 42 Closed hat, 46 Open hat.
-- **Parameters** so far: Master, 7 voice levels (= the hardware fader multiplier), Seq Sync, Seq Run (Free), Tempo (Free). 233 sound parameters (generated, see below) in per-voice groups, plus FX.
+- **Parameters**: Master, 7 voice levels (= the hardware fader multiplier), Seq Sync, Seq Run (Free), Tempo (Free), and 233 generated sound parameters in per-voice groups plus FX (see *Parameter phase*).
 - **Sound source**: clean-room factory presets (see *Presets* below). The upstream `initKit` is no longer used by the plugin or the host tests (only by the reference harness comparison).
 - Loudness: the engine is loud by design (hardware headroom is the kit designer's job); the demo beat touches 0 dBFS at Master = 1.
 
 ## Validation done
 
-`host_tests` (resampler quality at 5 rates, block independence, event latency, 12 sequencer grid cases), `plugin_smoke` (bundle loads; 3 rates × 6 block sizes incl. 1 and 4096 with MIDI; no NaN/Inf, sane level; state round-trip by parameter name; 3 interleaved instances; free-run sequencer produces sound). **pluginval, strictness level 5: SUCCESS** (2026-10-24, VST3 build; includes plugin state, automation at 44.1/48/96 kHz × 64…1024, editor, bus layouts; the VST3 SDK validator and auval steps were skipped by the tool as not configured). Not yet done: DAW load test (Live 12 / REAPER are installed), malloc-trap check of `processBlock`, bypass handling, AU.
+`host_tests` (resampler quality at 5 rates, block independence, event latency, 12 sequencer grid cases), `plugin_smoke` (bundle loads; 3 rates × 6 block sizes incl. 1 and 4096 with MIDI; no NaN/Inf, sane level; state round-trip by parameter name; 3 interleaved instances; free-run sequencer produces sound). **pluginval, strictness level 5: SUCCESS** (2026-10-24, VST3 build; includes plugin state, automation at 44.1/48/96 kHz × 64…1024, editor, bus layouts; the VST3 SDK validator and auval steps were skipped by the tool as not configured). The user has run the builds in Ableton Live after each milestone (all green). Not yet done: REAPER run, malloc-trap check of `processBlock`, bypass handling, AU, a CI build of the plugin itself.
 
 ## UI (phase 7 first slice, 2026-10-24)
 
 React 18 + TypeScript + Tailwind (tokens from the concept) in `Source/UI/web`, built by `Tools/ui/build.sh` (Vite + vite-plugin-singlefile) into **one** `dist/index.html` that is committed and embedded with `juce_add_binary_data`; the editor is a JUCE `WebBrowserComponent` (WKWebView) serving it through the resource provider. Resizable 900×600 … 2400×1600, default 1300×860, layout is fluid (grid/flex, `clamp()`).
 
-Contents: header (LynnDrum, Host/Free sync, run, BPM, master), voice matrix & mixer (7 strips: select, level fader bound to the `faderN` parameters, mute), sound-deck frame (voice banner + four module panels - **empty until the parameter phase**), step-sequencer deck (7 tracks × up to 64 steps in bars of 16: toggle, per-step volume bar, probability/note/flam/shift inspector, track length, swing, clear/copy/paste/random, per-track playhead).
+Contents: header (LynnDrum, Host/Free sync, run, BPM, master), voice matrix & mixer (7 strips: select, level fader bound to the `faderN` parameters, mute), sound deck (voice banner, tabs, module panels - see the later sections), step-sequencer deck (7 tracks × up to 64 steps in bars of 16: toggle, per-step volume bar, probability/note/flam/shift inspector, track length, swing, clear/copy/paste/random, per-track playhead).
 
 Plumbing:
 - Host-automatable parameters (`master`, `tempo`, `faderN`, `seqRun`, `seqSync`) use JUCE web relays/attachments (gesture begin/end, automation both ways).
@@ -47,7 +47,7 @@ Plumbing:
 - Browser development: `cd Source/UI/web && npm run dev` runs the page against a mock bridge (`src/bridge.ts`), no plugin needed; Playwright screenshots work against `npm run preview`.
 
 Verified: `tsc` strict, Vite build, headless-browser render without console errors at 1300×860 and 960×640, `host_tests` (bridge command → sequencer, clear/length, state round-trip, queue overflow ordering), pluginval level 5 with the editor open (SUCCESS). **Not verified: how it looks inside the real WKWebView** (no screen-capture permission in the authoring session) - please look at it in Live.
-Known gaps: no pan/solo/drive/send (parameter phase), p-lock editing, pattern select/chain/song, Euclid, roll, kit browser/morph, level meter, undo/redo, accessibility pass.
+Known gaps (still open): kit morph, undo/redo, accessibility pass, send/aux outputs.
 
 ## Parameter phase (P5, 2026-10-24)
 
@@ -82,7 +82,7 @@ Tests: `preset_tests` (processor class driven directly: factory list and content
 64 patterns in 4 banks (A-D) of 16: the sequencer deck has a pattern bar (click = edit it **and** play it next - queued to the end of the bar while running, immediate while stopped; shift-click = edit only; FOLLOW makes the edit view track the playing pattern; copy / paste / clear whole patterns), a SONG toggle and a song editor (up to 64 entries, END / LOOP, current position highlighted). Each pattern has its own steps, track lengths and swing; mutes are global. Pattern edits no longer get lost when the sequencer leaves a pattern (deviation Q9 / S6: upstream restores a "backup buffer" over the pattern being left).
 Factory presets now come with two patterns each (a main pattern and a variation/fill) and a short song (`Presets/factory/README.md`).
 Verified with the scripted host: select while playing switches at the bar end (kick on the new pattern's step 9 at 3.006 s, not before), song 1,2,loop plays 0.006 / 3.006 / 4.005 s as expected; bridge tests for addressing, copy/clear pattern, song state, state round-trip with several patterns, a stale-engine restore, and queue overflow.
-Still open: kit-per-pattern (`kitNr`), pattern chaining via the LXR "next pattern / repeat" settings (the song covers it), Euclid and roll UI, p-lock editing.
+Still open: kit-per-pattern (`kitNr`) and pattern chaining via the LXR "next pattern / repeat" settings (the song covers it).
 
 ## P-lock editing (2026-10-24)
 
@@ -122,3 +122,9 @@ does not affect the audition buttons or keys.
 table), CLICK (transient type/level/pitch per voice) and KIT ROUTING (audio output, volume, pan, drive and sample-rate reducer per
 voice, the global reducer, and the FX bus). The matrix tabs show the six sound voices (the two hi-hat tracks share one voice);
 clicking a voice tag selects it. Cells are the same controls as the main tab, so automation and p-locks are unaffected.
+
+## Parked (decided 2026-10-24, not forgotten)
+
+- **Kit-per-pattern** (`kitNr`): wait for hands-on use of the plugin first. Would need a deviation entry, preset/state schema 4 and a rule for kit changes versus queued pattern switches and p-locks.
+- **LXR kit/pattern import**: no hardware at hand, so no pressing need; the on-disk SD format is still unread.
+- Also open: kit-only / pattern-only preset load, morph, undo/redo, Q8 (upstream Euclid-16 `% 0`, reproduced on purpose), REAPER and CI runs, an ear audition of the factory kits.

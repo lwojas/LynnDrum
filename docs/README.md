@@ -3,8 +3,7 @@
 > **Correction (2026-10-24):** wherever these study documents say "228 sound parameters" / "228-byte kit", read **247** (`END_OF_SOUND_PARAMETERS = 247`, verified by compiling `Parameters.h`; the 228 came from a stale comment upstream). The plugin exposes 233 of them as host parameters (`DEVIATIONS.md` P1).
 
 Source: `Reference/lxr-desktop-app` (pinned at `a43cd4f`, 2026-10-23). UI inputs: `concept/stitch_lxr_02_vst_ui_design/` (mockup) and `../guidelines.md` (design guideline; inspiration only, see `lxr-ui-architecture.md` §7).
-Scope of this stage: **study and plan only. No plugin code has been written. webdsp was not touched and was not read.**
-Revised 2026-10-24 after the first round of decisions (below).
+**Status (2026-10-24): the plan below has been implemented** as a working VST3 (macOS arm64) with a bit-exact engine and sequencer, 233 automatable parameters, presets, a React UI and a 64-pattern bank. Start with [building-lynndrum.md](building-lynndrum.md) (report: build story, DSP, gotchas, lessons), then [plugin.md](plugin.md) (what is built, how to build and test it) and `../DEVIATIONS.md`. The study documents below are kept as written (they are the design record); where they say "not started" or give a parameter count of 228, `plugin.md` and `DEVIATIONS.md` win. webdsp was not touched and was not read.
 
 ## Decisions so far
 
@@ -19,6 +18,9 @@ Revised 2026-10-24 after the first round of decisions (below).
 
 | Doc | Content |
 |---|---|
+| [building-lynndrum.md](building-lynndrum.md) | **Report**: how the plugin was built, how the DSP works, gotchas, clever solutions, lessons for future plugins |
+| [plugin.md](plugin.md) | What is built and how to build/test it (host layer, parameters, presets, UI, sequencer features) |
+| [ref-harness.md](ref-harness.md) | The reference harness and the golden-test setup |
 | [lxr-architecture.md](lxr-architecture.md) | Licence/source boundary, repo map, build switches, execution/thread model, the parameter-layer problem |
 | [lxr-dsp.md](lxr-dsp.md) | Oscillators, FM, filter, envelopes, click control, transients, voices, modulation, FX — what the code does, with measured numbers |
 | [lxr-sequencer.md](lxr-sequencer.md) | **New.** Step sequencer: original data model and timing, flam/shift/probability/p-lock logic, plugin design (host-PPQ clock, transport, edits), UI mapping, tests, open items |

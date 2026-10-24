@@ -72,7 +72,7 @@ Minimal VST3: stereo out, MIDI in, APVTS with 2 dummy params, a sine "engine", `
 `EngineHost`: tick loop, output FIFO, resampler (44 140 → host), `EventScheduler` with tick-quantised timestamps, note map / channel mode, tempo, bypass, latency reporting.
 **Exit:** at host 44 140 Hz (resampler bypassed) plugin output equals `lxr_render` bit-exactly; at 44.1/48/88.2/96/192 kHz metrics within tolerance (T2); note-on-to-sound latency documented. **Complexity:** M (5–8 d; resampler selection dominates). **Risks:** resampler quality/latency; block sizes not multiples of 64; timestamp mapping with latency compensation. **Dependencies:** P2, P3.
 
-### Phase 5 — Parameters and automation *(M5)*
+### Phase 5 — Parameters and automation *(M5) — done 2026-10-24: 233 generated parameters, per-parameter sweep test, pluginval L5*
 Generated parameter table (from Appendix A) + display functions + defaults; APVTS layout (127-step floats, choices, bools); audio-thread polling → `lxr_set_param`; generated modulation-destination lists (also used for p-lock destinations); per-voice `fader`/`mute`; automation round-trip tests; kit snapshot.
 **Exit:** all ≈200 parameters automatable and audible; each parameter verified by a sweep test against the harness (T0 per parameter); pluginval automation tests pass. **Complexity:** M (5–8 d). **Risk:** table errors → generate and test, never hand-write.
 
@@ -80,15 +80,15 @@ Generated parameter table (from Appendix A) + display functions + defaults; APVT
 Versioned state (`ValueTree`): params, faders, mutes, note map, **sequencer `PatternSet`** (S2), UI size; `KitSnapshot` double-buffered hand-off; kit save/load (`.lynnkit` = 228 bytes + name + schema); **clean-room** factory kits and a few factory patterns; preset-browser data model. Optional: LXR kit/pattern importer (needs `presetManager.c` reading — unresolved #6).
 **Exit:** save → reload → render bit-identical (including patterns); old-schema states load; DAW project reload. **Complexity:** S–M (3–5 d).
 
-### Stage S3 — Patterns, song, Euclid, roll, kit-per-pattern *(M6b)*
+### Stage S3 — Patterns, song, Euclid, roll, kit-per-pattern *(M6b) — done except kit-per-pattern (parked)*
 64 patterns, copy/clear, chaining and song mode (`SONG_END/LOOP`), pattern switching at master wrap from UI/automation/pattern-select, Euclid generator UI path, live roll (step-boundary granularity, faithful), per-pattern kit snapshots (kit switch on pattern change), undo/redo on the command log.
 **Exit:** T0 event streams for pattern/song scenarios; switching during flam/shift cases; state round-trip with 64 patterns. **Complexity:** M (5–8 d). **Dependencies:** S2, P6.
 
-### Phase 7 — UI *(M7, fluid from the start)*
+### Phase 7 — UI *(M7, fluid from the start) — done for the first playable (mixer, deck tabs, sequencer, patterns, p-locks, Euclid, roll, readouts, graphs, solo); not yet looked at in the real WKWebView by the author (user runs it in Live)*
 7a. **WebView spike** (after P3): knob + meter in two DAWs; go/no-go. 7b. Mock-bridge dev environment + Playwright diffs against `screen.png` **at the design size and the responsive matrix** (`lxr-ui-architecture.md` §6.4). 7c. Mixer rack, header (LynnDrum branding, kit name, meter, BPM/sync/swing, transport), the four synth modules, fluid layout rules in every component. 7d. **Sequencer deck** (developed on a simulated playhead after S1; bound to the bridge after S2): step lane, inspector (volume/prob/note/flam/shift/p-locks), track length/rotation, bar tabs, pattern select, transport/sync. 7e. Mod/routing tabs. 7f. Click/transient tab. 7g. About/credits (derivation statement, CC-BY attribution, GPL notice). 7h. Polish vs `guideline.md`.
 **Complexity:** L–XL (20–30 d incl. the deck). **Risks:** WebView/host quirks; scope creep from mockup-only controls; responsive regressions (mitigated by the screenshot matrix in CI). **Dependencies:** P3 (spike), P5/S2 for real binding.
 
-### Phase 8 — Validation *(M8)*
+### Phase 8 — Validation *(M8) — partly done: golden/oracle suites, UBSan, multi-instance, pluginval L5, user runs in Live; open: REAPER, malloc trap, CI for the plugin, soak/fuzz*
 Run the full catalogue (§3) on all targets: DAW matrix, CPU/profile, soak/fuzz, multi-instance, sample-rate sweep, transport/loop abuse for the sequencer, automation stress; produce the deviation register and the "plausibility vs online references" notes (informal listening against published LXR demos, clearly labelled as not a null test). **Complexity:** M (5–8 d, partly continuous). **Exit:** all T0 green, every deviation registered and justified.
 
 ### Phase 9 — Refinement (only after M8)
