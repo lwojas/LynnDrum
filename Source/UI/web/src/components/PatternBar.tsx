@@ -1,11 +1,13 @@
 import React, { useState } from 'react'
 import { useStore } from '../store'
 import { SONG_END, SONG_LOOP } from '../model'
+import { useTelemetry } from '../telemetry'
 
 const BANKS = ['A', 'B', 'C', 'D']
 
 function SongEditor({ onClose }: { onClose: () => void }) {
-  const { bank, sendG, playhead } = useStore()
+  const { bank, sendG } = useStore()
+  const songPos = useTelemetry(t => (t.running ? t.songPosition : -1))
   const firstEnd = bank.song.findIndex(e => e >= SONG_END)
   const shown = Math.min(64, (firstEnd < 0 ? 64 : firstEnd) + 1)
   return (
@@ -17,7 +19,7 @@ function SongEditor({ onClose }: { onClose: () => void }) {
       <div className="grid gap-1" style={{ gridTemplateColumns: 'repeat(8, minmax(0, 1fr))' }}>
         {Array.from({ length: shown }, (_, i) => {
           const v = bank.song[i]
-          const playing = bank.songMode && playhead.running && playhead.songPosition === i
+          const playing = bank.songMode && songPos === i
           return (
             <label key={i} className={`flex flex-col text-[8px] font-mono text-slate-500 rounded border p-0.5 ${playing ? 'border-synth-cyan' : 'border-synth-border'}`}>
               {String(i + 1).padStart(2, '0')}
@@ -35,10 +37,11 @@ function SongEditor({ onClose }: { onClose: () => void }) {
 }
 
 export function PatternBar() {
-  const { viewPat, setViewPat, bank, sendG, playhead, follow, setFollow, patClipboard } = useStore()
+  const { viewPat, setViewPat, bank, sendG, follow, setFollow, patClipboard } = useStore()
+  const active = useTelemetry(t => t.activePattern), pendingRaw = useTelemetry(t => t.pendingPattern)
   const [songOpen, setSongOpen] = useState(false)
   const page = Math.floor(viewPat / 16)
-  const active = playhead.activePattern ?? 0, pending = playhead.pendingPattern ?? active
+  const pending = pendingRaw
   const btn = 'px-2 py-0.5 rounded bg-synth-surface hover:bg-synth-border border border-synth-border text-slate-300 disabled:opacity-40'
   return (
     <div className="flex items-center gap-2 text-[10px] font-mono relative">

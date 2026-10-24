@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import { useStore } from '../store'
+import { getTelemetry, onTelemetryFrame, Telemetry } from '../telemetry'
 import { PatternBar } from './PatternBar'
 import { EuclidPanel, RollControl } from './EuclidRoll'
 import { MOD_TARGETS, MOD_TARGET_PAR, SOUND_PARAMS } from '../params.generated'
@@ -22,11 +23,10 @@ function VolBar({ vol, on, onChange }: { vol: number; on: boolean; onChange: (v:
 }
 
 function Pad({ idx }: { idx: number }) {
-  const { pattern, send, voice, playhead, selStep, setSelStep } = useStore()
+  const { pattern, send, voice, selStep, setSelStep } = useStore()
   const tr = pattern.tracks[voice]
   const outside = idx >= tr.length
   const on = tr.on[idx] && !outside
-  const playing = playhead.running && playhead.steps[voice] === idx && !outside
   const sel = selStep === idx
   const flam = tr.flam[idx], shift = shiftOf(tr.shift[idx]), prob = tr.prob[idx]
   const tags: { t: string; c: string }[] = []
@@ -37,7 +37,7 @@ function Pad({ idx }: { idx: number }) {
   return (
     <div className={`relative flex flex-col justify-between rounded-md border-2 p-1 min-w-0 select-none transition-colors
         ${outside ? 'opacity-25 border-synth-border bg-synth-bg' : on ? 'border-synth-amber bg-synth-surface' : 'border-synth-border bg-synth-bg/80'}
-        ${playing ? 'ring-2 ring-synth-cyan shadow-glow-cyan' : ''} ${sel && !outside ? 'outline outline-1 outline-slate-300' : ''}`}
+        data-[playing=true]:ring-2 data-[playing=true]:ring-synth-cyan data-[playing=true]:shadow-glow-cyan ${sel && !outside ? 'outline outline-1 outline-slate-300' : ''}`}
       title="click: add / select / remove  ·  shift-click or right-click: select only"
       onContextMenu={(e) => { e.preventDefault(); if (!outside) setSelStep(idx) }}
       onClick={(e) => {
@@ -81,9 +81,10 @@ function LockRow({ slot, voice, step }: { slot: 1 | 2; voice: number; step: numb
       <select disabled={!on} value={par} onChange={(e) => setPar(parseInt(e.target.value, 10))}
         className="bg-synth-surface border border-synth-border rounded px-1 py-0.5 disabled:opacity-40 max-w-[190px]">
         <option value={-1}>none</option>
-        {groups.map(g => <optgroup key={g} label={g}>{LOCKABLE.filter(t => t.label.split(':')[0] === g).map(t => <option key={t.par} value={t.par}>{t.label.replace(/^[^:]*:\s*/, '')}</option>)}</optgroup>)}
+        {groups.map(g => <optgroup key={g} label={g}>{LOCKABLE.filter((t, i, a) => t.label.split(':')[0] === g && a.findIndex(u => u.par === t.par) === i).map(t => <option key={t.par} value={t.par}>{t.label.replace(/^[^:]*:\s*/, '')}</option>)}</optgroup>)}
       </select>
       {def && def.kind === 'int' && <input type="range" min={def.min} max={def.max} value={val} className="w-28 accent-synth-cyan" onChange={(e) => send(['stepLock', voice, step, slot, par, parseInt(e.target.value, 10)])} />}
+      {def && def.kind === 'int' && <span className="w-16 text-synth-cyan font-mono">{formatValue(def, val)}</span>}
       {def && def.kind !== 'int' && (
         <select value={val} onChange={(e) => send(['stepLock', voice, step, slot, par, parseInt(e.target.value, 10)])} className="bg-synth-surface border border-synth-border rounded px-1 py-0.5 text-synth-cyan">
           {Array.from({ length: def.max - def.min + 1 }, (_, k) => def.min + k).map(v => <option key={v} value={v}>{formatValue(def, v)}</option>)}
@@ -132,9 +133,24 @@ function Inspector() {
 }
 
 export function SequencerDeck() {
-  const { pattern, send, voice, bar, setBar, clipboard, playhead } = useStore()
+  const { pattern, send, voice, bar, setBar, clipboard } = useStore()
   const tr = pattern.tracks[voice]
-  useEffect(() => { if (playhead.running && tr.length > 16) { const b = Math.floor(playhead.steps[voice] / 16); if (b !== bar) setBar(b) } }, [playhead.steps[voice], playhead.running])
+  // Playhead: no React re-render per frame. The pad under the playhead gets a data-playing attribute (styled by CSS variants),
+  // set directly on the DOM node; the bar tab follows the playhead through the (rare) setBar.
+  const grid = useRef<HTMLDivElement>(null)
+  const live = useRef({ voice, bar, length: tr.length }); live.current = { voice, bar, length: tr.length }
+  const lit = useRef<Element | null>(null)
+  const place = useRef((t: Telemetry) => {})
+  place.current = (t: Telemetry) => {
+    const { voice: v, bar: b, length } = live.current
+    const idx = t.running ? t.steps[v] : -1
+    const local = idx - b * 16
+    const el = idx >= 0 && idx < length && local >= 0 && local < 16 ? grid.current?.children[local] ?? null : null
+    if (el !== lit.current) { lit.current?.removeAttribute('data-playing'); el?.setAttribute('data-playing', 'true'); lit.current = el }
+    if (t.running && length > 16 && idx >= 0) { const nb = Math.floor(idx / 16); if (nb !== b) setBar(nb) }
+  }
+  useEffect(() => onTelemetryFrame(t => place.current(t)), [])
+  useEffect(() => { lit.current = null; place.current(getTelemetry()) }, [voice, bar, tr.length, pattern])
   const bars = Math.max(1, Math.min(4, Math.ceil(tr.length / 16)))
   const random = () => { for (let s = 0; s < NUM_STEPS; s++) send(['step', voice, s, s < tr.length && Math.random() < 0.3 ? 1 : 0]) }
   const btn = 'px-2 py-0.5 rounded bg-synth-surface hover:bg-synth-border border border-synth-border text-slate-300 disabled:opacity-40'
@@ -171,7 +187,7 @@ export function SequencerDeck() {
             </select></label>
         </div>
       </div>
-      <div className="grid gap-1.5 flex-1 min-h-0" style={{ gridTemplateColumns: 'repeat(16, minmax(0, 1fr))' }}>
+      <div ref={grid} className="grid gap-1.5 flex-1 min-h-0" style={{ gridTemplateColumns: 'repeat(16, minmax(0, 1fr))' }}>
         {Array.from({ length: 16 }, (_, k) => <Pad key={bar * 16 + k} idx={bar * 16 + k} />)}
       </div>
       <Inspector />

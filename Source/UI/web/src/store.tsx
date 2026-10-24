@@ -1,16 +1,17 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { bridge, ParamHandle } from './bridge'
-import { BankInfo, Cmd, GlobalCmd, NUM_TRACKS, PATTERN_LEVEL, Pattern, Playhead, SONG_END, applyCmd, emptyPattern } from './model'
+import { BankInfo, Cmd, GlobalCmd, NUM_TRACKS, PATTERN_LEVEL, Pattern, SONG_END, applyCmd, emptyPattern } from './model'
 import { setCurrentVoice } from './audition'
+import { onTelemetryFrame, seedTelemetry } from './telemetry'
 
+// Editing state (pattern data, selections) lives in React. Telemetry (playhead, meter) does not: see telemetry.ts.
 interface Store {
   pattern: Pattern                                  // the pattern being edited (viewPat)
   viewPat: number; setViewPat: (p: number) => void
   follow: boolean; setFollow: (f: boolean) => void  // the view follows the playing pattern
   bank: BankInfo
   send: (c: Cmd) => void                            // edit the viewed pattern
-  sendG: (c: GlobalCmd) => void                     // commands with explicit arguments (mute, patterns, song)
-  playhead: Playhead
+  sendG: (c: GlobalCmd) => void                     // commands with explicit arguments (mute, patterns, song, roll)
   voice: number; setVoice: (v: number) => void
   bar: number; setBar: (b: number) => void
   selStep: number; setSelStep: (s: number) => void
@@ -27,7 +28,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [bank, setBank] = useState<BankInfo>(emptyBank())
   const [viewPat, setViewPatState] = useState(0)
   const [follow, setFollow] = useState(true)
-  const [playhead, setPlayhead] = useState<Playhead>({ running: false, steps: [0, 0, 0, 0, 0, 0, 0], bpm: 120 })
   const [voice, setVoice] = useState(0)
   const [bar, setBar] = useState(0)
   const [selStep, setSelStep] = useState(0)
@@ -36,19 +36,21 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const view = useRef(0); view.current = viewPat
 
   const loadView = useCallback((p: number) => { bridge.getPattern(p).then(x => { if (view.current === p) setPattern(x) }) }, [])
-  const refreshBank = useCallback(() => bridge.getState().then(s => { setBank({ used: s.used, song: s.song, songMode: s.songMode, mutes: s.mutes }); setPlayhead(h => ({ ...h, running: s.running, bpm: s.bpm })) }), [])
+  const refreshBank = useCallback(() => bridge.getState().then(s => { setBank({ used: s.used, song: s.song, songMode: s.songMode, mutes: s.mutes }); seedTelemetry(s.running, s.bpm) }), [])
   const setViewPat = useCallback((p: number) => { view.current = p; setViewPatState(p); setBar(0); loadView(p) }, [loadView])
 
   useEffect(() => { refreshBank(); loadView(0) }, [])
-  useEffect(() => bridge.onPlayhead(p => setPlayhead(p)), [])
   useEffect(() => bridge.onPresetLoaded(() => { refreshBank(); loadView(view.current) }), [loadView, refreshBank])
   useEffect(() => { setCurrentVoice(voice) }, [voice])
-  // the view follows the playing pattern (the sequencer switches at the end of the bar)
-  const lastActive = useRef(-1)
+
+  // the view follows the playing pattern (the sequencer switches at the end of the bar) - decided per telemetry frame, outside React
+  const followRef = useRef(follow); followRef.current = follow
   useEffect(() => {
-    const a = playhead.activePattern
-    if (a !== undefined && a !== lastActive.current) { lastActive.current = a; if (follow && playhead.running && a !== view.current) setViewPat(a) }
-  }, [playhead.activePattern, playhead.running, follow, setViewPat])
+    let last = -1
+    return onTelemetryFrame(t => {
+      if (t.activePattern !== last) { last = t.activePattern; if (followRef.current && t.running && t.activePattern !== view.current) setViewPat(t.activePattern) }
+    })
+  }, [setViewPat])
 
   const send = useCallback((c: Cmd) => {
     const p = view.current
@@ -66,8 +68,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     else if (c[0] === 'copyPattern') { setBank(b => ({ ...b, used: b.used.map((u, i) => (i === c[2] ? b.used[c[1]] : u)) })); if (c[2] === view.current) setTimeout(() => loadView(c[2]), 0) }
   }, [loadView])
 
-  const v = useMemo(() => ({ pattern, viewPat, setViewPat, follow, setFollow, bank, send, sendG, playhead, voice, setVoice, bar, setBar, selStep, setSelStep, clipboard, patClipboard }),
-    [pattern, viewPat, setViewPat, follow, bank, send, sendG, playhead, voice, bar, selStep])
+  const v = useMemo(() => ({ pattern, viewPat, setViewPat, follow, setFollow, bank, send, sendG, voice, setVoice, bar, setBar, selStep, setSelStep, clipboard, patClipboard }),
+    [pattern, viewPat, setViewPat, follow, bank, send, sendG, voice, bar, selStep])
   return <Ctx.Provider value={v}>{children}</Ctx.Provider>
 }
 

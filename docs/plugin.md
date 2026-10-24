@@ -94,3 +94,17 @@ Verified: command -> sequencer data (both numbering ranges, clear, bad slot/para
 
 - **Euclid** (deck button *EUCLID*): length (1-64), steps, rotation for the selected voice of the viewed pattern, a live preview of the rhythm and APPLY. The rhythm comes from the **firmware's own generator**: the bridge runs it in a private scratch sequencer instance (the derived code keeps its state in the instance, so the audio thread is never touched), then replaces the track's steps and length through the normal command path (steps that stay on keep their settings, new ones get volume 100). Checked against the oracle's recorded masks (16/5 = 0x1249, 16/7 rot 3 = 0xA54A, 13/5, 32/9) and the 64-step rotation case that the unguarded upstream shift would have erased (H8). Length 16 is stored as 16 (upstream stored 0, Q8).
 - **Roll** (deck button *ROLL* + rate list): hold to retrigger the selected voice at 1/16, 1/8, 1/4, 1/2 or 1 bar (every 1, 2, 4, 8, 16 steps, on step boundaries, velocity 100, the step's note - the firmware's rule); *one-shot* or a stopped sequencer fire once per press. Releasing the pointer anywhere ends the roll. Not saved in presets (performance control). Measured through the engine: 1 s of hold at 120 BPM gives 8 hits at 1/16, 4 at 1/8, 1 in one-shot.
+
+## Readouts and per-frame UI
+
+**Readouts.** Knobs and p-lock sliders show physical units (`Source/UI/web/src/readout.ts`): notes + Hz for coarse / mod-osc / FM
+frequency (raw value is a MIDI note), cents for fine, ms/s for attack/decay/pitch-decay (`∞` = never decays), Hz for filter cutoff,
+LFO rate and sample-rate reducer, dB for volume, L/R/C for pan, `×` for pitch-mod and click pitch, % for amounts. The nonlinear
+curves are *not* re-derived in TypeScript: `Tools/params/readout_tables.sh` dumps the derived engine's own mappings (128-entry
+tables) to `src/readout.golden.json`, which the UI imports. Regenerate it if the engine mappings ever change.
+Not yet converted (plain raw value): amp/pitch slope, `repeat`, LFO phase/target voice, FX P1-P4.
+
+**Per-frame telemetry stays out of React.** `src/telemetry.ts` owns playhead/peak data; the playhead highlight is a `data-playing`
+attribute set directly on the step pad DOM node, the meter is a `<canvas>` driven by `requestAnimationFrame`, and low-rate values
+(BPM, running, active/pending pattern, song position) are read through `useSyncExternalStore` selectors so only the affected
+components re-render.

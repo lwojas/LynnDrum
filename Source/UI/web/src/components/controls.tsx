@@ -1,6 +1,7 @@
 import React, { useRef } from 'react'
 import { useParam } from '../store'
 import { commitSoundEdit } from '../audition'
+import { readoutFor } from '../readout'
 import { MOD_TARGETS, ParamDef, SOUND_PARAMS } from '../params.generated'
 
 export const PARAM_BY_ID = new Map<string, ParamDef>(SOUND_PARAMS.map(p => [p.id, p]))
@@ -10,6 +11,8 @@ export function formatValue(d: ParamDef, raw: number): string {
   if (d.kind === 'choice') return d.choices?.[raw] ?? String(raw)
   if (d.kind === 'target') return MOD_TARGETS[raw] ?? String(raw)
   if (d.kind === 'bool') return raw ? 'ON' : 'OFF'
+  const r = readoutFor(d.id)
+  if (r) return r(raw)
   if (d.bipolar) return (raw - 63 > 0 ? '+' : '') + (raw - 63)
   return String(raw)
 }

@@ -1,30 +1,19 @@
 import React from 'react'
-import { useParam, useStore } from '../store'
+import { useParam } from '../store'
 import { PresetBar } from './PresetBar'
-
-function Meter() {
-  const { playhead } = useStore()
-  const [hold, setHold] = React.useState({ l: 0, r: 0 })
-  React.useEffect(() => { setHold(h => ({ l: Math.max(playhead.peakL ?? 0, h.l * 0.85), r: Math.max(playhead.peakR ?? 0, h.r * 0.85) })) }, [playhead])
-  const bar = (v: number) => Math.max(0, Math.min(1, (20 * Math.log10(Math.max(v, 1e-4)) + 60) / 66))      // -60 dB .. +6 dB
-  const db = (v: number) => (v < 1e-4 ? '-inf' : (20 * Math.log10(v)).toFixed(1))
-  const col = (v: number) => (v > 1 ? '#ff3b5c' : v > 0.7 ? '#ff7728' : '#2fe278')
-  return (
-    <div className="flex flex-col gap-0.5 w-28" title="Output peak">
-      {[hold.l, hold.r].map((v, i) => <div key={i} className="h-1.5 rounded-sm bg-black/60 overflow-hidden"><div className="h-full" style={{ width: `${bar(v) * 100}%`, background: col(v) }} /></div>)}
-      <span className="text-[9px] font-mono text-slate-400 text-right leading-none">{db(Math.max(hold.l, hold.r))} dB</span>
-    </div>)
-}
+import { Meter } from './Meter'
+import { useTelemetry } from '../telemetry'
 
 export function Header() {
-  const { playhead } = useStore()
+  const hostBpm = useTelemetry(t => t.bpm)
+  const hostRunning = useTelemetry(t => t.running)
   const [sync, setSync] = useParam('seqSync', 'combo')
   const [run, setRun] = useParam('seqRun', 'toggle')
   const [tempo, setTempo, tempoH] = useParam('tempo')
   const [master, setMaster, masterH] = useParam('master')
   const free = sync === 1
   const freeBpm = 30 + tempo * 270
-  const bpm = free ? freeBpm : playhead.bpm
+  const bpm = free ? freeBpm : hostBpm
   return (
     <header className="h-14 shrink-0 flex items-center gap-4 px-4 border-b-2 border-synth-border bg-synth-panel">
       <div className="flex items-baseline gap-2">
@@ -43,7 +32,7 @@ export function Header() {
         </div>
         <button disabled={!free} onClick={() => setRun(run ? 0 : 1)}
           className={`ml-1 px-3 py-1 rounded font-bold border ${!free ? 'opacity-40 border-synth-border text-slate-400' : run ? 'bg-synth-emerald text-black border-synth-emerald' : 'border-synth-border text-slate-200'}`}>
-          {free ? (run ? '■ STOP' : '▶ RUN') : playhead.running ? '▶ HOST' : '■ HOST'}
+          {free ? (run ? '■ STOP' : '▶ RUN') : hostRunning ? '▶ HOST' : '■ HOST'}
         </button>
       </div>
       <div className="flex flex-col items-end leading-none">
