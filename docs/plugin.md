@@ -102,7 +102,7 @@ frequency (raw value is a MIDI note), cents for fine, ms/s for attack/decay/pitc
 LFO rate and sample-rate reducer, dB for volume, L/R/C for pan, `×` for pitch-mod and click pitch, % for amounts. The nonlinear
 curves are *not* re-derived in TypeScript: `Tools/params/readout_tables.sh` dumps the derived engine's own mappings (128-entry
 tables) to `src/readout.golden.json`, which the UI imports. Regenerate it if the engine mappings ever change.
-Not yet converted (plain raw value): amp/pitch slope, `repeat`, LFO phase/target voice, FX P1-P4.
+Slopes show curve shape (`lin` at centre, ±%), repeat shows `off`/`N×`, LFO phase shows degrees; FX P1-P4 are effect-dependent and show %.
 
 **Per-frame telemetry stays out of React.** `src/telemetry.ts` owns playhead/peak data; the playhead highlight is a `data-playing`
 attribute set directly on the step pad DOM node, the meter is a `<canvas>` driven by `requestAnimationFrame`, and low-rate values

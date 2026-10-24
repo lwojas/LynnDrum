@@ -44,7 +44,10 @@ export function readoutFor(id: string): Fmt | undefined {
   if (/^trans\d_freq/.test(id)) return d => '×' + T.clickPitch[d].toFixed(2)
   if (/^vol\d/.test(id)) return d => d === 0 ? '-∞ dB' : (20 * Math.log10(d / 127)).toFixed(1) + ' dB'
   if (/^pan\d/.test(id)) return d => { const p = Math.round(((d - 63.5) / 63.5) * 100); return p === 0 ? 'C' : (p < 0 ? 'L' : 'R') + Math.abs(p) }
+  if (/^(vol|pitch)_slope/.test(id)) return d => { const p = Math.round(((d - 63.5) / 63.5) * 100); return Math.abs(p) <= 1 ? 'lin' : signed(p, String(p)) + '%' }
+  if (/^repeat/.test(id)) return d => d === 0 ? 'off' : d + '×'
+  if (/^offset_lfo/.test(id)) return d => Math.round((d / 127) * 360) + '°'
   if (/^fx_dry_wet/.test(id)) return d => d + '%'
-  if (/^(mod_osc_gain|fmamnt|amount_lfo|drive|snare_dist|cymbal_dist|hat_dist|filter_drive|velo_mod|trans\d_vol|pwm|noise_freq|mix|offset_lfo)/.test(id)) return fmtPct
+  if (/^(mod_osc_gain|fmamnt|amount_lfo|drive|snare_dist|cymbal_dist|hat_dist|filter_drive|velo_mod|trans\d_vol|pwm|noise_freq|mix|fx_p\d)/.test(id)) return fmtPct
   return undefined
 }
