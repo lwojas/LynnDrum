@@ -185,6 +185,52 @@ static void bridgeTests()
         CHECK (ba.readLevel().l == 0.f, "meter peak must reset after reading");
     }
 
+    // Euclid: the firmware's generator (golden values taken from the oracle: Tools/ref-harness/golden/seq/euclid_*.ev)
+    {
+        auto bits = [&] (int len, int st, int rot) { SeqBridge e; const auto a = e.euclidPreview (len, st, rot); unsigned long long m = 0; for (int i = 0; i < 64; ++i) if (a[(size_t) i]) m |= 1ull << i; return m; };
+        CHECK (bits (16, 5, 0) == 0x1249ull, "euclid 16/5: %llx", bits (16, 5, 0));
+        CHECK (bits (16, 7, 3) == 0xa54aull, "euclid 16/7 rot 3: %llx", bits (16, 7, 3));
+        CHECK (bits (13, 5, 0) == 0x0529ull, "euclid 13/5: %llx", bits (13, 5, 0));
+        CHECK (bits (32, 9, 0) == 0x12244891ull, "euclid 32/9: %llx", bits (32, 9, 0));
+        const auto m64 = bits (64, 17, 5); int pop = 0; for (int i = 0; i < 64; ++i) pop += (m64 >> i) & 1;
+        CHECK (pop == 17, "euclid 64/17 rot 5 has %d steps (the unguarded upstream shift erased it)", pop);
+        SeqBridge e; EngineHost he; he.prepare (48000.0);
+        e.applyUiCommand ({ 2, 1, 16, 5, 0 }, "euclid"); e.drain (he);
+        std::uint16_t m[4]; unsigned len = 0; lxrseq_get_main_steps (he.sequencer(), 2, 1, m, &len);
+        CHECK (m[0] == 0x1249 && len == 16, "euclid command reached the sequencer (mask %04x, length %u; upstream would store 0 for 16)", m[0], len);
+        CHECK (e.pattern (2).tracks[1].length == 16 && e.pattern (2).tracks[1].on[3] && !e.pattern (2).tracks[1].on[4], "euclid mirror");
+        CHECK (!e.applyUiCommand ({ 2, 1, 16, 0, 0 }, "euclid") && !e.applyUiCommand ({ 99, 1, 16, 5, 0 }, "euclid"), "bad euclid arguments accepted");
+    }
+
+    // roll: while held the voice retriggers at the roll rate (every step at rate 5 = 1/16), one-shot (rate 0) fires once
+    {
+        auto rollOnsets = [&] (int rate)
+        {
+            EngineHost hr; hr.prepare (48000.0); SeqBridge br;
+            std::uint8_t k[LXR_KIT_BYTES]; lynn::params::fillDefaultKit (k); hr.loadKit (k);
+            HostEvent sp; sp.type = HostEvent::Type::Param; sp.a = 50; sp.b = 5; float a_[64], b_[64]; hr.process (a_, b_, 64, &sp, 1);
+            hr.setTempo (120.0);
+            br.applyUiCommand ({ (double) rate }, "rollRate"); br.drain (hr);
+            std::vector<float> l (48000 * 3), r (l.size());
+            HostEvent run; run.type = HostEvent::Type::SeqRun; bool on = false, off = false;
+            for (size_t pos = 0; pos < l.size(); pos += 256)
+            {
+                if (pos >= 256 * 10 && !on) { on = true; br.applyUiCommand ({ 0, 1 }, "roll"); }
+                if (pos >= 256 * 10 + 48000 && !off) { off = true; br.applyUiCommand ({ 0, 0 }, "roll"); }
+                br.drain (hr);
+                hr.process (l.data() + pos, r.data() + pos, 256, pos == 0 ? &run : nullptr, pos == 0 ? 1 : 0);
+            }
+            int n = 0, quiet = 1 << 20;
+            for (float v : l) { const float a = std::fabs (v); if (a > 0.05f && quiet > 2400) ++n; if (a < 0.01f) ++quiet; else if (a > 0.05f) quiet = 0; }
+            return n;
+        };
+        const int every16 = rollOnsets (5), every8 = rollOnsets (4), oneShot = rollOnsets (0);
+        std::printf ("roll for 1 s at 120 bpm: 1/16 -> %d hits, 1/8 -> %d, one-shot -> %d\n", every16, every8, oneShot);
+        CHECK (every16 >= 7 && every16 <= 10, "1/16 roll hits: %d", every16);
+        CHECK (every8 >= 3 && every8 <= 6, "1/8 roll hits: %d", every8);
+        CHECK (oneShot == 1, "one-shot roll must fire once, not %d times", oneShot);
+    }
+
     // p-locks: command -> sequencer data (cortex destination numbering), clearing, and the audible effect (restore on the next trigger)
     {
         SeqBridge bl; EngineHost hl; hl.prepare (48000.0);

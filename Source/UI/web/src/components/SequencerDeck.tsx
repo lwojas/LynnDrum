@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import { useStore } from '../store'
 import { PatternBar } from './PatternBar'
+import { EuclidPanel, RollControl } from './EuclidRoll'
 import { MOD_TARGETS, MOD_TARGET_PAR, SOUND_PARAMS } from '../params.generated'
 import { formatValue, PARAM_BY_ID } from './controls'
 import { FLAM_LABELS, NUM_STEPS, SHIFT_NONE, TRACKS, shiftOf } from '../model'
@@ -156,7 +157,9 @@ export function SequencerDeck() {
           <button className={btn} onClick={() => { clipboard.current = voice }}>COPY</button>
           <button className={btn} disabled={clipboard.current === null} onClick={() => clipboard.current !== null && send(['copyTrack', clipboard.current, voice])}>PASTE</button>
           <button className={btn} onClick={random}>RANDOM</button>
+          <EuclidPanel />
         </div>
+        <RollControl />
         <div className="flex items-center gap-3">
           <label className="flex items-center gap-1 text-slate-400">SWING
             <input type="range" min={0} max={127} value={pattern.shuffle} className="w-20 accent-synth-amber" onChange={(e) => send(['shuffle', parseInt(e.target.value, 10)])} />

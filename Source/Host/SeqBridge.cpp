@@ -5,7 +5,22 @@
 
 namespace lynn
 {
-SeqBridge::SeqBridge() {}                                   // empty = what a fresh sequencer holds, so mirror and engine start in sync
+SeqBridge::SeqBridge() {}
+SeqBridge::~SeqBridge() { if (scratch) lxrseq_destroy (scratch); }
+
+std::array<bool, kSteps> SeqBridge::euclidPreview (int length, int steps, int rotation)
+{
+    std::array<bool, kSteps> out {};
+    length = std::clamp (length, 1, 64); steps = std::clamp (steps, 1, length); rotation = std::clamp (rotation, 0, length - 1);
+    if (!scratch) { LxrSeqSink sink {}; static const std::uint8_t zeros[256] = {}; sink.originalCc = zeros; scratch = lxrseq_create (&sink, 1); }
+    lxrseq_euclid_length (scratch, 0, (unsigned) length);
+    lxrseq_euclid_steps (scratch, 0, (unsigned) steps, 0);
+    lxrseq_euclid_rotation (scratch, 0, (unsigned) rotation, 0);
+    std::uint16_t m[4]; unsigned len = 0;
+    lxrseq_get_main_steps (scratch, 0, 0, m, &len);
+    for (int i = 0; i < length; ++i) out[(size_t) i] = ((m[i / 16] >> (i % 16)) & 1) != 0;
+    return out;
+}                                   // empty = what a fresh sequencer holds, so mirror and engine start in sync
 
 void SeqBridge::loadDemo()
 {
@@ -149,6 +164,17 @@ bool SeqBridge::applyUiCommand (const std::vector<double>& a, const std::string&
         const UiPattern old = bank[(size_t) p]; bank[(size_t) p].tracks[(size_t) d] = bank[(size_t) p].tracks[(size_t) s];
         sendPattern (p, &old); return true;
     }
+    if (n == "euclid")                                             // [pat, track, length, steps, rotation]: replaces the track's steps
+    {
+        const int t = at (1, 0, kTracks - 1), len = at (2, 1, 64), st = at (3, 1, 64), rot = at (4, 0, 63); if (p < 0 || t < 0 || len < 0 || st < 0 || rot < 0) return false;
+        const auto bits = euclidPreview (len, st, rot);
+        const UiPattern old = bank[(size_t) p]; auto& tr = bank[(size_t) p].tracks[(size_t) t];
+        tr.length = (std::uint8_t) len;
+        for (int i = 0; i < kSteps; ++i) { tr.on[(size_t) i] = bits[(size_t) i] ? 1 : 0; if (bits[(size_t) i] && !old.tracks[(size_t) t].on[(size_t) i]) { tr.vol[(size_t) i] = 100; } }
+        sendPattern (p, &old); return true;
+    }
+    if (n == "roll") { const int t = at (0, 0, kTracks - 1); if (t < 0) return false; SeqCommand c; c.type = SeqCommand::Roll; c.track = (std::uint8_t) t; c.value = a.size() > 1 && a[1] != 0; push (c); return true; }
+    if (n == "rollRate") { const int r = at (0, 0, 5); if (r < 0) return false; SeqCommand c; c.type = SeqCommand::RollRate; c.value = (std::uint16_t) r; push (c); return true; }
     if (n == "clearPattern") { if (p < 0) return false; setPattern (p, UiPattern()); return true; }
     if (n == "copyPattern") { const int s = at (0, 0, kPatterns - 1), d = at (1, 0, kPatterns - 1); if (s < 0 || d < 0) return false; setPattern (d, bank[(size_t) s]); return true; }
     if (n == "selectPattern") { if (p < 0) return false; SeqCommand c; c.type = SeqCommand::SelectPattern; c.pat = (std::uint8_t) p; push (c); return true; }
@@ -261,6 +287,8 @@ void SeqBridge::drain (EngineHost& host) noexcept
             case SeqCommand::SelectPattern: lxrseq_set_next_pattern (q, c.pat); break;
             case SeqCommand::SongMode: lxrseq_set_song_mode (q, c.value); break;
             case SeqCommand::SongEntry: lxrseq_set_song_entry (q, c.idx, c.value); break;
+            case SeqCommand::Roll: lxrseq_set_roll (q, c.track, c.value); break;
+            case SeqCommand::RollRate: lxrseq_set_roll_rate (q, c.value); break;
         }
     }
     tail.store (t, std::memory_order_release);

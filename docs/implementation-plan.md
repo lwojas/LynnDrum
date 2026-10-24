@@ -62,7 +62,7 @@ Deliverables: the docs (now ten, incl. `lxr-sequencer.md`). Remaining non-engine
 ### Phase 3 — JUCE plugin shell *(M3) — done 2026-10-24 except pluginval/DAW runs (`docs/plugin.md`)*
 Minimal VST3: stereo out, MIDI in, APVTS with 2 dummy params, a sine "engine", `pluginval` ≥ 5, state save/load, bypass, multiple instances; JUCE 8.x, CMake. **Exit:** passes pluginval; loads in target DAW(s); no allocations in `processBlock` (malloc-trap build). **Complexity:** S (2–3 d).
 
-### Stage S2 — Sequencer clock, transport, edits, bridge *(M4b, with P4) — clock, tempo, run/stop, locate/loop anchoring, edit queue, state done; pattern bank/song/Euclid/roll UI and p-lock editing still open*
+### Stage S2 — Sequencer clock, transport, edits, bridge *(M4b, with P4) — clock, tempo, run/stop, locate/loop anchoring, edit queue, state done; pattern bank, song, p-lock editing, Euclid and roll done; kit-per-pattern open*
 - `SeqClock`: `AudioPlayHead` PPQ → 96-PPQ sub-tick boundaries with sample offsets (tempo changes, loops, locates, time-signature agnostic, hosts without position info → free-run); `SeqTransport`: host-sync + free-run, position anchoring (`lxr-sequencer.md` §4.2); shuffle in the PPQ domain.
 - Sequencer triggers + p-lock overrides into the `EventScheduler`; latency compensation identical to MIDI.
 - `SeqBridge`: lock-free edit-command queue (UI → audio), mirrored UI copy, playhead telemetry; state serialisation of the `PatternSet`; host-automatable sequencer controls (run/hold, pattern select, shuffle, mutes, roll hold).

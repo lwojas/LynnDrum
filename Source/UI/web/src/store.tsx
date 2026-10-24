@@ -53,9 +53,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const send = useCallback((c: Cmd) => {
     const p = view.current
     bridge.cmd(PATTERN_LEVEL.has(c[0]) ? [c[0], p, ...c.slice(1)] : (c as any))
-    setPattern(x => applyCmd(x, c))
-    if (c[0] === 'step' || c[0] === 'clearTrack' || c[0] === 'copyTrack') setBank(b => b.used[p] ? b : { ...b, used: b.used.map((u, i) => (i === p ? true : u)) })
-  }, [])
+    if (c[0] === 'euclid') setTimeout(() => loadView(p), 0)             // computed by the plugin: fetch the result
+    else setPattern(x => applyCmd(x, c))
+    if (c[0] === 'step' || c[0] === 'clearTrack' || c[0] === 'copyTrack' || c[0] === 'euclid') setBank(b => b.used[p] ? b : { ...b, used: b.used.map((u, i) => (i === p ? true : u)) })
+  }, [loadView])
   const sendG = useCallback((c: GlobalCmd) => {
     bridge.cmd(c as any)
     if (c[0] === 'mute') setBank(b => ({ ...b, mutes: b.mutes.map((m, i) => (i === c[1] ? !!c[2] : m)) }))

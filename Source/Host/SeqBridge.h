@@ -52,7 +52,7 @@ struct UiSong
 
 struct SeqCommand
 {
-    enum Type : std::uint8_t { Step, Length, Mute, Shuffle, Audition, SelectPattern, SongMode, SongEntry };
+    enum Type : std::uint8_t { Step, Length, Mute, Shuffle, Audition, SelectPattern, SongMode, SongEntry, Roll, RollRate };
     Type type = Step;
     std::uint8_t pat = 0, track = 0, idx = 0, on = 0, vol = 100, prob = 100, note = 60, flam = 0, shift = kShiftNone;
     std::uint8_t lp1 = kNoLock, lv1 = 0, lp2 = kNoLock, lv2 = 0;      // p-lock slots of a Step command
@@ -63,6 +63,9 @@ class SeqBridge
 {
 public:
     SeqBridge();
+    ~SeqBridge();
+    SeqBridge (const SeqBridge&) = delete;
+    SeqBridge& operator= (const SeqBridge&) = delete;
 
     // ---- message thread -------------------------------------------------------------------------------------------
     const UiPattern& pattern (int p) const noexcept { return bank[(size_t) p]; }
@@ -74,6 +77,8 @@ public:
     // JSON command from the editor (see Source/UI/web/src/model.ts). Returns false if malformed.
     bool applyUiCommand (const std::vector<double>& args, const std::string& name);
 
+    /** Euclidean pattern as the firmware's generator computes it (length 1..64, steps 1..length, rotation 0..length-1); 64 flags, false beyond `length`. */
+    std::array<bool, kSteps> euclidPreview (int length, int steps, int rotation);
     void audition (int track, int velocity);                 // trigger a voice now (UI preview)
     void setBank (const std::array<UiPattern, kPatterns>&, const UiSong&, std::uint8_t mutesMask);   // preset / state load
     void setPattern (int p, const UiPattern&);               // replace one pattern
@@ -95,6 +100,7 @@ public:
 
 private:
     void push (const SeqCommand&);
+    LxrSeq* scratch = nullptr;                               // private sequencer used only to run the firmware's Euclid generator
     void editStep (int pat, int t, int i);
     void editLength (int pat, int t);
     void editMute (int t);

@@ -16,6 +16,7 @@ export interface Bridge {
   readonly isMock: boolean
   getState(): Promise<PluginState>
   getPattern(pat: number): Promise<Pattern>
+  euclid(length: number, steps: number, rotation: number): Promise<number[]>
   cmd(c: (string | number)[]): void
   onPlayhead(cb: (p: Playhead) => void): () => void
   param(id: string, kind: 'slider' | 'toggle' | 'combo'): ParamHandle
@@ -36,6 +37,7 @@ function realBridge(): Bridge {
   const nGet = (Juce as any).getNativeFunction('lynn_getState')
   const nCmd = (Juce as any).getNativeFunction('lynn_cmd')
   const nGetPat = (Juce as any).getNativeFunction('lynn_getPattern')
+  const nEuclid = (Juce as any).getNativeFunction('lynn_euclid')
   const handles = new Map<string, ParamHandle>()
   const nPresets = (Juce as any).getNativeFunction('lynn_presets'), nLoad = (Juce as any).getNativeFunction('lynn_loadPreset')
   const nAud = (Juce as any).getNativeFunction('lynn_audition')
@@ -49,6 +51,7 @@ function realBridge(): Bridge {
     onPreset: (cb) => listen('preset', cb), onPresetLoaded: (cb) => listen('presetLoaded', () => cb()),
     async getState() { return JSON.parse(await nGet()) as PluginState },
     async getPattern(p) { return JSON.parse(await nGetPat(p)) as Pattern },
+    async euclid(l, s, r) { return JSON.parse(await nEuclid(l, s, r)) as number[] },
     cmd(c) { nCmd(JSON.stringify(c)) },
     onPlayhead(cb) {
       const id = (window as any).__JUCE__.backend.addEventListener('playhead', (e: any) => cb(e as Playhead))
@@ -112,9 +115,11 @@ function mockBridge(): Bridge {
     onPreset(cb) { pl.add(cb); return () => pl.delete(cb) }, onPresetLoaded(cb) { ll.add(cb); return () => ll.delete(cb) },
     async getState() { return { pattern: bank[0], bpm, running, used: bank.map(p => JSON.stringify(p) !== JSON.stringify(emptyPattern())), song, songMode, mutes } },
     async getPattern(p) { return bank[p] },
+    async euclid(l, s, r) { const out = Array(64).fill(0); for (let i = 0; i < l; i++) out[(i + r) % l] = Math.floor(((i + 1) * s) / l) > Math.floor((i * s) / l) ? 1 : 0; return out },     // dev stand-in (the plugin uses the firmware's generator)
     cmd(c) {
       const [name, ...a] = c as [string, ...number[]]
-      if (PATTERN_LEVEL.has(name)) { const p = a[0]; bank[p] = applyCmd(bank[p], [name, ...a.slice(1)] as any) }
+      if (name !== 'euclid' && PATTERN_LEVEL.has(name)) { const p = a[0]; bank[p] = applyCmd(bank[p], [name, ...a.slice(1)] as any) }
+      else if (name === 'euclid') { const [p, t, l, st, r] = a; const x = emptyPattern().tracks[0]; const o = bank[p]; const bits: number[] = Array(64).fill(0); for (let i = 0; i < l; i++) bits[(i + r) % l] = Math.floor(((i + 1) * st) / l) > Math.floor((i * st) / l) ? 1 : 0; const tr = { ...o.tracks[t], length: l, on: bits.map(b => !!b) }; void x; bank[p] = { ...o, tracks: o.tracks.map((q, i) => (i === t ? tr : q)) } }
       else if (name === 'mute') mutes[a[0]] = !!a[1]
       else if (name === 'clearPattern') bank[a[0]] = emptyPattern()
       else if (name === 'copyPattern') bank[a[1]] = JSON.parse(JSON.stringify(bank[a[0]]))

@@ -43,6 +43,7 @@ export type Cmd =
   | ['stepNote', track: number, idx: number, v: number]
   | ['stepFlam', track: number, idx: number, v: number]
   | ['stepShift', track: number, idx: number, v: number]
+  | ['euclid', track: number, length: number, steps: number, rotation: number]       // computed by the plugin (firmware generator): the view is reloaded
   | ['stepLock', track: number, idx: number, slot: number, par: number, v: number]
   | ['trackLength', track: number, len: number]
   | ['clearTrack', track: number]
@@ -67,6 +68,7 @@ export function applyCmd(p: Pattern, c: Cmd): Pattern {
     case 'stepNote': edit(c[1], x => { x.note[c[2]] = c[3] }); break
     case 'stepFlam': edit(c[1], x => { x.flam[c[2]] = c[3] }); break
     case 'stepShift': edit(c[1], x => { x.shift[c[2]] = c[3] }); break
+    case 'euclid': break
     case 'stepLock': edit(c[1], x => { const [par, val] = c[3] === 1 ? [x.lockPar1, x.lockVal1] : [x.lockPar2, x.lockVal2]; par[c[2]] = c[4]; val[c[2]] = c[5] }); break
     case 'trackLength': edit(c[1], x => { x.length = c[2] }); break
     case 'clearTrack': q.tracks[c[1]] = { ...emptyTrack(), length: q.tracks[c[1]].length }; break
@@ -77,7 +79,7 @@ export function applyCmd(p: Pattern, c: Cmd): Pattern {
 }
 
 /** commands that address one pattern: the store inserts the viewed pattern's number after the name on the wire */
-export const PATTERN_LEVEL = new Set(['stepLock', 'step', 'stepVol', 'stepProb', 'stepNote', 'stepFlam', 'stepShift', 'trackLength', 'clearTrack', 'copyTrack', 'shuffle'])
+export const PATTERN_LEVEL = new Set(['euclid', 'stepLock', 'step', 'stepVol', 'stepProb', 'stepNote', 'stepFlam', 'stepShift', 'trackLength', 'clearTrack', 'copyTrack', 'shuffle'])
 /** commands with explicit arguments, sent as they are */
 export type GlobalCmd =
   | ['mute', track: number, on: number]
@@ -86,6 +88,8 @@ export type GlobalCmd =
   | ['selectPattern', pat: number]
   | ['songMode', on: number]
   | ['songSet', pos: number, pat: number]
+  | ['roll', track: number, on: number]
+  | ['rollRate', rate: number]
 export const SONG_END = 64, SONG_LOOP = 65
 
 export interface Playhead { running: boolean; steps: number[]; bpm: number; peakL?: number; peakR?: number; activePattern?: number; pendingPattern?: number; songPosition?: number }

@@ -46,6 +46,12 @@ LynnDrumEditor::LynnDrumEditor (LynnDrumProcessor& p) : juce::AudioProcessorEdit
                              { done (juce::JSON::toString (stateJson(), true)); })
         .withNativeFunction ("lynn_getPattern", [this] (const juce::Array<juce::var>& a, juce::WebBrowserComponent::NativeFunctionCompletion done)
                              { done (juce::JSON::toString (patternJson (a.size() > 0 ? (int) a[0] : 0), true)); })
+        .withNativeFunction ("lynn_euclid", [this] (const juce::Array<juce::var>& a, juce::WebBrowserComponent::NativeFunctionCompletion done)
+        {
+            juce::Array<juce::var> out;
+            if (a.size() > 2) for (bool b : proc.bridge().euclidPreview ((int) a[0], (int) a[1], (int) a[2])) out.add (b ? 1 : 0);
+            done (juce::JSON::toString (juce::var (out), true));
+        })
         .withNativeFunction ("lynn_cmd", [this] (const juce::Array<juce::var>& args, juce::WebBrowserComponent::NativeFunctionCompletion done)
         {
             bool ok = false;
