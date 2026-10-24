@@ -2,6 +2,7 @@ import React from 'react'
 import { useStore } from '../store'
 import { TRACKS } from '../model'
 import { SOUND_PARAMS, ParamDef } from '../params.generated'
+import { EnvGraph, FilterGraph } from './Graphs'
 import { Ctl, Knob, Select, Switch } from './controls'
 import { audition, isAuto, onAutoChange, setAuto } from '../audition'
 
@@ -75,6 +76,8 @@ export function SoundDeck() {
   const { voice } = useStore()
   const t = TRACKS[voice]
   const defs = SOUND_PARAMS.filter(d => d.group === VOICE_GROUP[voice] && !hidden(voice, d))
+  const vn = Math.min(voice, 5) + 1
+  const decayId = voice === 5 ? 'velod6_closed' : voice === 6 ? 'velod6_open' : `velod${vn}`
   const by = (m: Module) => defs.filter(d => moduleOf(d) === m)
   return (
     <section className="flex-1 min-w-0 min-h-0 p-3 flex flex-col gap-3">
@@ -90,7 +93,10 @@ export function SoundDeck() {
         </div>
       </div>
       <div className="grid gap-3 flex-1 min-h-0" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gridAutoRows: 'minmax(0, 1fr)' }}>
-        {MODULES.map(m => <Panel key={m.key} title={m.title} accent={m.accent}><Group defs={by(m.key)} accent={m.accent} /></Panel>)}
+        {MODULES.map(m => <Panel key={m.key} title={m.title} accent={m.accent}>
+          {m.key === 'filter' && <FilterGraph n={vn} />}
+          {m.key === 'env' && <EnvGraph n={vn} decayId={decayId} />}
+          <Group defs={by(m.key)} accent={m.accent} /></Panel>)}
       </div>
       <FxStrip />
     </section>

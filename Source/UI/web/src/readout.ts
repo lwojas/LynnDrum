@@ -10,7 +10,7 @@ export const mtof = (n: number) => 440 * Math.pow(2, (n - 69) / 12)
 
 export function fmtHz(hz: number): string {
   if (hz < 10) return hz.toFixed(2) + ' Hz'
-  if (hz < 100) return hz.toFixed(1) + ' Hz'
+  if (hz < 100) return Math.round(hz) + ' Hz'
   if (hz < 1000) return Math.round(hz) + ' Hz'
   return (hz / 1000).toFixed(hz < 10000 ? 2 : 1) + ' kHz'
 }
