@@ -86,6 +86,9 @@ def edit_sequencer(s):
                r'void\s+seq_sendMidiNoteOn\s*\(const uint8_t channel, const uint8_t note, const uint8_t veloc\)\s*(?=\{)',
                r'static\s+void\s+seq_sendProgChg\s*\(const uint8_t ptn\)\s*(?=\{)']:
         s = strip_func(s, fn)
+    # S6: upstream copies a "backup buffer" (the pattern as it was loaded from the SD card) over the pattern being left,
+    # discarding every edit made since. The plugin edits patterns in place and keeps all 64 in memory.
+    s = strip_decl(s, 'seq_copyBackupBufferToPattern(seq_activePattern);')
     for d in ['static void seq_sendMidi(MidiMsg msg);', 'static void seq_sendRealtime(const uint8_t status);', 'static void seq_sendProgChg(const uint8_t ptn);']:
         s = strip_decl(s, d)
     return s

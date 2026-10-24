@@ -17,6 +17,7 @@ private:
     void timerCallback() override;
     std::optional<juce::WebBrowserComponent::Resource> resource (const juce::String& url);
     juce::var stateJson() const;
+    juce::var patternJson (int p) const;
     juce::var presetsJson (bool withItems) const;
 
     LynnDrumProcessor& proc;

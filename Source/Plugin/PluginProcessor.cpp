@@ -255,8 +255,8 @@ void LynnDrumProcessor::setStateInformation (const void* data, int size)
             if (b64.isNotEmpty())
             {
                 juce::MemoryOutputStream mo;
-                if (juce::Base64::convertFromBase64 (mo, b64) && seqBridge.deserialize (static_cast<const std::uint8_t*> (mo.getData()), mo.getDataSize()))
-                    seqBridge.resyncAll();
+                if (juce::Base64::convertFromBase64 (mo, b64))
+                    seqBridge.deserialize (static_cast<const std::uint8_t*> (mo.getData()), mo.getDataSize());     // diffs against the mirror, which tracks the engine
             }
             const auto pname = vt.getProperty ("preset", "Init").toString();      // schema 1 states have no preset info
             const bool pfac = (bool) vt.getProperty ("presetFactory", true), pdirty = (bool) vt.getProperty ("presetDirty", false);

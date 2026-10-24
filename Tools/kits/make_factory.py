@@ -53,7 +53,7 @@ def pat(tracks, shuffle=0, lengths=None):
             i, vol, *rest = s; o = dict(i=i, vol=vol)
             for k, v in zip(('prob', 'note', 'flam', 'shift'), rest): o[k] = v
             steps.append(o)
-        out.append(dict(length=(lengths or {}).get(t, 16), mute=False, steps=steps))
+        out.append(dict(length=(lengths or {}).get(t, 16), steps=steps))
     return dict(shuffle=shuffle, tracks=out)
 
 FOUR = pat({0: [(0, 118), (4, 112), (8, 118), (12, 112)], 3: [(4, 108), (12, 108)], 5: [(2, 80), (6, 80), (10, 80), (14, 80)], 6: [(14, 85)], 1: [(15, 60, 40)]})
@@ -63,7 +63,16 @@ BROKEN = pat({0: [(0, 118), (3, 100), (7, 105), (10, 118), (13, 95)], 3: [(4, 10
               5: [(i, 90 if i % 4 == 0 else 65, 85) for i in range(16)], 6: [(6, 80), (15, 80, 60)], 2: [(11, 80, 50), (13, 70, 50)],
               4: [(0, 85)]}, shuffle=40, lengths={4: 32, 2: 12})
 
-PRESETS = [('Init', INIT, None), ('Tight 4/4', TIGHT, FOUR), ('Deep Backbeat', DEEP, BACK), ('Metal Broken', METAL, BROKEN)]
+# variations (pattern 2 of each preset) and a song that uses them
+FOUR_FILL = pat({0: [(0, 118), (4, 112), (8, 118), (12, 112)], 3: [(4, 108), (12, 108), (13, 80), (14, 90), (15, 100)], 5: [(i, 80) for i in range(0, 16, 2)],
+                 2: [(12, 95), (14, 100)], 4: [(0, 85)]})
+BACK_B = pat({0: [(0, 118), (6, 100), (8, 105), (10, 112)], 3: [(4, 110), (12, 110), (11, 55, 45)], 5: [(i, 90 if i % 4 == 0 else 65) for i in range(0, 16, 2)],
+              6: [(6, 85), (14, 85)], 1: [(15, 80)]}, shuffle=24)
+BROKEN_B = pat({0: [(0, 118), (10, 105)], 3: [(8, 108), (15, 70, 70, 60, 2)], 5: [(i, 85) for i in range(0, 16, 4)], 6: [(2, 80), (10, 80)],
+                1: [(4, 85, 60), (6, 80, 60)], 4: [(0, 90)]}, shuffle=40, lengths={4: 32, 2: 12})
+END, LOOP = 64, 65
+PRESETS = [('Init', INIT, [], None), ('Tight 4/4', TIGHT, [FOUR, FOUR_FILL], [0, 0, 0, 1, LOOP]),
+           ('Deep Backbeat', DEEP, [BACK, BACK_B], [0, 0, 1, 0, LOOP]), ('Metal Broken', METAL, [BROKEN, BROKEN_B], [0, 1, LOOP])]
 
 def validate_pattern(p):
     for t in p['tracks']:
@@ -72,10 +81,11 @@ def validate_pattern(p):
 
 def write():
     os.makedirs(OUT, exist_ok=True)
-    for name, k, p in PRESETS:
-        if p: validate_pattern(p)
+    for name, k, pats, song in PRESETS:
+        for q in pats: validate_pattern(q)
         doc = dict(schema=1, name=name, kit=k)
-        if p: doc['pattern'] = p
+        if pats: doc['patterns'] = [dict(index=i, **q) for i, q in enumerate(pats)]
+        if song: doc['song'] = dict(enabled=False, entries=song + [END] * (64 - len(song)))
         fn = os.path.join(OUT, name.lower().replace(' ', '_').replace('/', '') + '.lynnpreset')
         if name == 'Init': fn = os.path.join(OUT, 'init.lynnpreset')
         json.dump(doc, open(fn, 'w'), indent=1, sort_keys=False); open(fn, 'a').write('\n')
@@ -104,7 +114,7 @@ def render_seq(lines, blocks):
 def measure():
     VOICES = [('Kick (D1)', 0, 36), ('Tom (D2)', 1, 41), ('Tom (D3)', 2, 43), ('Snare', 3, 38), ('Cymbal', 4, 49), ('CH', 5, 42), ('OH', 6, 46)]
     bad = 0
-    for name, k, p in PRESETS:
+    for name, k, pats, _song in PRESETS:
         print('==', name)
         for vn, voice, _n in VOICES:
             x = mono(render(par_lines(k) + [f'trig {voice} 60 115'], 900))
@@ -113,10 +123,10 @@ def measure():
             print(f'  {vn:10s} peak {pk:4.2f} decay(-40dB) {dec:5.0f} ms dominant {dominant_hz(x, st):6.0f} Hz centroid {centroid_hz(x, st):6.0f} Hz')
             if not (0.05 < pk < 1.9): print('   ^ LEVEL OUT OF RANGE'); bad += 1
         # all voices together must not clip hard
-        if p:
+        for pi, p in enumerate(pats):
             pk = render_seq(par_lines(k) + pattern_script(p), 2750)       # 2 bars at 120 bpm (5.5 s)
             clipped = sum(1 for v in pk if v >= 0.999)
-            print(f'  pattern, 2 bars: peak {max(pk):.2f}, clipped samples {clipped}'); bad += clipped > 20
+            print(f'  pattern {pi + 1}, 2 bars: peak {max(pk):.2f}, clipped samples {clipped}'); bad += clipped > 20
     return bad
 
 if __name__ == '__main__':

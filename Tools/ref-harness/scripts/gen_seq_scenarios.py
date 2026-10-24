@@ -78,6 +78,9 @@ s.raw('songset 0 0', 'songset 1 1', 'songset 2 2', 'songset 3 64', 'song 1'); s.
 s = new('pattern_kit_change'); s.step(0, 0); s.step(0, 0, pat=1); s.raw('par PAR_PATTERN_MODE 1'); s.run(); s.steps(5); s.raw('pattern 1'); s.bars(2); s.save()
 for (ln, st, rot) in ((16, 5, 0), (16, 7, 3), (13, 5, 0), (32, 9, 0), (64, 17, 5), (8, 3, 0)):
     s = new(f'euclid_{ln}_{st}_{rot}'); s.raw(f'euk_len 0 {ln}', f'euk_steps 0 {st} 0', f'euk_rot 0 {rot} 0', 'dump 0 0'); ln == 16 and s.raw('len 0 0 16'); s.run(); s.steps(ln * 2 + 2); s.save()
+# --- deviation S6 (plugin only, `dev_` prefix = not comparable with the oracle): edits survive a pattern switch --------------------
+s = new('dev_pattern_keeps_edits'); s.step(0, 0); s.step(0, 8); s.step(1, 4, pat=1)
+s.run(); s.steps(5); s.raw('pattern 1'); s.bars(2); s.raw('pattern 0'); s.bars(3); s.save()
 # --- roll -----------------------------------------------------------------------------
 for rr in (0, 1, 2, 3, 4, 5):
     s = new(f'roll_rate{rr}'); s.step(1, 0, note=64); s.raw(f'rollrate {rr}'); s.run(); s.steps(4); s.raw('roll 0 1'); s.bars(1); s.raw('roll 0 0'); s.steps(8); s.save()

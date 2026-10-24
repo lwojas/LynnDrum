@@ -617,7 +617,7 @@ IN_ITCM_RAM void seq_setPendingPatternActive()
 		}
 		*/
 		//copy current backup to current slot (discarding unsaved changes)
-		seq_copyBackupBufferToPattern(seq_activePattern);
+		
 		//copy pending pattern to backup buffer
 		seq_copyPatternToBackupBuffer(seq_pendingPattern);
 

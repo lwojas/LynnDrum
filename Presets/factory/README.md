@@ -2,12 +2,12 @@
 
 Clean-room: authored for LynnDrum with `Tools/kits/make_factory.py` (formulas of `docs/lxr-dsp.md`, checked by measurement). **Nobody has auditioned these by ear yet** - they are plausible starting points, not finished sound design. Edit the recipe, run the script, rebuild.
 
-| Preset | Kit idea | Pattern |
+| Preset | Kit idea | Patterns (song) |
 |---|---|---|
-| Init | one plain voice each (sine kick with pitch drop, two toms, noise+triangle snare, metallic cymbal and hats); the default of every parameter | none |
-| Tight 4/4 | short, punchy | four on the floor, backbeat snare, offbeat hats |
-| Deep Backbeat | lower, longer | swung backbeat with ghost snares (probability) |
-| Metal Broken | FM toms, bright metallic hats/cymbal | broken beat: polymetric cymbal (32) and tom (12) tracks, flam, shift, probability |
+| Init | one plain voice each; the default of every parameter | none |
+| Tight 4/4 | short, punchy | 1 four on the floor, 2 with a snare fill (song 1 1 1 2, loop) |
+| Deep Backbeat | lower, longer | 1 swung backbeat with ghost snares, 2 with open hats (song 1 1 2 1, loop) |
+| Metal Broken | FM toms, bright metallic hats/cymbal | 1 broken beat with polymetric cymbal (32) and tom (12) tracks, flam, shift, probability; 2 sparse half-time variation (song 1 2, loop) |
 
 Measured with the reference renderer (`python3 Tools/kits/make_factory.py --measure`; level = peak of the summed buses, decay = time to -40 dB):
 
@@ -28,7 +28,8 @@ Measured with the reference renderer (`python3 Tools/kits/make_factory.py --meas
   Cymbal     peak 0.47 decay(-40dB)   920 ms dominant   3518 Hz centroid   8405 Hz
   CH         peak 0.21 decay(-40dB)    40 ms dominant   4666 Hz centroid  10815 Hz
   OH         peak 0.23 decay(-40dB)   290 ms dominant   3421 Hz centroid  10490 Hz
-  pattern, 2 bars: peak 0.46, clipped samples 0
+  pattern 1, 2 bars: peak 0.46, clipped samples 0
+  pattern 2, 2 bars: peak 0.63, clipped samples 0
 == Deep Backbeat
   Kick (D1)  peak 0.40 decay(-40dB)   650 ms dominant     38 Hz centroid     78 Hz
   Tom (D2)   peak 0.35 decay(-40dB)   520 ms dominant     75 Hz centroid    136 Hz
@@ -37,7 +38,8 @@ Measured with the reference renderer (`python3 Tools/kits/make_factory.py --meas
   Cymbal     peak 0.57 decay(-40dB)  1290 ms dominant   1320 Hz centroid   6757 Hz
   CH         peak 0.28 decay(-40dB)    90 ms dominant   1870 Hz centroid   8202 Hz
   OH         peak 0.28 decay(-40dB)   520 ms dominant   2177 Hz centroid   8663 Hz
-  pattern, 2 bars: peak 0.49, clipped samples 0
+  pattern 1, 2 bars: peak 0.49, clipped samples 0
+  pattern 2, 2 bars: peak 0.46, clipped samples 0
 == Metal Broken
   Kick (D1)  peak 0.39 decay(-40dB)   440 ms dominant     48 Hz centroid    204 Hz
   Tom (D2)   peak 0.34 decay(-40dB)   330 ms dominant    129 Hz centroid    396 Hz
@@ -46,5 +48,6 @@ Measured with the reference renderer (`python3 Tools/kits/make_factory.py --meas
   Cymbal     peak 0.57 decay(-40dB)  1290 ms dominant   1110 Hz centroid   9412 Hz
   CH         peak 0.15 decay(-40dB)    50 ms dominant   4354 Hz centroid  10032 Hz
   OH         peak 0.16 decay(-40dB)   390 ms dominant   2489 Hz centroid  11080 Hz
-  pattern, 2 bars: peak 0.61, clipped samples 0
+  pattern 1, 2 bars: peak 0.61, clipped samples 0
+  pattern 2, 2 bars: peak 0.49, clipped samples 0
 ```

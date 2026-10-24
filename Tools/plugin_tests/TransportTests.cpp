@@ -28,8 +28,8 @@ struct Run
         p.setPlayHead (&host);
         p.prepareToPlay (sr, block);
         auto& b = p.bridge();
-        for (int s = 0; s < 64; ++s) for (int tr = 0; tr < 7; ++tr) b.applyUiCommand ({ (double) tr, (double) s, 0 }, "step");   // empty pattern
-        b.applyUiCommand ({ 0, 0, 1 }, "step"); b.applyUiCommand ({ 0, 0, 127 }, "stepVol");                                       // kick on step 1 of 16 only
+        for (int pt = 0; pt < 64; ++pt) b.applyUiCommand ({ (double) pt }, "clearPattern");                                              // empty bank (a fresh instance holds the Tight 4/4 preset)
+        b.applyUiCommand ({ 0, 0, 0, 1 }, "step"); b.applyUiCommand ({ 0, 0, 0, 127 }, "stepVol");                                       // kick on step 1 of 16 only
         p.apvts.getParameter ("velod1")->setValueNotifyingHost (p.apvts.getParameter ("velod1")->convertTo0to1 (5.f));
         p.apvts.getParameter ("pan1")->setValueNotifyingHost (0.5f);
         for (int i = 0; i < 4; ++i) step (false);                                                                                  // apply the edits
@@ -84,6 +84,27 @@ int main()
     {   // stop then start elsewhere
         Run r; r.host.ppq = 0.0; r.host.playing = true; r.run (0.5); r.host.playing = false; r.run (0.3); r.host.ppq = 2.5; r.host.playing = true; r.run (2.5);
         CHECK (r.onsets.size() >= 2, "restart after stop");
+    }
+    {   // pattern 2 has its kick on step 9 only; selecting it while playing takes effect at the end of the bar
+        Run r; auto& b = r.p.bridge();
+        b.applyUiCommand ({ 1, 0, 8, 1 }, "step"); b.applyUiCommand ({ 1, 0, 8, 127 }, "stepVol"); r.step (false);
+        r.host.ppq = 0.0; r.host.playing = true; r.run (0.3);
+        b.applyUiCommand ({ 1 }, "selectPattern"); r.run (5.0);
+        std::printf ("pattern switch: kicks at"); for (double o : r.onsets) std::printf (" %.3f", o); std::printf ("\n");
+        CHECK (r.onsets.size() >= 3 && std::fabs (r.onsets[0]) < 0.02, "first bar plays pattern 1");
+        CHECK (r.onsets.size() >= 2 && std::fabs (r.onsets[1] - 3.0) < 0.03, "queued pattern starts at the bar end (kick on its step 9 at 3.0 s): %.3f", r.onsets.size() > 1 ? r.onsets[1] : -1.0);
+        CHECK (r.onsets.size() >= 3 && std::fabs (r.onsets[2] - 5.0) < 0.03, "and keeps playing it: %.3f", r.onsets.size() > 2 ? r.onsets[2] : -1.0);
+    }
+    {   // song mode: patterns 1, 2, then loop
+        Run r; auto& b = r.p.bridge();
+        b.applyUiCommand ({ 1, 0, 8, 1 }, "step"); b.applyUiCommand ({ 1, 0, 8, 127 }, "stepVol");
+        b.applyUiCommand ({ 0, 0 }, "songSet"); b.applyUiCommand ({ 1, 1 }, "songSet"); b.applyUiCommand ({ 2, 65 }, "songSet"); b.applyUiCommand ({ 1 }, "songMode");
+        r.step (false);
+        r.host.ppq = 0.0; r.host.playing = true; r.run (6.5);
+        std::printf ("song 1,2,loop: kicks at"); for (double o : r.onsets) std::printf (" %.3f", o); std::printf ("\n");
+        const double want[] = { 0.0, 3.0, 4.0, 7.0 };
+        CHECK (r.onsets.size() >= 3, "song produced %zu kicks", r.onsets.size());
+        for (size_t i = 0; i < 3 && i < r.onsets.size(); ++i) CHECK (std::fabs (r.onsets[i] - want[i]) < 0.04, "song kick %zu at %.3f, expected %.3f", i, r.onsets[i], want[i]);
     }
     std::printf (failures ? "%d FAILURE(S)\n" : "transport tests passed\n", failures);
     return failures ? 1 : 0;

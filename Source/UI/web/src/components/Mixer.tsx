@@ -7,11 +7,11 @@ import { audition } from '../audition'
 const dbOf = (v: number) => (v <= 0.0005 ? '-inf' : (20 * Math.log10(v)).toFixed(1) + 'dB')
 
 function Strip({ t }: { t: number }) {
-  const { voice, setVoice, pattern, send } = useStore()
+  const { voice, setVoice, bank, sendG } = useStore()
   const info = TRACKS[t]
   const [val, set, handle] = useParam('fader' + (t + 1))
   const sel = voice === t
-  const muted = pattern.tracks[t].muted
+  const muted = bank.mutes[t]
   return (
     <div className={`flex flex-col items-stretch min-w-0 flex-1 rounded-lg border p-1.5 gap-1.5 bg-synth-surface/60 ${sel ? 'border-synth-amber shadow-glow-amber' : 'border-synth-border'}`}>
       <button onClick={() => { setVoice(t); audition(t) }}
@@ -22,7 +22,7 @@ function Strip({ t }: { t: number }) {
       <div className="flex gap-1 justify-center">
         <button title={`Audition ${info.name} (key ${t + 1})`} onPointerDown={() => audition(t)}
           className="w-7 h-5 rounded text-[10px] border bg-synth-panel text-synth-emerald border-synth-border hover:bg-synth-emerald hover:text-black">▶</button>
-        <button title="Mute (stops this track's sequencer triggers)" onClick={() => send(['mute', t, muted ? 0 : 1])}
+        <button title="Mute (stops this track's sequencer triggers)" onClick={() => sendG(['mute', t, muted ? 0 : 1])}
           className={`w-7 h-5 rounded text-[10px] font-mono border ${muted ? 'bg-synth-red text-black border-synth-red' : 'bg-synth-panel text-slate-300 border-synth-border'}`}>M</button>
       </div>
     </div>

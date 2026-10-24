@@ -129,3 +129,6 @@ void lxrseq_start_at(LxrSeq* q, uint32_t absStep, unsigned sub, double remaining
     lxrseq_cur->m_seq_lastTick = lxrseq_cur->m_systick_ticks - (uint32_t)period + wait;
     LEAVE();
 }
+unsigned lxrseq_pending_pattern(const LxrSeq* q) { return q->m_seq_pendingPattern; }
+unsigned lxrseq_song_position(const LxrSeq* q) { return q->m_seq_songPositionPointer; }
+int lxrseq_song_mode(const LxrSeq* q) { return q->m_seq_songModeEnabled; }

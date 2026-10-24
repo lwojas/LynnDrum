@@ -18,7 +18,6 @@ export const TRACKS: TrackInfo[] = [
 export interface TrackPattern {
   on: boolean[]; vol: number[]; prob: number[]; note: number[]; flam: number[]; shift: number[]
   length: number            // 1..64 steps
-  muted: boolean
 }
 export interface Pattern { tracks: TrackPattern[]; shuffle: number }
 
@@ -29,7 +28,7 @@ export function emptyTrack(): TrackPattern {
   return {
     on: Array(NUM_STEPS).fill(false), vol: Array(NUM_STEPS).fill(100), prob: Array(NUM_STEPS).fill(100),
     note: Array(NUM_STEPS).fill(60), flam: Array(NUM_STEPS).fill(0), shift: Array(NUM_STEPS).fill(SHIFT_NONE),
-    length: 16, muted: false,
+    length: 16,
   }
 }
 export const emptyPattern = (): Pattern => ({ tracks: Array.from({ length: NUM_TRACKS }, emptyTrack), shuffle: 0 })
@@ -45,7 +44,6 @@ export type Cmd =
   | ['trackLength', track: number, len: number]
   | ['clearTrack', track: number]
   | ['copyTrack', src: number, dst: number]
-  | ['mute', track: number, on: number]
   | ['shuffle', v: number]
 
 export function applyCmd(p: Pattern, c: Cmd): Pattern {
@@ -66,13 +64,25 @@ export function applyCmd(p: Pattern, c: Cmd): Pattern {
     case 'stepFlam': edit(c[1], x => { x.flam[c[2]] = c[3] }); break
     case 'stepShift': edit(c[1], x => { x.shift[c[2]] = c[3] }); break
     case 'trackLength': edit(c[1], x => { x.length = c[2] }); break
-    case 'clearTrack': q.tracks[c[1]] = { ...emptyTrack(), length: q.tracks[c[1]].length, muted: q.tracks[c[1]].muted }; break
-    case 'copyTrack': q.tracks[c[2]] = { ...q.tracks[c[1]], muted: q.tracks[c[2]].muted }; break
-    case 'mute': edit(c[1], x => { x.muted = !!c[2] }); break
+    case 'clearTrack': q.tracks[c[1]] = { ...emptyTrack(), length: q.tracks[c[1]].length }; break
+    case 'copyTrack': q.tracks[c[2]] = { ...q.tracks[c[1]] }; break
     case 'shuffle': q.shuffle = c[1]; break
   }
   return q
 }
 
-export interface Playhead { running: boolean; steps: number[]; bpm: number; peakL?: number; peakR?: number }
-export interface PluginState { pattern: Pattern; bpm: number; running: boolean }
+/** commands that address one pattern: the store inserts the viewed pattern's number after the name on the wire */
+export const PATTERN_LEVEL = new Set(['step', 'stepVol', 'stepProb', 'stepNote', 'stepFlam', 'stepShift', 'trackLength', 'clearTrack', 'copyTrack', 'shuffle'])
+/** commands with explicit arguments, sent as they are */
+export type GlobalCmd =
+  | ['mute', track: number, on: number]
+  | ['clearPattern', pat: number]
+  | ['copyPattern', src: number, dst: number]
+  | ['selectPattern', pat: number]
+  | ['songMode', on: number]
+  | ['songSet', pos: number, pat: number]
+export const SONG_END = 64, SONG_LOOP = 65
+
+export interface Playhead { running: boolean; steps: number[]; bpm: number; peakL?: number; peakR?: number; activePattern?: number; pendingPattern?: number; songPosition?: number }
+export interface BankInfo { used: boolean[]; song: number[]; songMode: boolean; mutes: boolean[] }
+export interface PluginState extends BankInfo { pattern: Pattern; bpm: number; running: boolean }

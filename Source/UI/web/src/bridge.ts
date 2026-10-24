@@ -1,7 +1,7 @@
 // Bridge to the plugin (JUCE WebBrowserComponent) with a browser-side mock for development.
 import * as Juce from './juce/index.js'
 import { SOUND_PARAMS } from './params.generated'
-import { Cmd, Pattern, PluginState, Playhead, NUM_TRACKS, emptyPattern, applyCmd } from './model'
+import { Cmd, GlobalCmd, Pattern, PluginState, Playhead, NUM_TRACKS, emptyPattern, applyCmd, PATTERN_LEVEL, SONG_END } from './model'
 
 export interface ParamHandle {
   get(): number                          // normalised 0..1
@@ -15,7 +15,8 @@ export interface PresetState { items?: PresetInfo[]; current: string; factory: b
 export interface Bridge {
   readonly isMock: boolean
   getState(): Promise<PluginState>
-  cmd(c: Cmd): void
+  getPattern(pat: number): Promise<Pattern>
+  cmd(c: (string | number)[]): void
   onPlayhead(cb: (p: Playhead) => void): () => void
   param(id: string, kind: 'slider' | 'toggle' | 'combo'): ParamHandle
   audition(voice: number, velocity: number): void
@@ -34,6 +35,7 @@ const hasJuce = () => !!(window as any).__JUCE__?.initialisationData?.__juce__fu
 function realBridge(): Bridge {
   const nGet = (Juce as any).getNativeFunction('lynn_getState')
   const nCmd = (Juce as any).getNativeFunction('lynn_cmd')
+  const nGetPat = (Juce as any).getNativeFunction('lynn_getPattern')
   const handles = new Map<string, ParamHandle>()
   const nPresets = (Juce as any).getNativeFunction('lynn_presets'), nLoad = (Juce as any).getNativeFunction('lynn_loadPreset')
   const nAud = (Juce as any).getNativeFunction('lynn_audition')
@@ -46,6 +48,7 @@ function realBridge(): Bridge {
     loadPreset: (n, f) => nLoad(n, f), savePreset: (n) => nSave(n), deletePreset: (n) => nDel(n),
     onPreset: (cb) => listen('preset', cb), onPresetLoaded: (cb) => listen('presetLoaded', () => cb()),
     async getState() { return JSON.parse(await nGet()) as PluginState },
+    async getPattern(p) { return JSON.parse(await nGetPat(p)) as Pattern },
     cmd(c) { nCmd(JSON.stringify(c)) },
     onPlayhead(cb) {
       const id = (window as any).__JUCE__.backend.addEventListener('playhead', (e: any) => cb(e as Playhead))
@@ -74,17 +77,22 @@ function realBridge(): Bridge {
 
 // ----------------------------------------------------------------------------------------------------- mock bridge
 function mockBridge(): Bridge {
-  let pattern: Pattern = emptyPattern()
-  const demo = (t: number, steps: number[], vol = 100) => steps.forEach(s => { pattern = applyCmd(pattern, ['step', t, s, 1]); pattern = applyCmd(pattern, ['stepVol', t, s, vol]) })
+  const bank: Pattern[] = Array.from({ length: 64 }, () => emptyPattern())
+  const demo = (t: number, steps: number[], vol = 100) => steps.forEach(s => { bank[0] = applyCmd(bank[0], ['step', t, s, 1]); bank[0] = applyCmd(bank[0], ['stepVol', t, s, vol]) })
   demo(0, [0, 4, 8, 12], 110); demo(3, [4, 12], 105); demo(5, [0, 2, 4, 6, 8, 10, 12, 14], 80); demo(6, [14], 90)
+  bank[1] = applyCmd(applyCmd(emptyPattern(), ['step', 0, 0, 1]), ['step', 3, 4, 1])
+  const song = Array(64).fill(SONG_END); song[0] = 0; song[1] = 1; song[2] = 65
+  let songMode = false; const mutes = Array(NUM_TRACKS).fill(false)
+  let active = 0, pending = 0
   let running = true; const bpm = 120
   const listeners = new Set<(p: Playhead) => void>()
   let tick = 0
   setInterval(() => {
     tick++
     const step = Math.floor(tick / 5) % 16
-    const steps = Array.from({ length: NUM_TRACKS }, (_, t) => step % pattern.tracks[t].length)
-    listeners.forEach(l => l({ running, steps, bpm }))
+    if (step === 0 && tick % 80 === 5) active = pending
+    const steps = Array.from({ length: NUM_TRACKS }, (_, t) => step % bank[active].tracks[t].length)
+    listeners.forEach(l => l({ running, steps, bpm, activePattern: active, pendingPattern: pending, songPosition: 0 }))
   }, 100)
   const params: Record<string, number> = { master: 0.5, seqSync: 0, seqRun: 0, tempo: 0.33 }
   for (let i = 1; i <= 7; i++) params['fader' + i] = 1
@@ -102,8 +110,18 @@ function mockBridge(): Bridge {
     async savePreset(n) { if (!items.some(i => i.name === n)) items = [...items, { name: n, factory: false }]; cur = n; curF = false; dirty = false; push(); return true },
     async deletePreset(n) { items = items.filter(i => i.factory || i.name !== n); push(); return true },
     onPreset(cb) { pl.add(cb); return () => pl.delete(cb) }, onPresetLoaded(cb) { ll.add(cb); return () => ll.delete(cb) },
-    async getState() { return { pattern, bpm, running } },
-    cmd(c) { pattern = applyCmd(pattern, c) },
+    async getState() { return { pattern: bank[0], bpm, running, used: bank.map(p => JSON.stringify(p) !== JSON.stringify(emptyPattern())), song, songMode, mutes } },
+    async getPattern(p) { return bank[p] },
+    cmd(c) {
+      const [name, ...a] = c as [string, ...number[]]
+      if (PATTERN_LEVEL.has(name)) { const p = a[0]; bank[p] = applyCmd(bank[p], [name, ...a.slice(1)] as any) }
+      else if (name === 'mute') mutes[a[0]] = !!a[1]
+      else if (name === 'clearPattern') bank[a[0]] = emptyPattern()
+      else if (name === 'copyPattern') bank[a[1]] = JSON.parse(JSON.stringify(bank[a[0]]))
+      else if (name === 'selectPattern') { pending = a[0]; if (!running) active = a[0] }
+      else if (name === 'songMode') songMode = !!a[0]
+      else if (name === 'songSet') song[a[0]] = a[1]
+    },
     onPlayhead(cb) { listeners.add(cb); return () => listeners.delete(cb) },
     param(id) {
       return {

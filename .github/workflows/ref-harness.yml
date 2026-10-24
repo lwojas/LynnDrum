@@ -34,6 +34,8 @@ jobs:
         run: |
           sh Tools/ref-harness/scripts/run_seq_scenarios.sh build-core/lxr_render_seq build/seqscen build-core/seqev
           diff -ru Tools/ref-harness/golden/seq build-core/seqev
+          mkdir -p build-core/devev && WITH_DEV=1 sh Tools/ref-harness/scripts/run_seq_scenarios.sh build-core/lxr_render_seq build/seqscen build-core/devev
+          diff -u Tools/ref-harness/golden/seq_dev/dev_pattern_keeps_edits.ev build-core/devev/dev_pattern_keeps_edits.ev
           build-core/test_seq_instances
       - name: Plugin build and host-layer / bundle tests
         run: |

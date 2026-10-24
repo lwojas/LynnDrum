@@ -43,6 +43,7 @@ Not yet done in Phase 2: the base/override/effective split for modulation and p-
 | Q5 | Local variables named `isStepShuffled` renamed `isStepShuffledLocal` (macro hijack) | mechanical | T0 |
 | Q6 | `automationNode.c` lives only in lxr_seq (restores/writes p-locks through the sink); removed from lxr_core | one definition per symbol, clean boundary | link test |
 | Q7 | **Probability/rng: the sequencer has its own xorshift32 stream** (seed via `lxrseq_set_seed`); upstream shared one TRNG stream with the noise oscillators. Event streams are identical when audio is not rendered; rendered noise differs in scenarios that use probability/active steps with noise voices (15 of 75 `play` scenarios). | reproducible bounces independent of audio | `play` comparison, S4 |
+| Q9 | **S6 implemented**: `seq_setPendingPatternActive` no longer copies the pattern *backup buffer* over the pattern being left (upstream discards every edit made since the pattern was loaded from the SD card). All 64 patterns live in memory and edits are permanent. | the plugin has no SD card / load step | `dev_pattern_keeps_edits` golden (`golden/seq_dev`), oracle streams unchanged |
 | Q8 | Euclid length 16 -> stored 0 -> `% 0` in `seq_processFlam` (upstream bug, found in S0) is **not yet fixed in lxr_seq** (reference behaviour kept; scenarios normalise). Fix = treat 0 as 16 everywhere - to be done with its own pinning test. | | `euclid_16_*` |
 
 Remaining sequencer deviations from `docs/lxr-sequencer.md` §7: S1 (clock) is now Q2; S2 MIDI clock slave kept in code but unused; S3 host-position anchoring and S8 float tempo belong to the S2 stage (SeqClock/SeqTransport);
@@ -66,3 +67,12 @@ S5 is **superseded by decision D8 (2026-10-24): shuffle reproduces the original*
 | P3 | Velocity / LFO "target" parameters are choices over the firmware's 229-entry `modTargets[]` list and use `lxr_set_mod_target` (same effect as the front-panel messages). | engine API |
 | P4 | Display names are generated + a small rename table (`Tools/params/gen_params.py`); parameter ids are the lower-cased `PAR_` names and are stable. | host automation lanes must not change |
 | P5 | Defaults = the clean-room *Init* preset (`Presets/factory/init.lynnpreset`); no upstream kit data is used by the plugin. | NOTICE |
+
+## Pattern bank (2026-10-24)
+
+| ID | What | Why |
+|---|---|---|
+| B1 | The bridge mirrors all 64 patterns + the song + the mutes; every command carries its pattern; diffs (not full resends) are queued on preset/state load. | UI/audio isolation |
+| B2 | Mutes are global (as in the engine), no longer stored per pattern; first-format presets with a per-track `mute` still load (mute moves to the bank). | engine semantics |
+| B3 | Selecting a pattern while the sequencer runs queues it for the end of the bar (master track wrap, upstream rule); while stopped it switches at once. The edit view can follow the playing pattern. | upstream behaviour |
+| B4 | Preset format: `patterns` (list of `{index, shuffle, tracks}`), `song`, `mutes`; the first single `pattern` key is read as pattern 1. State schema 2 blob stores only non-empty patterns. | multi-pattern presets |

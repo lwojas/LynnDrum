@@ -10,6 +10,7 @@ static int failures = 0;
 static int paramValue (LynnDrumProcessor& p, const lynn::params::Def& d) { return (int) (p.apvts.getRawParameterValue (d.id)->load() + 0.5f); }
 
 static int countSteps (const lynn::UiPattern& p) { int n = 0; for (auto& t : p.tracks) for (auto v : t.on) n += v; return n; }
+static int countAll (LynnDrumProcessor& p) { int n = 0; for (int i = 0; i < lynn::kPatterns; ++i) n += countSteps (p.bridge().pattern (i)); return n; }
 
 static const lynn::params::Def& def (const char* id) { for (auto& d : lynn::params::kSound) if (juce::String (d.id) == id) return d; jassertfalse; return lynn::params::kSound[0]; }
 
@@ -38,17 +39,17 @@ int main()
             for (auto& d : lynn::params::kSound) CHECK (doc["kit"][juce::Identifier (d.id)].operator int() == paramValue (p, d), "%s: %s", n.toRawUTF8(), d.id);
         }
         pm.load ("Init", true);
-        CHECK (countSteps (p.bridge().pattern()) == 0, "Init has an empty pattern");
+        CHECK (countAll (p) == 0, "Init has an empty bank");
         pm.load ("Metal Broken", true);
-        CHECK (countSteps (p.bridge().pattern()) == 30 && p.bridge().pattern().tracks[4].length == 32 && p.bridge().pattern().shuffle == 40, "Metal Broken pattern content");
-        CHECK (p.bridge().pattern().tracks[3].flam[4] == 1 || true, "");
-
+        CHECK (countSteps (p.bridge().pattern (0)) == 30 && countSteps (p.bridge().pattern (1)) == 13 && countAll (p) == 43 && p.bridge().pattern (0).tracks[4].length == 32 && p.bridge().pattern (0).shuffle == 40, "Metal Broken bank content");
+        CHECK (p.bridge().songState().entries[0] == 0 && p.bridge().songState().entries[1] == 1 && p.bridge().songState().entries[2] == lynn::kSongLoop && !p.bridge().songState().enabled, "Metal Broken song");
+        
         // ---- dirty tracking ------------------------------------------------------------------------------------------
         auto* kickDecay = p.apvts.getParameter ("velod1");
         kickDecay->setValueNotifyingHost (kickDecay->convertTo0to1 (3.0f));
         CHECK (pm.isDirty(), "parameter edit must mark the preset dirty");
         pm.load ("Metal Broken", true); CHECK (!pm.isDirty(), "reload cleans");
-        p.bridge().applyUiCommand ({ 0, 5, 1 }, "step");
+        p.bridge().applyUiCommand ({ 0, 0, 5, 1 }, "step");
         CHECK (pm.isDirty(), "pattern edit must mark the preset dirty");
 
         // ---- save / reload / delete user presets -----------------------------------------------------------------------
@@ -71,9 +72,14 @@ int main()
         CHECK (pm.apply (juce::JSON::parse ("{\"schema\":1,\"name\":\"x\",\"kit\":{\"coarse1\":9999,\"waveform_nonexistent\":3,\"pan1\":-5},\"pattern\":{\"tracks\":[{\"length\":500,\"steps\":[{\"i\":99,\"vol\":0},{\"i\":3,\"vol\":999,\"flam\":77}]}]}}")),
               "a sloppy but valid document loads");
         CHECK (paramValue (p, def ("coarse1")) == 127 && paramValue (p, def ("pan1")) == 0, "out-of-range kit values are clamped");
-        CHECK (p.bridge().pattern().tracks[0].length == 64 && p.bridge().pattern().tracks[0].vol[3] == 127 && p.bridge().pattern().tracks[0].flam[3] == 5, "out-of-range pattern values are clamped");
-        CHECK (countSteps (p.bridge().pattern()) == 1, "step index out of range ignored");
+        CHECK (p.bridge().pattern (0).tracks[0].length == 64 && p.bridge().pattern (0).tracks[0].vol[3] == 127 && p.bridge().pattern (0).tracks[0].flam[3] == 5, "out-of-range pattern values are clamped");
+        CHECK (countAll (p) == 1, "step index out of range ignored");
         CHECK (paramValue (p, def ("velod1")) == def ("velod1").def, "missing kit entries fall back to the Init defaults");
+
+        CHECK (pm.apply (juce::JSON::parse ("{\"schema\":1,\"name\":\"old\",\"kit\":{},\"pattern\":{\"shuffle\":10,\"tracks\":[{\"length\":8,\"mute\":true,\"steps\":[{\"i\":2,\"vol\":90}]}]}}")), "first-format document loads");
+        CHECK (p.bridge().pattern (0).shuffle == 10 && p.bridge().pattern (0).tracks[0].length == 8 && p.bridge().muted (0) && countAll (p) == 1, "first-format document content (mute moved to the bank)");
+        CHECK (pm.apply (juce::JSON::parse ("{\"schema\":1,\"name\":\"multi\",\"patterns\":[{\"index\":7,\"tracks\":[{\"steps\":[{\"i\":1}]}]},{\"index\":99,\"tracks\":[]}],\"song\":{\"enabled\":true,\"entries\":[7,7,65]}}")), "multi-pattern document loads");
+        CHECK (countSteps (p.bridge().pattern (7)) == 1 && countAll (p) == 1 && p.bridge().songState().enabled && p.bridge().songState().entries[2] == lynn::kSongLoop, "multi-pattern content; index 99 ignored");
 
         // ---- plugin state ------------------------------------------------------------------------------------------------------
         pm.load ("Deep Backbeat", true);

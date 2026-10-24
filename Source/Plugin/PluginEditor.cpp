@@ -17,7 +17,7 @@ juce::var trackJson (const lynn::UiTrack& t)
     }
     o->setProperty ("on", on); o->setProperty ("vol", vol); o->setProperty ("prob", prob);
     o->setProperty ("note", note); o->setProperty ("flam", flam); o->setProperty ("shift", shift);
-    o->setProperty ("length", (int) t.length); o->setProperty ("muted", t.muted);
+    o->setProperty ("length", (int) t.length);
     return juce::var (o);
 }
 }
@@ -41,6 +41,8 @@ LynnDrumEditor::LynnDrumEditor (LynnDrumProcessor& p) : juce::AudioProcessorEdit
         .withResourceProvider ([this] (const juce::String& url) { return resource (url); })
         .withNativeFunction ("lynn_getState", [this] (const juce::Array<juce::var>&, juce::WebBrowserComponent::NativeFunctionCompletion done)
                              { done (juce::JSON::toString (stateJson(), true)); })
+        .withNativeFunction ("lynn_getPattern", [this] (const juce::Array<juce::var>& a, juce::WebBrowserComponent::NativeFunctionCompletion done)
+                             { done (juce::JSON::toString (patternJson (a.size() > 0 ? (int) a[0] : 0), true)); })
         .withNativeFunction ("lynn_cmd", [this] (const juce::Array<juce::var>& args, juce::WebBrowserComponent::NativeFunctionCompletion done)
         {
             bool ok = false;
@@ -144,15 +146,25 @@ juce::var LynnDrumEditor::presetsJson (bool withItems) const
     return juce::var (root);
 }
 
+juce::var LynnDrumEditor::patternJson (int p) const
+{
+    auto* pat = new juce::DynamicObject();
+    juce::Array<juce::var> tracks;
+    for (const auto& t : proc.bridge().pattern (juce::jlimit (0, lynn::kPatterns - 1, p)).tracks) tracks.add (trackJson (t));
+    pat->setProperty ("tracks", tracks);
+    pat->setProperty ("shuffle", (int) proc.bridge().pattern (juce::jlimit (0, lynn::kPatterns - 1, p)).shuffle);
+    return juce::var (pat);
+}
+
 juce::var LynnDrumEditor::stateJson() const
 {
     auto* root = new juce::DynamicObject();
-    auto* pat = new juce::DynamicObject();
-    juce::Array<juce::var> tracks;
-    for (const auto& t : proc.bridge().pattern().tracks) tracks.add (trackJson (t));
-    pat->setProperty ("tracks", tracks);
-    pat->setProperty ("shuffle", (int) proc.bridge().pattern().shuffle);
-    root->setProperty ("pattern", juce::var (pat));
+    root->setProperty ("pattern", patternJson (0));
+    juce::Array<juce::var> used, song, mutes;
+    for (int p = 0; p < lynn::kPatterns; ++p) used.add (proc.bridge().used (p));
+    for (auto e : proc.bridge().songState().entries) song.add ((int) e);
+    for (int t = 0; t < lynn::kTracks; ++t) mutes.add (proc.bridge().muted (t));
+    root->setProperty ("used", used); root->setProperty ("song", song); root->setProperty ("songMode", proc.bridge().songState().enabled); root->setProperty ("mutes", mutes);
     root->setProperty ("bpm", proc.shownBpm());
     root->setProperty ("running", proc.bridge().readPlayhead().running);
     return juce::var (root);
@@ -167,6 +179,7 @@ void LynnDrumEditor::timerCallback()
     for (int s : ph.steps) steps.add (s);
     const auto lv = proc.bridge().readLevel();
     o->setProperty ("running", ph.running); o->setProperty ("steps", steps); o->setProperty ("bpm", ph.bpm); o->setProperty ("peakL", (double) lv.l); o->setProperty ("peakR", (double) lv.r);
+    o->setProperty ("activePattern", ph.activePattern); o->setProperty ("pendingPattern", ph.pendingPattern); o->setProperty ("songPosition", ph.songPosition);
     if (web) web->emitEventIfBrowserIsVisible ("playhead", juce::var (o));
     if (web) web->emitEventIfBrowserIsVisible ("preset", presetsJson (false));
 }

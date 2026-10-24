@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import { useStore } from '../store'
+import { PatternBar } from './PatternBar'
 import { FLAM_LABELS, NUM_STEPS, SHIFT_NONE, TRACKS, shiftOf } from '../model'
 
 const noteName = (n: number) => ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'][n % 12] + (Math.floor(n / 12) - 1)
@@ -95,7 +96,8 @@ export function SequencerDeck() {
   const random = () => { for (let s = 0; s < NUM_STEPS; s++) send(['step', voice, s, s < tr.length && Math.random() < 0.3 ? 1 : 0]) }
   const btn = 'px-2 py-0.5 rounded bg-synth-surface hover:bg-synth-border border border-synth-border text-slate-300 disabled:opacity-40'
   return (
-    <footer className="shrink-0 bg-synth-panel border-t-2 border-synth-border p-3 flex flex-col gap-2" style={{ height: 'clamp(250px, 34%, 340px)' }}>
+    <footer className="shrink-0 bg-synth-panel border-t-2 border-synth-border p-3 flex flex-col gap-2" style={{ height: 'clamp(290px, 40%, 400px)' }}>
+      <PatternBar />
       <div className="flex items-center justify-between gap-3 flex-wrap pb-1.5 border-b border-synth-border/70 text-[10px] font-mono">
         <div className="flex items-center gap-3">
           <span className="font-extrabold text-xs tracking-wider">STEP SEQUENCER</span>

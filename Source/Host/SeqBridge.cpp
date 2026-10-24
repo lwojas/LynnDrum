@@ -5,18 +5,19 @@
 
 namespace lynn
 {
-SeqBridge::SeqBridge() { loadDemo(); }
+SeqBridge::SeqBridge() {}                                   // empty = what a fresh sequencer holds, so mirror and engine start in sync
 
 void SeqBridge::loadDemo()
 {
-    mirror = UiPattern();
-    auto on = [this] (int t, int s, int v) { mirror.tracks[(size_t) t].on[(size_t) s] = 1; mirror.tracks[(size_t) t].vol[(size_t) s] = (std::uint8_t) v; };
+    bank[0] = UiPattern();
+    auto on = [this] (int t, int s, int v) { bank[0].tracks[(size_t) t].on[(size_t) s] = 1; bank[0].tracks[(size_t) t].vol[(size_t) s] = (std::uint8_t) v; };
     for (int s : { 0, 4, 8, 12 }) on (0, s, 110);
     for (int s : { 4, 12 }) on (3, s, 105);
     for (int s = 0; s < 16; s += 2) on (5, s, s % 4 ? 70 : 95);
     on (6, 14, 90);
 }
 
+// ---- queue --------------------------------------------------------------------------------------------------------------
 void SeqBridge::push (const SeqCommand& c)
 {
     if (!pending.empty()) { pending.push_back (c); flush(); return; }
@@ -38,90 +39,133 @@ void SeqBridge::flush()
     }
 }
 
-void SeqBridge::editStep (int t, int i)
+void SeqBridge::editStep (int p, int t, int i)
 {
-    const auto& tr = mirror.tracks[(size_t) t]; const size_t k = (size_t) i;
-    SeqCommand c; c.type = SeqCommand::Step; c.track = (std::uint8_t) t; c.idx = (std::uint8_t) i;
+    const auto& tr = bank[(size_t) p].tracks[(size_t) t]; const size_t k = (size_t) i;
+    SeqCommand c; c.type = SeqCommand::Step; c.pat = (std::uint8_t) p; c.track = (std::uint8_t) t; c.idx = (std::uint8_t) i;
     c.on = tr.on[k]; c.vol = tr.vol[k]; c.prob = tr.prob[k]; c.note = tr.note[k]; c.flam = tr.flam[k]; c.shift = tr.shift[k];
     push (c);
 }
-void SeqBridge::editLength (int t) { SeqCommand c; c.type = SeqCommand::Length; c.track = (std::uint8_t) t; c.value = mirror.tracks[(size_t) t].length; push (c); }
-void SeqBridge::editMute (int t) { SeqCommand c; c.type = SeqCommand::Mute; c.track = (std::uint8_t) t; c.value = mirror.tracks[(size_t) t].muted ? 1 : 0; push (c); }
+void SeqBridge::editLength (int p, int t) { SeqCommand c; c.type = SeqCommand::Length; c.pat = (std::uint8_t) p; c.track = (std::uint8_t) t; c.value = bank[(size_t) p].tracks[(size_t) t].length; push (c); }
+void SeqBridge::editMute (int t) { SeqCommand c; c.type = SeqCommand::Mute; c.track = (std::uint8_t) t; c.value = muted (t) ? 1 : 0; push (c); }
+void SeqBridge::editShuffle (int p) { SeqCommand c; c.type = SeqCommand::Shuffle; c.pat = (std::uint8_t) p; c.value = bank[(size_t) p].shuffle; push (c); }
 void SeqBridge::audition (int t, int vel)
 {
     if (t < 0 || t >= kTracks) return;
     SeqCommand c; c.type = SeqCommand::Audition; c.track = (std::uint8_t) t; c.vol = (std::uint8_t) std::clamp (vel, 1, 127); push (c);
 }
 
-void SeqBridge::editShuffle() { SeqCommand c; c.type = SeqCommand::Shuffle; c.value = mirror.shuffle; push (c); }
-
-void SeqBridge::setPattern (const UiPattern& p) { mirror = p; resyncAll(); }
-
-void SeqBridge::resyncAll()
+void SeqBridge::sendPattern (int p, const UiPattern* old)
 {
+    const auto& n = bank[(size_t) p];
     for (int t = 0; t < kTracks; ++t)
     {
-        editLength (t); editMute (t);
-        for (int i = 0; i < kSteps; ++i) editStep (t, i);
+        const auto& a = n.tracks[(size_t) t];
+        if (!old || old->tracks[(size_t) t].length != a.length) editLength (p, t);
+        for (int i = 0; i < kSteps; ++i)
+        {
+            const size_t k = (size_t) i;
+            if (old)
+            {
+                const auto& b = old->tracks[(size_t) t];
+                if (a.on[k] == b.on[k] && a.vol[k] == b.vol[k] && a.prob[k] == b.prob[k] && a.note[k] == b.note[k] && a.flam[k] == b.flam[k] && a.shift[k] == b.shift[k]) continue;
+            }
+            editStep (p, t, i);
+        }
     }
-    editShuffle();
+    if (!old || old->shuffle != n.shuffle) editShuffle (p);
 }
 
+void SeqBridge::sendSong()
+{
+    SeqCommand m; m.type = SeqCommand::SongMode; m.value = song.enabled ? 1 : 0; push (m);
+    for (int i = 0; i < kSongLength; ++i) { SeqCommand c; c.type = SeqCommand::SongEntry; c.idx = (std::uint8_t) i; c.value = song.entries[(size_t) i]; push (c); }
+}
+
+void SeqBridge::setPattern (int p, const UiPattern& np)
+{
+    const UiPattern old = bank[(size_t) p];
+    bank[(size_t) p] = np;
+    sendPattern (p, &old);
+}
+
+void SeqBridge::setBank (const std::array<UiPattern, kPatterns>& nb, const UiSong& ns, std::uint8_t newMutes)
+{
+    for (int p = 0; p < kPatterns; ++p)
+        if (!(bank[(size_t) p] == nb[(size_t) p])) { const UiPattern old = bank[(size_t) p]; bank[(size_t) p] = nb[(size_t) p]; sendPattern (p, &old); }
+    if (!(song == ns)) { song = ns; sendSong(); }
+    for (int t = 0; t < kTracks; ++t) if (((mutes ^ newMutes) >> t) & 1) { mutes = (std::uint8_t) ((mutes & ~(1 << t)) | (newMutes & (1 << t))); editMute (t); }
+}
+
+// ---- UI commands --------------------------------------------------------------------------------------------------------
 bool SeqBridge::applyUiCommand (const std::vector<double>& a, const std::string& n)
 {
     edits.fetch_add (1, std::memory_order_relaxed);
-    auto track = [&] (size_t k) { return a.size() > k && a[k] >= 0 && a[k] < kTracks ? (int) a[k] : -1; };
-    auto step = [&] (size_t k) { return a.size() > k && a[k] >= 0 && a[k] < kSteps ? (int) a[k] : -1; };
+    auto at = [&] (size_t k, int lo, int hi) { return a.size() > k && a[k] >= lo && a[k] <= hi ? (int) a[k] : -1; };
     auto val = [&] (size_t k, int lo, int hi) { return (std::uint8_t) std::clamp (a.size() > k ? (int) a[k] : lo, lo, hi); };
+    const int p = at (0, 0, kPatterns - 1);
+
     if (n == "step" || n == "stepVol" || n == "stepProb" || n == "stepNote" || n == "stepFlam" || n == "stepShift")
     {
-        const int t = track (0), i = step (1); if (t < 0 || i < 0) return false;
-        auto& tr = mirror.tracks[(size_t) t]; const size_t k = (size_t) i;
+        const int t = at (1, 0, kTracks - 1), i = at (2, 0, kSteps - 1); if (p < 0 || t < 0 || i < 0) return false;
+        auto& tr = bank[(size_t) p].tracks[(size_t) t]; const size_t k = (size_t) i;
         if (n == "step")
         {
-            tr.on[k] = a.size() > 2 && a[2] != 0;
+            tr.on[k] = a.size() > 3 && a[3] != 0;
             if (tr.on[k]) { if (!tr.vol[k]) tr.vol[k] = 100; if (!tr.prob[k]) tr.prob[k] = 100; }
         }
-        else if (n == "stepVol") tr.vol[k] = val (2, 1, 127);
-        else if (n == "stepProb") tr.prob[k] = val (2, 1, 100);
-        else if (n == "stepNote") tr.note[k] = val (2, 0, 127);
-        else if (n == "stepFlam") tr.flam[k] = val (2, 0, 5);
-        else tr.shift[k] = val (2, 0, 14);
-        editStep (t, i); return true;
+        else if (n == "stepVol") tr.vol[k] = val (3, 1, 127);
+        else if (n == "stepProb") tr.prob[k] = val (3, 1, 100);
+        else if (n == "stepNote") tr.note[k] = val (3, 0, 127);
+        else if (n == "stepFlam") tr.flam[k] = val (3, 0, 5);
+        else tr.shift[k] = val (3, 0, 14);
+        editStep (p, t, i); return true;
     }
-    if (n == "trackLength") { const int t = track (0); if (t < 0) return false; mirror.tracks[(size_t) t].length = val (1, 1, 64); editLength (t); return true; }
-    if (n == "mute") { const int t = track (0); if (t < 0) return false; mirror.tracks[(size_t) t].muted = a.size() > 1 && a[1] != 0; editMute (t); return true; }
-    if (n == "shuffle") { mirror.shuffle = val (0, 0, 127); editShuffle(); return true; }
+    if (n == "trackLength") { const int t = at (1, 0, kTracks - 1); if (p < 0 || t < 0) return false; bank[(size_t) p].tracks[(size_t) t].length = val (2, 1, 64); editLength (p, t); return true; }
+    if (n == "shuffle") { if (p < 0) return false; bank[(size_t) p].shuffle = val (1, 0, 127); editShuffle (p); return true; }
+    if (n == "mute") { const int t = at (0, 0, kTracks - 1); if (t < 0) return false; mutes = (std::uint8_t) ((mutes & ~(1 << t)) | ((a.size() > 1 && a[1] != 0) ? (1 << t) : 0)); editMute (t); return true; }
     if (n == "clearTrack")
     {
-        const int t = track (0); if (t < 0) return false;
-        auto& tr = mirror.tracks[(size_t) t]; const auto len = tr.length; const bool m = tr.muted;
-        tr = UiTrack(); tr.length = len; tr.muted = m;
-        for (int i = 0; i < kSteps; ++i) editStep (t, i);
-        return true;
+        const int t = at (1, 0, kTracks - 1); if (p < 0 || t < 0) return false;
+        const UiPattern old = bank[(size_t) p]; const auto len = old.tracks[(size_t) t].length;
+        bank[(size_t) p].tracks[(size_t) t] = UiTrack(); bank[(size_t) p].tracks[(size_t) t].length = len;
+        sendPattern (p, &old); return true;
     }
     if (n == "copyTrack")
     {
-        const int s = track (0), d = track (1); if (s < 0 || d < 0) return false;
-        const bool m = mirror.tracks[(size_t) d].muted; const auto len = mirror.tracks[(size_t) s].length;
-        mirror.tracks[(size_t) d] = mirror.tracks[(size_t) s]; mirror.tracks[(size_t) d].muted = m; mirror.tracks[(size_t) d].length = len;
-        editLength (d); for (int i = 0; i < kSteps; ++i) editStep (d, i);
-        return true;
+        const int s = at (1, 0, kTracks - 1), d = at (2, 0, kTracks - 1); if (p < 0 || s < 0 || d < 0) return false;
+        const UiPattern old = bank[(size_t) p]; bank[(size_t) p].tracks[(size_t) d] = bank[(size_t) p].tracks[(size_t) s];
+        sendPattern (p, &old); return true;
+    }
+    if (n == "clearPattern") { if (p < 0) return false; setPattern (p, UiPattern()); return true; }
+    if (n == "copyPattern") { const int s = at (0, 0, kPatterns - 1), d = at (1, 0, kPatterns - 1); if (s < 0 || d < 0) return false; setPattern (d, bank[(size_t) s]); return true; }
+    if (n == "selectPattern") { if (p < 0) return false; SeqCommand c; c.type = SeqCommand::SelectPattern; c.pat = (std::uint8_t) p; push (c); return true; }
+    if (n == "songMode") { song.enabled = a.size() > 0 && a[0] != 0; SeqCommand c; c.type = SeqCommand::SongMode; c.value = song.enabled ? 1 : 0; push (c); return true; }
+    if (n == "songSet")
+    {
+        const int pos = at (0, 0, kSongLength - 1), v = at (1, 0, kSongLoop); if (pos < 0 || v < 0) return false;
+        song.entries[(size_t) pos] = (std::uint8_t) v;
+        SeqCommand c; c.type = SeqCommand::SongEntry; c.idx = (std::uint8_t) pos; c.value = (std::uint16_t) v; push (c); return true;
     }
     return false;
 }
 
-// ---- state ------------------------------------------------------------------------------------------------------
+// ---- state ----------------------------------------------------------------------------------------------------------------
 std::string SeqBridge::serialize() const
 {
-    std::string s; s.push_back (1); s.push_back ((char) mirror.shuffle);
-    for (const auto& t : mirror.tracks)
+    std::string s; s.push_back (2); s.push_back (song.enabled ? 1 : 0); s.push_back ((char) mutes);
+    for (auto v : song.entries) s.push_back ((char) v);
+    int count = 0; for (int p = 0; p < kPatterns; ++p) if (used (p)) ++count;
+    s.push_back ((char) count);
+    for (int p = 0; p < kPatterns; ++p)
     {
-        s.push_back ((char) t.length); s.push_back (t.muted ? 1 : 0);
-        for (int i = 0; i < kSteps; ++i)
+        if (!used (p)) continue;
+        const auto& pt = bank[(size_t) p];
+        s.push_back ((char) p); s.push_back ((char) pt.shuffle);
+        for (const auto& t : pt.tracks)
         {
-            const size_t k = (size_t) i;
-            for (std::uint8_t v : { t.on[k], t.vol[k], t.prob[k], t.note[k], t.flam[k], t.shift[k] }) s.push_back ((char) v);
+            s.push_back ((char) t.length);
+            for (int i = 0; i < kSteps; ++i) { const size_t k = (size_t) i; for (std::uint8_t v : { t.on[k], t.vol[k], t.prob[k], t.note[k], t.flam[k], t.shift[k] }) s.push_back ((char) v); }
         }
     }
     return s;
@@ -129,24 +173,51 @@ std::string SeqBridge::serialize() const
 
 bool SeqBridge::deserialize (const std::uint8_t* d, size_t n)
 {
-    if (n != 2 + (size_t) kTracks * (2 + kSteps * 6) || d[0] != 1) return false;
-    UiPattern p; p.shuffle = std::min<std::uint8_t> (d[1], 127);
-    size_t o = 2;
-    for (auto& t : p.tracks)
+    auto readTrack = [] (UiTrack& t, const std::uint8_t* d, size_t& o)
     {
-        t.length = std::clamp<std::uint8_t> (d[o++], 1, 64); t.muted = d[o++] != 0;
+        t.length = std::clamp<std::uint8_t> (d[o++], 1, 64);
         for (int i = 0; i < kSteps; ++i)
         {
             const size_t k = (size_t) i;
             t.on[k] = d[o++] ? 1 : 0; t.vol[k] = std::clamp<std::uint8_t> (d[o++], 1, 127); t.prob[k] = std::clamp<std::uint8_t> (d[o++], 1, 100);
             t.note[k] = std::min<std::uint8_t> (d[o++], 127); t.flam[k] = std::min<std::uint8_t> (d[o++], 5); t.shift[k] = std::min<std::uint8_t> (d[o++], 14);
         }
+    };
+    std::array<UiPattern, kPatterns> nb; UiSong ns; std::uint8_t nm = 0;
+    if (n >= 1 && d[0] == 1 && n == 2 + (size_t) kTracks * (2 + kSteps * 6))          // schema 1: one pattern, mute flag per track
+    {
+        nb[0].shuffle = std::min<std::uint8_t> (d[1], 127); size_t o = 2;
+        for (int t = 0; t < kTracks; ++t)
+        {
+            auto& tr = nb[0].tracks[(size_t) t];
+            tr.length = std::clamp<std::uint8_t> (d[o++], 1, 64);
+            if (d[o++]) nm |= (std::uint8_t) (1 << t);
+            for (int i = 0; i < kSteps; ++i)
+            {
+                const size_t k = (size_t) i;
+                tr.on[k] = d[o++] ? 1 : 0; tr.vol[k] = std::clamp<std::uint8_t> (d[o++], 1, 127); tr.prob[k] = std::clamp<std::uint8_t> (d[o++], 1, 100);
+                tr.note[k] = std::min<std::uint8_t> (d[o++], 127); tr.flam[k] = std::min<std::uint8_t> (d[o++], 5); tr.shift[k] = std::min<std::uint8_t> (d[o++], 14);
+            }
+        }
+        setBank (nb, ns, nm); return true;
     }
-    mirror = p;
+    if (n < 4 + (size_t) kSongLength || d[0] != 2) return false;
+    ns.enabled = d[1] != 0; nm = d[2] & 0x7f;
+    size_t o = 3; for (auto& e : ns.entries) e = std::min<std::uint8_t> (d[o++], kSongLoop);
+    const int count = d[o++];
+    const size_t per = 2 + (size_t) kTracks * (1 + kSteps * 6);
+    if (count > kPatterns || n != o + (size_t) count * per) return false;
+    for (int c = 0; c < count; ++c)
+    {
+        const int p = d[o++]; if (p >= kPatterns) return false;
+        nb[(size_t) p].shuffle = std::min<std::uint8_t> (d[o++], 127);
+        for (auto& t : nb[(size_t) p].tracks) readTrack (t, d, o);
+    }
+    setBank (nb, ns, nm);
     return true;
 }
 
-// ---- audio thread -----------------------------------------------------------------------------------------------
+// ---- audio thread ---------------------------------------------------------------------------------------------------------------
 void SeqBridge::drain (EngineHost& host) noexcept
 {
     LxrSeq* q = host.sequencer();
@@ -158,14 +229,17 @@ void SeqBridge::drain (EngineHost& host) noexcept
         switch (c.type)
         {
             case SeqCommand::Step:
-                lxrseq_set_main_step (q, 0, c.track, c.idx, c.on);
-                lxrseq_set_step (q, 0, c.track, c.idx, c.vol, c.prob, c.note);
-                lxrseq_set_step_timing (q, 0, c.track, c.idx, c.flam, c.shift);
+                lxrseq_set_main_step (q, c.pat, c.track, c.idx, c.on);
+                lxrseq_set_step (q, c.pat, c.track, c.idx, c.vol, c.prob, c.note);
+                lxrseq_set_step_timing (q, c.pat, c.track, c.idx, c.flam, c.shift);
                 break;
-            case SeqCommand::Length:  lxrseq_set_track_length (q, 0, c.track, c.value); break;
+            case SeqCommand::Length:  lxrseq_set_track_length (q, c.pat, c.track, c.value); break;
             case SeqCommand::Mute:    lxrseq_set_mute (q, c.track, c.value); break;
-            case SeqCommand::Shuffle: lxrseq_set_pattern_shuffle (q, 0, c.value); break;
+            case SeqCommand::Shuffle: lxrseq_set_pattern_shuffle (q, c.pat, c.value); break;
             case SeqCommand::Audition: lxr_trigger (host.raw(), c.track, 60, c.vol); break;
+            case SeqCommand::SelectPattern: lxrseq_set_next_pattern (q, c.pat); break;
+            case SeqCommand::SongMode: lxrseq_set_song_mode (q, c.value); break;
+            case SeqCommand::SongEntry: lxrseq_set_song_entry (q, c.idx, c.value); break;
         }
     }
     tail.store (t, std::memory_order_release);
@@ -179,6 +253,8 @@ void SeqBridge::publishPlayhead (EngineHost& host, double bpm, float pl, float p
     for (int t = 0; t < kTracks; ++t) { const int s = lxrseq_step_index (host.sequencer(), (unsigned) t); w |= (std::uint64_t) (s < 0 ? 0 : s & 0xff) << (8 * t); }
     if (lxrseq_is_running (host.sequencer())) w |= (std::uint64_t) 1 << 56;
     playheadWord.store (w, std::memory_order_relaxed);
+    patternWord.store ((std::uint32_t) (lxrseq_active_pattern (host.sequencer()) & 0xff) | (std::uint32_t) (lxrseq_pending_pattern (host.sequencer()) & 0xff) << 8
+                       | (std::uint32_t) (lxrseq_song_position (host.sequencer()) & 0xff) << 16, std::memory_order_relaxed);
     bpmShown.store ((float) bpm, std::memory_order_relaxed);
 }
 
@@ -187,7 +263,8 @@ SeqBridge::Level SeqBridge::readLevel() noexcept { return { peakL.exchange (0.f,
 SeqBridge::Playhead SeqBridge::readPlayhead() const noexcept
 {
     const auto w = playheadWord.load (std::memory_order_relaxed);
-    Playhead p { ((w >> 56) & 1) != 0, {}, (double) bpmShown.load (std::memory_order_relaxed) };
+    const auto pw = patternWord.load (std::memory_order_relaxed);
+    Playhead p { ((w >> 56) & 1) != 0, {}, (double) bpmShown.load (std::memory_order_relaxed), (int) (pw & 0xff), (int) ((pw >> 8) & 0xff), (int) ((pw >> 16) & 0xff) };
     for (int t = 0; t < kTracks; ++t) p.steps[(size_t) t] = (int) ((w >> (8 * t)) & 0xff);
     return p;
 }

@@ -66,6 +66,9 @@ void    lxrseq_euclid_steps(LxrSeq*, unsigned track, unsigned steps, unsigned pa
 void    lxrseq_euclid_rotation(LxrSeq*, unsigned track, unsigned rotation, unsigned pat);
 void    lxrseq_get_main_steps(const LxrSeq*, unsigned pat, unsigned track, uint16_t out[4], unsigned* length);
 unsigned lxrseq_active_pattern(const LxrSeq*);
+unsigned lxrseq_pending_pattern(const LxrSeq*);                      /* the pattern that starts at the next master-track wrap */
+unsigned lxrseq_song_position(const LxrSeq*);
+int      lxrseq_song_mode(const LxrSeq*);
 int      lxrseq_step_index(const LxrSeq*, unsigned track);                  /* step the track last played (-1 before the first step) */
 unsigned lxrseq_prescale_counter(const LxrSeq*);          /* sub-tick (0..23) within the current step */
 

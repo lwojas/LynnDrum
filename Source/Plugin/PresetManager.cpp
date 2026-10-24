@@ -75,20 +75,34 @@ juce::var PresetManager::document (const juce::String& name) const
     auto* kit = new juce::DynamicObject();
     for (const auto& d : lynn::params::kSound) kit->setProperty (d.id, (int) (proc.apvts.getRawParameterValue (d.id)->load() + 0.5f));
     root->setProperty ("kit", juce::var (kit));
-    auto* pat = new juce::DynamicObject();
-    pat->setProperty ("shuffle", (int) proc.bridge().pattern().shuffle);
-    juce::Array<juce::var> tracks;
-    for (const auto& t : proc.bridge().pattern().tracks)
+    juce::Array<juce::var> patterns;
+    for (int p = 0; p < lynn::kPatterns; ++p)
     {
-        auto* to = new juce::DynamicObject();
-        to->setProperty ("length", (int) t.length); to->setProperty ("mute", t.muted);
-        juce::Array<juce::var> steps;
-        for (int i = 0; i < lynn::kSteps; ++i) if (t.on[(size_t) i]) steps.add (stepVar (i, t));
-        to->setProperty ("steps", steps);
-        tracks.add (juce::var (to));
+        if (!proc.bridge().used (p)) continue;
+        const auto& pt = proc.bridge().pattern (p);
+        auto* po = new juce::DynamicObject();
+        po->setProperty ("index", p); po->setProperty ("shuffle", (int) pt.shuffle);
+        juce::Array<juce::var> tracks;
+        for (const auto& t : pt.tracks)
+        {
+            auto* to = new juce::DynamicObject();
+            to->setProperty ("length", (int) t.length);
+            juce::Array<juce::var> steps;
+            for (int i = 0; i < lynn::kSteps; ++i) if (t.on[(size_t) i]) steps.add (stepVar (i, t));
+            to->setProperty ("steps", steps);
+            tracks.add (juce::var (to));
+        }
+        po->setProperty ("tracks", tracks);
+        patterns.add (juce::var (po));
     }
-    pat->setProperty ("tracks", tracks);
-    root->setProperty ("pattern", juce::var (pat));
+    root->setProperty ("patterns", patterns);
+    auto* so = new juce::DynamicObject();
+    so->setProperty ("enabled", proc.bridge().songState().enabled);
+    juce::Array<juce::var> entries; for (auto e : proc.bridge().songState().entries) entries.add ((int) e);
+    so->setProperty ("entries", entries);
+    root->setProperty ("song", juce::var (so));
+    juce::Array<juce::var> mutes; for (int t = 0; t < lynn::kTracks; ++t) mutes.add (proc.bridge().muted (t));
+    root->setProperty ("mutes", mutes);
     return juce::var (root);
 }
 
@@ -104,29 +118,46 @@ bool PresetManager::apply (const juce::var& doc)
     }
     loading = false;
 
-    lynn::UiPattern up;                                       // no "pattern" key = empty pattern
-    const auto pat = doc["pattern"];
-    if (pat.isObject())
+    // patterns: "patterns": [{index, shuffle, tracks:[{length, steps}]}] (current), or the single "pattern" of the first format (= pattern 0).
+    // Nothing given = all patterns empty.
+    std::array<lynn::UiPattern, lynn::kPatterns> bank;
+    std::uint8_t mutesMask = 0;
+    auto readPattern = [&] (const juce::var& pv, lynn::UiPattern& up)
     {
-        up.shuffle = (std::uint8_t) clampi (pat["shuffle"], 0, 127, 0);
-        if (auto* ts = pat["tracks"].getArray())
+        up.shuffle = (std::uint8_t) clampi (pv["shuffle"], 0, 127, 0);
+        if (auto* ts = pv["tracks"].getArray())
             for (int t = 0; t < juce::jmin (ts->size(), lynn::kTracks); ++t)
             {
                 const auto& tv = (*ts)[t]; auto& tr = up.tracks[(size_t) t];
-                tr.length = (std::uint8_t) clampi (tv["length"], 1, 64, 16); tr.muted = (bool) tv["mute"];
+                tr.length = (std::uint8_t) clampi (tv["length"], 1, 64, 16);
+                if ((bool) tv["mute"]) mutesMask |= (std::uint8_t) (1 << t);                       // first format: mute lived in the track
                 if (auto* ss = tv["steps"].getArray())
                     for (const auto& sv : *ss)
                     {
                         if (sv["i"].isVoid() || (int) sv["i"] < 0 || (int) sv["i"] >= lynn::kSteps) continue;       // not clamped: a wrong index would silently move a step
-                        const int i = (int) sv["i"];
-                        const size_t k = (size_t) i;
+                        const size_t k = (size_t) (int) sv["i"];
                         tr.on[k] = 1; tr.vol[k] = (std::uint8_t) clampi (sv["vol"], 1, 127, 100); tr.prob[k] = (std::uint8_t) clampi (sv["prob"], 1, 100, 100);
                         tr.note[k] = (std::uint8_t) clampi (sv["note"], 0, 127, 60); tr.flam[k] = (std::uint8_t) clampi (sv["flam"], 0, 5, 0);
                         tr.shift[k] = (std::uint8_t) clampi (sv["shift"], 0, 14, lynn::kShiftNone);
                     }
             }
+    };
+    if (doc["pattern"].isObject()) readPattern (doc["pattern"], bank[0]);
+    if (auto* ps = doc["patterns"].getArray())
+        for (const auto& pv : *ps)
+        {
+            if (pv["index"].isVoid() || (int) pv["index"] < 0 || (int) pv["index"] >= lynn::kPatterns) continue;
+            readPattern (pv, bank[(size_t) (int) pv["index"]]);
+        }
+    if (auto* ms = doc["mutes"].getArray()) { mutesMask = 0; for (int t = 0; t < juce::jmin (ms->size(), lynn::kTracks); ++t) if ((bool) (*ms)[t]) mutesMask |= (std::uint8_t) (1 << t); }
+    lynn::UiSong song;
+    if (doc["song"].isObject())
+    {
+        song.enabled = (bool) doc["song"]["enabled"];
+        if (auto* es = doc["song"]["entries"].getArray()) for (int i = 0; i < juce::jmin (es->size(), lynn::kSongLength); ++i) song.entries[(size_t) i] = (std::uint8_t) clampi ((*es)[i], 0, lynn::kSongLoop, lynn::kSongEnd);
     }
-    proc.bridge().setPattern (up);
+    proc.bridge().setBank (bank, song, mutesMask);
+    proc.bridge().applyUiCommand ({ 0 }, "selectPattern");                    // play pattern 1 (queued if the sequencer is running)
     return true;
 }
 

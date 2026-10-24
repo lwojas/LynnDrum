@@ -136,21 +136,41 @@ static void sequencerGrid (double rate, double bpm, int block)
     CHECK (worst <= tol, "grid deviation %.1f > %.1f", worst, tol);
 }
 
-// --- sequencer bridge: UI commands reach the real sequencer, state round-trips, queue overflow loses nothing
+// --- sequencer bridge: UI commands reach the real sequencer (all 64 patterns), state round-trips, queue overflow loses nothing
 static void bridgeTests()
 {
     EngineHost h; h.prepare (48000.0); SeqBridge b;
-    auto mask = [&] (int track) { std::uint16_t m[4]; unsigned len; lxrseq_get_main_steps (h.sequencer(), 0, track, m, &len); return m[0]; };
-    CHECK (b.applyUiCommand ({ 2, 3, 1 }, "step"), "step command rejected");
-    CHECK (b.applyUiCommand ({ 2, 3, 90 }, "stepVol"), "stepVol rejected");
-    CHECK (!b.applyUiCommand ({ 9, 3, 1 }, "step"), "bad track accepted");
+    auto mask = [&] (int pat, int track) { std::uint16_t m[4]; unsigned len; lxrseq_get_main_steps (h.sequencer(), pat, track, m, &len); return m[0]; };
+    auto length = [&] (int pat, int track) { std::uint16_t m[4]; unsigned len = 0; lxrseq_get_main_steps (h.sequencer(), pat, track, m, &len); return len; };
+    CHECK (b.applyUiCommand ({ 0, 2, 3, 1 }, "step"), "step command rejected");
+    CHECK (b.applyUiCommand ({ 0, 2, 3, 90 }, "stepVol"), "stepVol rejected");
+    CHECK (!b.applyUiCommand ({ 0, 9, 3, 1 }, "step"), "bad track accepted");
+    CHECK (!b.applyUiCommand ({ 64, 0, 3, 1 }, "step"), "bad pattern accepted");
     CHECK (!b.applyUiCommand ({}, "nonsense"), "unknown command accepted");
     b.drain (h);
-    CHECK ((mask (2) & (1u << 3)) != 0, "step 3 of track 2 not set in the sequencer");
-    b.applyUiCommand ({ 2 }, "clearTrack"); b.drain (h);
-    CHECK (mask (2) == 0, "clearTrack did not clear");
-    b.applyUiCommand ({ 1, 21 }, "trackLength"); b.drain (h);
-    { std::uint16_t m[4]; unsigned len = 0; lxrseq_get_main_steps (h.sequencer(), 0, 1, m, &len); CHECK (len == 21, "length %u", len); }
+    CHECK ((mask (0, 2) & (1u << 3)) != 0, "step 3 of track 2 not set in the sequencer");
+    b.applyUiCommand ({ 0, 2 }, "clearTrack"); b.drain (h);
+    CHECK (mask (0, 2) == 0, "clearTrack did not clear");
+    b.applyUiCommand ({ 0, 1, 21 }, "trackLength"); b.drain (h);
+    CHECK (length (0, 1) == 21, "length %u", length (0, 1));
+
+    // the whole bank: edits address their own pattern and do not leak into others
+    b.applyUiCommand ({ 5, 0, 7, 1 }, "step"); b.applyUiCommand ({ 63, 6, 0, 1 }, "step"); b.applyUiCommand ({ 5, 3, 24 }, "trackLength"); b.applyUiCommand ({ 5, 40 }, "shuffle");
+    b.drain (h);
+    CHECK ((mask (5, 0) & (1u << 7)) && (mask (63, 6) & 1u) && mask (0, 0) == 0 && length (5, 3) == 24 && length (0, 3) == 16, "pattern addressing");
+    b.applyUiCommand ({ 5, 9 }, "copyPattern"); b.drain (h);
+    CHECK ((mask (9, 0) & (1u << 7)) && length (9, 3) == 24, "copyPattern");
+    b.applyUiCommand ({ 9 }, "clearPattern"); b.drain (h);
+    CHECK (mask (9, 0) == 0 && length (9, 3) == 16, "clearPattern");
+    b.applyUiCommand ({ 5, 1, 2, 1 }, "copyTrack"); b.drain (h);
+    b.applyUiCommand ({ 3, 1 }, "mute"); b.drain (h);
+    CHECK (b.muted (3) && !b.muted (2), "mute mirror");
+
+    // pattern select while stopped is immediate; song entries/mode reach the sequencer
+    b.applyUiCommand ({ 5 }, "selectPattern"); b.drain (h);
+    CHECK (lxrseq_active_pattern (h.sequencer()) == 5, "select pattern while stopped must switch at once (%u)", lxrseq_active_pattern (h.sequencer()));
+    b.applyUiCommand ({ 0, 5 }, "songSet"); b.applyUiCommand ({ 1, 2 }, "songSet"); b.applyUiCommand ({ 1 }, "songMode"); b.drain (h);
+    CHECK (lxrseq_song_mode (h.sequencer()) == 1 && b.songState().entries[1] == 2, "song state");
 
     // audition: a UI trigger sounds without any sequencer or MIDI, and reports a level
     {
@@ -165,19 +185,28 @@ static void bridgeTests()
         CHECK (ba.readLevel().l == 0.f, "meter peak must reset after reading");
     }
 
-    // state round-trip
-    b.applyUiCommand ({ 4, 10, 1 }, "step"); b.applyUiCommand ({ 4, 10, 3 }, "stepFlam"); b.applyUiCommand ({ 4, 10, 11 }, "stepShift");
-    b.applyUiCommand ({ 64 }, "shuffle");
+    // state round-trip: several patterns, a song, mutes
+    b.applyUiCommand ({ 12, 4, 10, 1 }, "step"); b.applyUiCommand ({ 12, 4, 10, 3 }, "stepFlam"); b.applyUiCommand ({ 12, 4, 10, 11 }, "stepShift");
+    b.applyUiCommand ({ 12, 64 }, "shuffle");
     const std::string blob = b.serialize();
     SeqBridge c; CHECK (c.deserialize (reinterpret_cast<const std::uint8_t*> (blob.data()), blob.size()), "deserialize failed");
     CHECK (c.serialize() == blob, "state not stable through a round-trip");
-    CHECK (c.pattern().tracks[4].flam[10] == 3 && c.pattern().tracks[4].shift[10] == 11 && c.pattern().shuffle == 64, "state content");
+    CHECK (c.pattern (12).tracks[4].flam[10] == 3 && c.pattern (12).tracks[4].shift[10] == 11 && c.pattern (12).shuffle == 64 && c.pattern (5).tracks[3].length == 24 && c.pattern (63).tracks[6].on[0], "state content");
+    CHECK (c.muted (3) && c.songState().enabled && c.songState().entries[1] == 2, "mutes and song in the state");
     CHECK (!c.deserialize (reinterpret_cast<const std::uint8_t*> (blob.data()), blob.size() - 1), "truncated state accepted");
+    {   // restoring into a bridge whose engine already holds other data must make the engine match exactly (diff against the mirror)
+        EngineHost h3; h3.prepare (48000.0); SeqBridge d;
+        d.applyUiCommand ({ 12, 0, 1, 1 }, "step"); d.drain (h3);
+        d.deserialize (reinterpret_cast<const std::uint8_t*> (blob.data()), blob.size()); d.drain (h3);
+        std::uint16_t m[4]; unsigned len; lxrseq_get_main_steps (h3.sequencer(), 12, 0, m, &len);
+        CHECK (m[0] == 0, "stale step survived a state restore");
+        lxrseq_get_main_steps (h3.sequencer(), 12, 4, m, &len); CHECK ((m[0] & (1u << 10)) != 0, "restored step missing");
+    }
 
     // overflow: more commands than the queue holds, applied in order once the audio side drains
     SeqBridge o; EngineHost h2; h2.prepare (48000.0);
     for (int rep = 0; rep < 40; ++rep) for (int t = 0; t < 7; ++t) for (int i = 0; i < 64; ++i)
-        o.applyUiCommand ({ (double) t, (double) i, (double) ((rep + i) & 1) }, "step");        // last rep (39): on where (39+i) odd
+        o.applyUiCommand ({ 0, (double) t, (double) i, (double) ((rep + i) & 1) }, "step");        // last rep (39): on where (39+i) odd
     for (int k = 0; k < 8; ++k) { o.drain (h2); o.flush(); }
     std::uint16_t m[4]; unsigned len; lxrseq_get_main_steps (h2.sequencer(), 0, 6, m, &len);
     CHECK (m[0] == 0x5555 && m[3] == 0x5555, "overflowed commands lost or reordered: %04x", m[0]);
