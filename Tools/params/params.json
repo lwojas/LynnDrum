@@ -1,0 +1,4923 @@
+{
+ "params": [
+  {
+   "par": 1,
+   "enum": "PAR_OSC_WAVE_DRUM1",
+   "id": "osc_wave_drum1",
+   "name": "Waveform",
+   "group": "Drum 1",
+   "kind": "choice",
+   "min": 0,
+   "max": 5,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Sine",
+    "Triangle",
+    "Saw",
+    "Rectangle",
+    "Noise",
+    "PWM"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 2,
+   "enum": "PAR_OSC_WAVE_DRUM2",
+   "id": "osc_wave_drum2",
+   "name": "Waveform",
+   "group": "Drum 2",
+   "kind": "choice",
+   "min": 0,
+   "max": 5,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Sine",
+    "Triangle",
+    "Saw",
+    "Rectangle",
+    "Noise",
+    "PWM"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 3,
+   "enum": "PAR_OSC_WAVE_DRUM3",
+   "id": "osc_wave_drum3",
+   "name": "Waveform",
+   "group": "Drum 3",
+   "kind": "choice",
+   "min": 0,
+   "max": 5,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Sine",
+    "Triangle",
+    "Saw",
+    "Rectangle",
+    "Noise",
+    "PWM"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 4,
+   "enum": "PAR_OSC_WAVE_SNARE",
+   "id": "osc_wave_snare",
+   "name": "Waveform",
+   "group": "Snare",
+   "kind": "choice",
+   "min": 0,
+   "max": 5,
+   "default": 1,
+   "bipolar": false,
+   "choices": [
+    "Sine",
+    "Triangle",
+    "Saw",
+    "Rectangle",
+    "Noise",
+    "PWM"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 6,
+   "enum": "PAR_WAVE1_CYM",
+   "id": "wave1_cym",
+   "name": "Wave 1",
+   "group": "Cymbal",
+   "kind": "choice",
+   "min": 0,
+   "max": 5,
+   "default": 3,
+   "bipolar": false,
+   "choices": [
+    "Sine",
+    "Triangle",
+    "Saw",
+    "Rectangle",
+    "Noise",
+    "PWM"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 7,
+   "enum": "PAR_WAVE1_HH",
+   "id": "wave1_hh",
+   "name": "Wave 1",
+   "group": "Hi-hat",
+   "kind": "choice",
+   "min": 0,
+   "max": 5,
+   "default": 3,
+   "bipolar": false,
+   "choices": [
+    "Sine",
+    "Triangle",
+    "Saw",
+    "Rectangle",
+    "Noise",
+    "PWM"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 8,
+   "enum": "PAR_COARSE1",
+   "id": "coarse1",
+   "name": "Coarse",
+   "group": "Drum 1",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 31,
+   "bipolar": true,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 9,
+   "enum": "PAR_FINE1",
+   "id": "fine1",
+   "name": "Fine",
+   "group": "Drum 1",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 63,
+   "bipolar": true,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 10,
+   "enum": "PAR_COARSE2",
+   "id": "coarse2",
+   "name": "Coarse",
+   "group": "Drum 2",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 45,
+   "bipolar": true,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 11,
+   "enum": "PAR_FINE2",
+   "id": "fine2",
+   "name": "Fine",
+   "group": "Drum 2",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 63,
+   "bipolar": true,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 12,
+   "enum": "PAR_COARSE3",
+   "id": "coarse3",
+   "name": "Coarse",
+   "group": "Drum 3",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 55,
+   "bipolar": true,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 13,
+   "enum": "PAR_FINE3",
+   "id": "fine3",
+   "name": "Fine",
+   "group": "Drum 3",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 63,
+   "bipolar": true,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 14,
+   "enum": "PAR_COARSE4",
+   "id": "coarse4",
+   "name": "Coarse",
+   "group": "Snare",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 57,
+   "bipolar": true,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 15,
+   "enum": "PAR_FINE4",
+   "id": "fine4",
+   "name": "Fine",
+   "group": "Snare",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 63,
+   "bipolar": true,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 16,
+   "enum": "PAR_COARSE5",
+   "id": "coarse5",
+   "name": "Coarse",
+   "group": "Cymbal",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 100,
+   "bipolar": true,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 17,
+   "enum": "PAR_FINE5",
+   "id": "fine5",
+   "name": "Fine",
+   "group": "Cymbal",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 63,
+   "bipolar": true,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 18,
+   "enum": "PAR_COARSE6",
+   "id": "coarse6",
+   "name": "Coarse",
+   "group": "Hi-hat",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 63,
+   "bipolar": true,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 19,
+   "enum": "PAR_FINE6",
+   "id": "fine6",
+   "name": "Fine",
+   "group": "Hi-hat",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 63,
+   "bipolar": true,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 20,
+   "enum": "PAR_MOD_WAVE_DRUM1",
+   "id": "mod_wave_drum1",
+   "name": "FM Waveform",
+   "group": "Drum 1",
+   "kind": "choice",
+   "min": 0,
+   "max": 5,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Sine",
+    "Triangle",
+    "Saw",
+    "Rectangle",
+    "Noise",
+    "PWM"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 21,
+   "enum": "PAR_MOD_WAVE_DRUM2",
+   "id": "mod_wave_drum2",
+   "name": "FM Waveform",
+   "group": "Drum 2",
+   "kind": "choice",
+   "min": 0,
+   "max": 5,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Sine",
+    "Triangle",
+    "Saw",
+    "Rectangle",
+    "Noise",
+    "PWM"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 22,
+   "enum": "PAR_MOD_WAVE_DRUM3",
+   "id": "mod_wave_drum3",
+   "name": "FM Waveform",
+   "group": "Drum 3",
+   "kind": "choice",
+   "min": 0,
+   "max": 5,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Sine",
+    "Triangle",
+    "Saw",
+    "Rectangle",
+    "Noise",
+    "PWM"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 23,
+   "enum": "PAR_WAVE2_CYM",
+   "id": "wave2_cym",
+   "name": "Wave 2",
+   "group": "Cymbal",
+   "kind": "choice",
+   "min": 0,
+   "max": 5,
+   "default": 3,
+   "bipolar": false,
+   "choices": [
+    "Sine",
+    "Triangle",
+    "Saw",
+    "Rectangle",
+    "Noise",
+    "PWM"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 24,
+   "enum": "PAR_WAVE3_CYM",
+   "id": "wave3_cym",
+   "name": "Wave 3",
+   "group": "Cymbal",
+   "kind": "choice",
+   "min": 0,
+   "max": 5,
+   "default": 4,
+   "bipolar": false,
+   "choices": [
+    "Sine",
+    "Triangle",
+    "Saw",
+    "Rectangle",
+    "Noise",
+    "PWM"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 25,
+   "enum": "PAR_WAVE2_HH",
+   "id": "wave2_hh",
+   "name": "Wave 2",
+   "group": "Hi-hat",
+   "kind": "choice",
+   "min": 0,
+   "max": 5,
+   "default": 3,
+   "bipolar": false,
+   "choices": [
+    "Sine",
+    "Triangle",
+    "Saw",
+    "Rectangle",
+    "Noise",
+    "PWM"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 26,
+   "enum": "PAR_WAVE3_HH",
+   "id": "wave3_hh",
+   "name": "Wave 3",
+   "group": "Hi-hat",
+   "kind": "choice",
+   "min": 0,
+   "max": 5,
+   "default": 4,
+   "bipolar": false,
+   "choices": [
+    "Sine",
+    "Triangle",
+    "Saw",
+    "Rectangle",
+    "Noise",
+    "PWM"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 27,
+   "enum": "PAR_NOISE_FREQ1",
+   "id": "noise_freq1",
+   "name": "Noise Freq",
+   "group": "Snare",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 127,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 28,
+   "enum": "PAR_MIX1",
+   "id": "mix1",
+   "name": "Noise / Osc Mix",
+   "group": "Snare",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 70,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 29,
+   "enum": "PAR_MOD_OSC_F1_CYM",
+   "id": "mod_osc_f1_cym",
+   "name": "Mod Osc 1 Freq",
+   "group": "Cymbal",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 63,
+   "bipolar": true,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 30,
+   "enum": "PAR_MOD_OSC_F2_CYM",
+   "id": "mod_osc_f2_cym",
+   "name": "Mod Osc 2 Freq",
+   "group": "Cymbal",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 63,
+   "bipolar": true,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 31,
+   "enum": "PAR_MOD_OSC_GAIN1_CYM",
+   "id": "mod_osc_gain1_cym",
+   "name": "Mod Osc 1 Gain",
+   "group": "Cymbal",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 110,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 32,
+   "enum": "PAR_MOD_OSC_GAIN2_CYM",
+   "id": "mod_osc_gain2_cym",
+   "name": "Mod Osc 2 Gain",
+   "group": "Cymbal",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 110,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 33,
+   "enum": "PAR_MOD_OSC_F1",
+   "id": "mod_osc_f1",
+   "name": "Mod Osc 1 Freq",
+   "group": "Hi-hat",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 63,
+   "bipolar": true,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 34,
+   "enum": "PAR_MOD_OSC_F2",
+   "id": "mod_osc_f2",
+   "name": "Mod Osc 2 Freq",
+   "group": "Hi-hat",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 63,
+   "bipolar": true,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 35,
+   "enum": "PAR_MOD_OSC_GAIN1",
+   "id": "mod_osc_gain1",
+   "name": "Mod Osc 1 Gain",
+   "group": "Hi-hat",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 100,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 36,
+   "enum": "PAR_MOD_OSC_GAIN2",
+   "id": "mod_osc_gain2",
+   "name": "Mod Osc 2 Gain",
+   "group": "Hi-hat",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 100,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 37,
+   "enum": "PAR_FILTER_FREQ_1",
+   "id": "filter_freq_1",
+   "name": "Filter Freq",
+   "group": "Drum 1",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 127,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 38,
+   "enum": "PAR_FILTER_FREQ_2",
+   "id": "filter_freq_2",
+   "name": "Filter Freq",
+   "group": "Drum 2",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 127,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 39,
+   "enum": "PAR_FILTER_FREQ_3",
+   "id": "filter_freq_3",
+   "name": "Filter Freq",
+   "group": "Drum 3",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 127,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 40,
+   "enum": "PAR_FILTER_FREQ_4",
+   "id": "filter_freq_4",
+   "name": "Filter Freq",
+   "group": "Snare",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 25,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 41,
+   "enum": "PAR_FILTER_FREQ_5",
+   "id": "filter_freq_5",
+   "name": "Filter Freq",
+   "group": "Cymbal",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 50,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 42,
+   "enum": "PAR_FILTER_FREQ_6",
+   "id": "filter_freq_6",
+   "name": "Filter Freq",
+   "group": "Hi-hat",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 90,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 43,
+   "enum": "PAR_RESO_1",
+   "id": "reso_1",
+   "name": "Resonance",
+   "group": "Drum 1",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 44,
+   "enum": "PAR_RESO_2",
+   "id": "reso_2",
+   "name": "Resonance",
+   "group": "Drum 2",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 45,
+   "enum": "PAR_RESO_3",
+   "id": "reso_3",
+   "name": "Resonance",
+   "group": "Drum 3",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 46,
+   "enum": "PAR_RESO_4",
+   "id": "reso_4",
+   "name": "Resonance",
+   "group": "Snare",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 47,
+   "enum": "PAR_RESO_5",
+   "id": "reso_5",
+   "name": "Resonance",
+   "group": "Cymbal",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 48,
+   "enum": "PAR_RESO_6",
+   "id": "reso_6",
+   "name": "Resonance",
+   "group": "Hi-hat",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 49,
+   "enum": "PAR_VELOA1",
+   "id": "veloa1",
+   "name": "Attack",
+   "group": "Drum 1",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 50,
+   "enum": "PAR_VELOD1",
+   "id": "velod1",
+   "name": "Decay",
+   "group": "Drum 1",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 32,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 51,
+   "enum": "PAR_VELOA2",
+   "id": "veloa2",
+   "name": "Attack",
+   "group": "Drum 2",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 52,
+   "enum": "PAR_VELOD2",
+   "id": "velod2",
+   "name": "Decay",
+   "group": "Drum 2",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 28,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 53,
+   "enum": "PAR_VELOA3",
+   "id": "veloa3",
+   "name": "Attack",
+   "group": "Drum 3",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 54,
+   "enum": "PAR_VELOD3",
+   "id": "velod3",
+   "name": "Decay",
+   "group": "Drum 3",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 24,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 55,
+   "enum": "PAR_VELOA4",
+   "id": "veloa4",
+   "name": "Attack",
+   "group": "Snare",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 56,
+   "enum": "PAR_VELOD4",
+   "id": "velod4",
+   "name": "Decay",
+   "group": "Snare",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 17,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 57,
+   "enum": "PAR_VELOA5",
+   "id": "veloa5",
+   "name": "Attack",
+   "group": "Cymbal",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 58,
+   "enum": "PAR_VELOD5",
+   "id": "velod5",
+   "name": "Decay",
+   "group": "Cymbal",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 58,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 59,
+   "enum": "PAR_VELOA6",
+   "id": "veloa6",
+   "name": "Attack",
+   "group": "Hi-hat",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 60,
+   "enum": "PAR_VELOD6_CLOSED",
+   "id": "velod6_closed",
+   "name": "Decay (closed)",
+   "group": "Hi-hat",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 5,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 61,
+   "enum": "PAR_VELOD6_OPEN",
+   "id": "velod6_open",
+   "name": "Decay (open)",
+   "group": "Hi-hat",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 30,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 62,
+   "enum": "PAR_VOL_SLOPE1",
+   "id": "vol_slope1",
+   "name": "Amp Slope",
+   "group": "Drum 1",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 64,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 63,
+   "enum": "PAR_VOL_SLOPE2",
+   "id": "vol_slope2",
+   "name": "Amp Slope",
+   "group": "Drum 2",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 64,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 64,
+   "enum": "PAR_VOL_SLOPE3",
+   "id": "vol_slope3",
+   "name": "Amp Slope",
+   "group": "Drum 3",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 64,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 65,
+   "enum": "PAR_VOL_SLOPE4",
+   "id": "vol_slope4",
+   "name": "Amp Slope",
+   "group": "Snare",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 64,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 66,
+   "enum": "PAR_VOL_SLOPE5",
+   "id": "vol_slope5",
+   "name": "Amp Slope",
+   "group": "Cymbal",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 64,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 67,
+   "enum": "PAR_VOL_SLOPE6",
+   "id": "vol_slope6",
+   "name": "Amp Slope",
+   "group": "Hi-hat",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 64,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 68,
+   "enum": "PAR_REPEAT4",
+   "id": "repeat4",
+   "name": "Repeat Count",
+   "group": "Snare",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 69,
+   "enum": "PAR_REPEAT5",
+   "id": "repeat5",
+   "name": "Repeat Count",
+   "group": "Cymbal",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 70,
+   "enum": "PAR_MOD_EG1",
+   "id": "mod_eg1",
+   "name": "Pitch Decay",
+   "group": "Drum 1",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 34,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 71,
+   "enum": "PAR_MOD_EG2",
+   "id": "mod_eg2",
+   "name": "Pitch Decay",
+   "group": "Drum 2",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 28,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 72,
+   "enum": "PAR_MOD_EG3",
+   "id": "mod_eg3",
+   "name": "Pitch Decay",
+   "group": "Drum 3",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 26,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 73,
+   "enum": "PAR_MOD_EG4",
+   "id": "mod_eg4",
+   "name": "Pitch Decay",
+   "group": "Snare",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 20,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 74,
+   "enum": "PAR_MODAMNT1",
+   "id": "modamnt1",
+   "name": "Pitch Mod",
+   "group": "Drum 1",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 48,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 75,
+   "enum": "PAR_MODAMNT2",
+   "id": "modamnt2",
+   "name": "Pitch Mod",
+   "group": "Drum 2",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 50,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 76,
+   "enum": "PAR_MODAMNT3",
+   "id": "modamnt3",
+   "name": "Pitch Mod",
+   "group": "Drum 3",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 50,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 77,
+   "enum": "PAR_MODAMNT4",
+   "id": "modamnt4",
+   "name": "Pitch Mod",
+   "group": "Snare",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 30,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 78,
+   "enum": "PAR_PITCH_SLOPE1",
+   "id": "pitch_slope1",
+   "name": "Pitch Slope",
+   "group": "Drum 1",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 64,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 79,
+   "enum": "PAR_PITCH_SLOPE2",
+   "id": "pitch_slope2",
+   "name": "Pitch Slope",
+   "group": "Drum 2",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 64,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 80,
+   "enum": "PAR_PITCH_SLOPE3",
+   "id": "pitch_slope3",
+   "name": "Pitch Slope",
+   "group": "Drum 3",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 64,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 81,
+   "enum": "PAR_PITCH_SLOPE4",
+   "id": "pitch_slope4",
+   "name": "Pitch Slope",
+   "group": "Snare",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 64,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 82,
+   "enum": "PAR_FMAMNT1",
+   "id": "fmamnt1",
+   "name": "FM Amount",
+   "group": "Drum 1",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 83,
+   "enum": "PAR_FM_FREQ1",
+   "id": "fm_freq1",
+   "name": "FM Freq",
+   "group": "Drum 1",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 63,
+   "bipolar": true,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 84,
+   "enum": "PAR_FMAMNT2",
+   "id": "fmamnt2",
+   "name": "FM Amount",
+   "group": "Drum 2",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 85,
+   "enum": "PAR_FM_FREQ2",
+   "id": "fm_freq2",
+   "name": "FM Freq",
+   "group": "Drum 2",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 63,
+   "bipolar": true,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 86,
+   "enum": "PAR_FMAMNT3",
+   "id": "fmamnt3",
+   "name": "FM Amount",
+   "group": "Drum 3",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 87,
+   "enum": "PAR_FM_FREQ3",
+   "id": "fm_freq3",
+   "name": "FM Freq",
+   "group": "Drum 3",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 63,
+   "bipolar": true,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 88,
+   "enum": "PAR_VOL1",
+   "id": "vol1",
+   "name": "Volume",
+   "group": "Drum 1",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 100,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 89,
+   "enum": "PAR_VOL2",
+   "id": "vol2",
+   "name": "Volume",
+   "group": "Drum 2",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 88,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 90,
+   "enum": "PAR_VOL3",
+   "id": "vol3",
+   "name": "Volume",
+   "group": "Drum 3",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 88,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 91,
+   "enum": "PAR_VOL4",
+   "id": "vol4",
+   "name": "Volume",
+   "group": "Snare",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 88,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 92,
+   "enum": "PAR_VOL5",
+   "id": "vol5",
+   "name": "Volume",
+   "group": "Cymbal",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 72,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 93,
+   "enum": "PAR_VOL6",
+   "id": "vol6",
+   "name": "Volume",
+   "group": "Hi-hat",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 80,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 94,
+   "enum": "PAR_PAN1",
+   "id": "pan1",
+   "name": "Pan",
+   "group": "Drum 1",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 63,
+   "bipolar": true,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 95,
+   "enum": "PAR_PAN2",
+   "id": "pan2",
+   "name": "Pan",
+   "group": "Drum 2",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 63,
+   "bipolar": true,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 96,
+   "enum": "PAR_PAN3",
+   "id": "pan3",
+   "name": "Pan",
+   "group": "Drum 3",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 63,
+   "bipolar": true,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 99,
+   "enum": "PAR_PAN4",
+   "id": "pan4",
+   "name": "Pan",
+   "group": "Snare",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 63,
+   "bipolar": true,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 100,
+   "enum": "PAR_PAN5",
+   "id": "pan5",
+   "name": "Pan",
+   "group": "Cymbal",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 63,
+   "bipolar": true,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 101,
+   "enum": "PAR_PAN6",
+   "id": "pan6",
+   "name": "Pan",
+   "group": "Hi-hat",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 63,
+   "bipolar": true,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 102,
+   "enum": "PAR_DRIVE1",
+   "id": "drive1",
+   "name": "Drive",
+   "group": "Drum 1",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 103,
+   "enum": "PAR_DRIVE2",
+   "id": "drive2",
+   "name": "Drive",
+   "group": "Drum 2",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 104,
+   "enum": "PAR_DRIVE3",
+   "id": "drive3",
+   "name": "Drive",
+   "group": "Drum 3",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 105,
+   "enum": "PAR_SNARE_DISTORTION",
+   "id": "snare_distortion",
+   "name": "Drive",
+   "group": "Snare",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 106,
+   "enum": "PAR_CYMBAL_DISTORTION",
+   "id": "cymbal_distortion",
+   "name": "Drive",
+   "group": "Cymbal",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 107,
+   "enum": "PAR_HAT_DISTORTION",
+   "id": "hat_distortion",
+   "name": "Drive",
+   "group": "Hi-hat",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 108,
+   "enum": "PAR_VOICE_DECIMATION1",
+   "id": "voice_decimation1",
+   "name": "Sample Rate Reducer",
+   "group": "Drum 1",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 127,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 109,
+   "enum": "PAR_VOICE_DECIMATION2",
+   "id": "voice_decimation2",
+   "name": "Sample Rate Reducer",
+   "group": "Drum 2",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 127,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 110,
+   "enum": "PAR_VOICE_DECIMATION3",
+   "id": "voice_decimation3",
+   "name": "Sample Rate Reducer",
+   "group": "Drum 3",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 127,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 111,
+   "enum": "PAR_VOICE_DECIMATION4",
+   "id": "voice_decimation4",
+   "name": "Sample Rate Reducer",
+   "group": "Snare",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 127,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 112,
+   "enum": "PAR_VOICE_DECIMATION5",
+   "id": "voice_decimation5",
+   "name": "Sample Rate Reducer",
+   "group": "Cymbal",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 127,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 113,
+   "enum": "PAR_VOICE_DECIMATION6",
+   "id": "voice_decimation6",
+   "name": "Sample Rate Reducer",
+   "group": "Hi-hat",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 127,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 114,
+   "enum": "PAR_VOICE_DECIMATION_ALL",
+   "id": "voice_decimation_all",
+   "name": "Sample Rate Reducer (all)",
+   "group": "Global",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 127,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 115,
+   "enum": "PAR_FREQ_LFO1",
+   "id": "freq_lfo1",
+   "name": "LFO Rate",
+   "group": "Drum 1",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 116,
+   "enum": "PAR_FREQ_LFO2",
+   "id": "freq_lfo2",
+   "name": "LFO Rate",
+   "group": "Drum 2",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 117,
+   "enum": "PAR_FREQ_LFO3",
+   "id": "freq_lfo3",
+   "name": "LFO Rate",
+   "group": "Drum 3",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 118,
+   "enum": "PAR_FREQ_LFO4",
+   "id": "freq_lfo4",
+   "name": "LFO Rate",
+   "group": "Snare",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 119,
+   "enum": "PAR_FREQ_LFO5",
+   "id": "freq_lfo5",
+   "name": "LFO Rate",
+   "group": "Cymbal",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 120,
+   "enum": "PAR_FREQ_LFO6",
+   "id": "freq_lfo6",
+   "name": "LFO Rate",
+   "group": "Hi-hat",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 121,
+   "enum": "PAR_AMOUNT_LFO1",
+   "id": "amount_lfo1",
+   "name": "LFO Amount",
+   "group": "Drum 1",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 122,
+   "enum": "PAR_AMOUNT_LFO2",
+   "id": "amount_lfo2",
+   "name": "LFO Amount",
+   "group": "Drum 2",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 123,
+   "enum": "PAR_AMOUNT_LFO3",
+   "id": "amount_lfo3",
+   "name": "LFO Amount",
+   "group": "Drum 3",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 124,
+   "enum": "PAR_AMOUNT_LFO4",
+   "id": "amount_lfo4",
+   "name": "LFO Amount",
+   "group": "Snare",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 125,
+   "enum": "PAR_AMOUNT_LFO5",
+   "id": "amount_lfo5",
+   "name": "LFO Amount",
+   "group": "Cymbal",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 126,
+   "enum": "PAR_AMOUNT_LFO6",
+   "id": "amount_lfo6",
+   "name": "LFO Amount",
+   "group": "Hi-hat",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 128,
+   "enum": "PAR_FILTER_DRIVE_1",
+   "id": "filter_drive_1",
+   "name": "Filter Drive",
+   "group": "Drum 1",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 129,
+   "enum": "PAR_FILTER_DRIVE_2",
+   "id": "filter_drive_2",
+   "name": "Filter Drive",
+   "group": "Drum 2",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 130,
+   "enum": "PAR_FILTER_DRIVE_3",
+   "id": "filter_drive_3",
+   "name": "Filter Drive",
+   "group": "Drum 3",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 131,
+   "enum": "PAR_FILTER_DRIVE_4",
+   "id": "filter_drive_4",
+   "name": "Filter Drive",
+   "group": "Snare",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 132,
+   "enum": "PAR_FILTER_DRIVE_5",
+   "id": "filter_drive_5",
+   "name": "Filter Drive",
+   "group": "Cymbal",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 133,
+   "enum": "PAR_FILTER_DRIVE_6",
+   "id": "filter_drive_6",
+   "name": "Filter Drive",
+   "group": "Hi-hat",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 134,
+   "enum": "PAR_MIX_MOD_1",
+   "id": "mix_mod_1",
+   "name": "FM / Mix Mode",
+   "group": "Drum 1",
+   "kind": "choice",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "FM",
+    "Mix"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 135,
+   "enum": "PAR_MIX_MOD_2",
+   "id": "mix_mod_2",
+   "name": "FM / Mix Mode",
+   "group": "Drum 2",
+   "kind": "choice",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "FM",
+    "Mix"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 136,
+   "enum": "PAR_MIX_MOD_3",
+   "id": "mix_mod_3",
+   "name": "FM / Mix Mode",
+   "group": "Drum 3",
+   "kind": "choice",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "FM",
+    "Mix"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 137,
+   "enum": "PAR_VOLUME_MOD_ON_OFF1",
+   "id": "volume_mod_on_off1",
+   "name": "Velocity > Volume",
+   "group": "Drum 1",
+   "kind": "bool",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 138,
+   "enum": "PAR_VOLUME_MOD_ON_OFF2",
+   "id": "volume_mod_on_off2",
+   "name": "Velocity > Volume",
+   "group": "Drum 2",
+   "kind": "bool",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 139,
+   "enum": "PAR_VOLUME_MOD_ON_OFF3",
+   "id": "volume_mod_on_off3",
+   "name": "Velocity > Volume",
+   "group": "Drum 3",
+   "kind": "bool",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 140,
+   "enum": "PAR_VOLUME_MOD_ON_OFF4",
+   "id": "volume_mod_on_off4",
+   "name": "Velocity > Volume",
+   "group": "Snare",
+   "kind": "bool",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 141,
+   "enum": "PAR_VOLUME_MOD_ON_OFF5",
+   "id": "volume_mod_on_off5",
+   "name": "Velocity > Volume",
+   "group": "Cymbal",
+   "kind": "bool",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 142,
+   "enum": "PAR_VOLUME_MOD_ON_OFF6",
+   "id": "volume_mod_on_off6",
+   "name": "Velocity > Volume",
+   "group": "Hi-hat",
+   "kind": "bool",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 143,
+   "enum": "PAR_VELO_MOD_AMT_1",
+   "id": "velo_mod_amt_1",
+   "name": "Velocity Amount",
+   "group": "Drum 1",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 144,
+   "enum": "PAR_VELO_MOD_AMT_2",
+   "id": "velo_mod_amt_2",
+   "name": "Velocity Amount",
+   "group": "Drum 2",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 145,
+   "enum": "PAR_VELO_MOD_AMT_3",
+   "id": "velo_mod_amt_3",
+   "name": "Velocity Amount",
+   "group": "Drum 3",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 146,
+   "enum": "PAR_VELO_MOD_AMT_4",
+   "id": "velo_mod_amt_4",
+   "name": "Velocity Amount",
+   "group": "Snare",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 147,
+   "enum": "PAR_VELO_MOD_AMT_5",
+   "id": "velo_mod_amt_5",
+   "name": "Velocity Amount",
+   "group": "Cymbal",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 148,
+   "enum": "PAR_VELO_MOD_AMT_6",
+   "id": "velo_mod_amt_6",
+   "name": "Velocity Amount",
+   "group": "Hi-hat",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 149,
+   "enum": "PAR_VEL_DEST_1",
+   "id": "vel_dest_1",
+   "name": "Velocity Target",
+   "group": "Drum 1",
+   "kind": "target",
+   "min": 0,
+   "max": 228,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": "vel",
+   "tindex": 0
+  },
+  {
+   "par": 150,
+   "enum": "PAR_VEL_DEST_2",
+   "id": "vel_dest_2",
+   "name": "Velocity Target",
+   "group": "Drum 2",
+   "kind": "target",
+   "min": 0,
+   "max": 228,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": "vel",
+   "tindex": 1
+  },
+  {
+   "par": 151,
+   "enum": "PAR_VEL_DEST_3",
+   "id": "vel_dest_3",
+   "name": "Velocity Target",
+   "group": "Drum 3",
+   "kind": "target",
+   "min": 0,
+   "max": 228,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": "vel",
+   "tindex": 2
+  },
+  {
+   "par": 152,
+   "enum": "PAR_VEL_DEST_4",
+   "id": "vel_dest_4",
+   "name": "Velocity Target",
+   "group": "Snare",
+   "kind": "target",
+   "min": 0,
+   "max": 228,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": "vel",
+   "tindex": 3
+  },
+  {
+   "par": 153,
+   "enum": "PAR_VEL_DEST_5",
+   "id": "vel_dest_5",
+   "name": "Velocity Target",
+   "group": "Cymbal",
+   "kind": "target",
+   "min": 0,
+   "max": 228,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": "vel",
+   "tindex": 4
+  },
+  {
+   "par": 154,
+   "enum": "PAR_VEL_DEST_6",
+   "id": "vel_dest_6",
+   "name": "Velocity Target",
+   "group": "Hi-hat",
+   "kind": "target",
+   "min": 0,
+   "max": 228,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": "vel",
+   "tindex": 5
+  },
+  {
+   "par": 155,
+   "enum": "PAR_WAVE_LFO1",
+   "id": "wave_lfo1",
+   "name": "LFO Wave",
+   "group": "Drum 1",
+   "kind": "choice",
+   "min": 0,
+   "max": 7,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Sine",
+    "Triangle",
+    "Saw up",
+    "Saw down",
+    "Square",
+    "Random",
+    "Exp up",
+    "Exp down"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 156,
+   "enum": "PAR_WAVE_LFO2",
+   "id": "wave_lfo2",
+   "name": "LFO Wave",
+   "group": "Drum 2",
+   "kind": "choice",
+   "min": 0,
+   "max": 7,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Sine",
+    "Triangle",
+    "Saw up",
+    "Saw down",
+    "Square",
+    "Random",
+    "Exp up",
+    "Exp down"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 157,
+   "enum": "PAR_WAVE_LFO3",
+   "id": "wave_lfo3",
+   "name": "LFO Wave",
+   "group": "Drum 3",
+   "kind": "choice",
+   "min": 0,
+   "max": 7,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Sine",
+    "Triangle",
+    "Saw up",
+    "Saw down",
+    "Square",
+    "Random",
+    "Exp up",
+    "Exp down"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 158,
+   "enum": "PAR_WAVE_LFO4",
+   "id": "wave_lfo4",
+   "name": "LFO Wave",
+   "group": "Snare",
+   "kind": "choice",
+   "min": 0,
+   "max": 7,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Sine",
+    "Triangle",
+    "Saw up",
+    "Saw down",
+    "Square",
+    "Random",
+    "Exp up",
+    "Exp down"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 159,
+   "enum": "PAR_WAVE_LFO5",
+   "id": "wave_lfo5",
+   "name": "LFO Wave",
+   "group": "Cymbal",
+   "kind": "choice",
+   "min": 0,
+   "max": 7,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Sine",
+    "Triangle",
+    "Saw up",
+    "Saw down",
+    "Square",
+    "Random",
+    "Exp up",
+    "Exp down"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 160,
+   "enum": "PAR_WAVE_LFO6",
+   "id": "wave_lfo6",
+   "name": "LFO Wave",
+   "group": "Hi-hat",
+   "kind": "choice",
+   "min": 0,
+   "max": 7,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Sine",
+    "Triangle",
+    "Saw up",
+    "Saw down",
+    "Square",
+    "Random",
+    "Exp up",
+    "Exp down"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 161,
+   "enum": "PAR_VOICE_LFO1",
+   "id": "voice_lfo1",
+   "name": "LFO Target Voice",
+   "group": "Drum 1",
+   "kind": "int",
+   "min": 1,
+   "max": 6,
+   "default": 1,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 162,
+   "enum": "PAR_VOICE_LFO2",
+   "id": "voice_lfo2",
+   "name": "LFO Target Voice",
+   "group": "Drum 2",
+   "kind": "int",
+   "min": 1,
+   "max": 6,
+   "default": 1,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 163,
+   "enum": "PAR_VOICE_LFO3",
+   "id": "voice_lfo3",
+   "name": "LFO Target Voice",
+   "group": "Drum 3",
+   "kind": "int",
+   "min": 1,
+   "max": 6,
+   "default": 1,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 164,
+   "enum": "PAR_VOICE_LFO4",
+   "id": "voice_lfo4",
+   "name": "LFO Target Voice",
+   "group": "Snare",
+   "kind": "int",
+   "min": 1,
+   "max": 6,
+   "default": 1,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 165,
+   "enum": "PAR_VOICE_LFO5",
+   "id": "voice_lfo5",
+   "name": "LFO Target Voice",
+   "group": "Cymbal",
+   "kind": "int",
+   "min": 1,
+   "max": 6,
+   "default": 1,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 166,
+   "enum": "PAR_VOICE_LFO6",
+   "id": "voice_lfo6",
+   "name": "LFO Target Voice",
+   "group": "Hi-hat",
+   "kind": "int",
+   "min": 1,
+   "max": 6,
+   "default": 1,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 167,
+   "enum": "PAR_TARGET_LFO1",
+   "id": "target_lfo1",
+   "name": "LFO Target",
+   "group": "Drum 1",
+   "kind": "target",
+   "min": 0,
+   "max": 228,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": "lfo",
+   "tindex": 0
+  },
+  {
+   "par": 168,
+   "enum": "PAR_TARGET_LFO2",
+   "id": "target_lfo2",
+   "name": "LFO Target",
+   "group": "Drum 2",
+   "kind": "target",
+   "min": 0,
+   "max": 228,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": "lfo",
+   "tindex": 1
+  },
+  {
+   "par": 169,
+   "enum": "PAR_TARGET_LFO3",
+   "id": "target_lfo3",
+   "name": "LFO Target",
+   "group": "Drum 3",
+   "kind": "target",
+   "min": 0,
+   "max": 228,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": "lfo",
+   "tindex": 2
+  },
+  {
+   "par": 170,
+   "enum": "PAR_TARGET_LFO4",
+   "id": "target_lfo4",
+   "name": "LFO Target",
+   "group": "Snare",
+   "kind": "target",
+   "min": 0,
+   "max": 228,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": "lfo",
+   "tindex": 3
+  },
+  {
+   "par": 171,
+   "enum": "PAR_TARGET_LFO5",
+   "id": "target_lfo5",
+   "name": "LFO Target",
+   "group": "Cymbal",
+   "kind": "target",
+   "min": 0,
+   "max": 228,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": "lfo",
+   "tindex": 4
+  },
+  {
+   "par": 172,
+   "enum": "PAR_TARGET_LFO6",
+   "id": "target_lfo6",
+   "name": "LFO Target",
+   "group": "Hi-hat",
+   "kind": "target",
+   "min": 0,
+   "max": 228,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": "lfo",
+   "tindex": 5
+  },
+  {
+   "par": 173,
+   "enum": "PAR_RETRIGGER_LFO1",
+   "id": "retrigger_lfo1",
+   "name": "LFO Retrigger",
+   "group": "Drum 1",
+   "kind": "choice",
+   "min": 0,
+   "max": 6,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Off",
+    "Voice 1",
+    "Voice 2",
+    "Voice 3",
+    "Voice 4",
+    "Voice 5",
+    "Voice 6"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 174,
+   "enum": "PAR_RETRIGGER_LFO2",
+   "id": "retrigger_lfo2",
+   "name": "LFO Retrigger",
+   "group": "Drum 2",
+   "kind": "choice",
+   "min": 0,
+   "max": 6,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Off",
+    "Voice 1",
+    "Voice 2",
+    "Voice 3",
+    "Voice 4",
+    "Voice 5",
+    "Voice 6"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 175,
+   "enum": "PAR_RETRIGGER_LFO3",
+   "id": "retrigger_lfo3",
+   "name": "LFO Retrigger",
+   "group": "Drum 3",
+   "kind": "choice",
+   "min": 0,
+   "max": 6,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Off",
+    "Voice 1",
+    "Voice 2",
+    "Voice 3",
+    "Voice 4",
+    "Voice 5",
+    "Voice 6"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 176,
+   "enum": "PAR_RETRIGGER_LFO4",
+   "id": "retrigger_lfo4",
+   "name": "LFO Retrigger",
+   "group": "Snare",
+   "kind": "choice",
+   "min": 0,
+   "max": 6,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Off",
+    "Voice 1",
+    "Voice 2",
+    "Voice 3",
+    "Voice 4",
+    "Voice 5",
+    "Voice 6"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 177,
+   "enum": "PAR_RETRIGGER_LFO5",
+   "id": "retrigger_lfo5",
+   "name": "LFO Retrigger",
+   "group": "Cymbal",
+   "kind": "choice",
+   "min": 0,
+   "max": 6,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Off",
+    "Voice 1",
+    "Voice 2",
+    "Voice 3",
+    "Voice 4",
+    "Voice 5",
+    "Voice 6"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 178,
+   "enum": "PAR_RETRIGGER_LFO6",
+   "id": "retrigger_lfo6",
+   "name": "LFO Retrigger",
+   "group": "Hi-hat",
+   "kind": "choice",
+   "min": 0,
+   "max": 6,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Off",
+    "Voice 1",
+    "Voice 2",
+    "Voice 3",
+    "Voice 4",
+    "Voice 5",
+    "Voice 6"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 179,
+   "enum": "PAR_SYNC_LFO1",
+   "id": "sync_lfo1",
+   "name": "LFO Sync",
+   "group": "Drum 1",
+   "kind": "choice",
+   "min": 0,
+   "max": 11,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Off",
+    "4/1",
+    "2/1",
+    "1/1",
+    "1/2",
+    "1/3",
+    "1/4",
+    "1/6",
+    "1/8",
+    "12",
+    "16",
+    "32"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 180,
+   "enum": "PAR_SYNC_LFO2",
+   "id": "sync_lfo2",
+   "name": "LFO Sync",
+   "group": "Drum 2",
+   "kind": "choice",
+   "min": 0,
+   "max": 11,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Off",
+    "4/1",
+    "2/1",
+    "1/1",
+    "1/2",
+    "1/3",
+    "1/4",
+    "1/6",
+    "1/8",
+    "12",
+    "16",
+    "32"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 181,
+   "enum": "PAR_SYNC_LFO3",
+   "id": "sync_lfo3",
+   "name": "LFO Sync",
+   "group": "Drum 3",
+   "kind": "choice",
+   "min": 0,
+   "max": 11,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Off",
+    "4/1",
+    "2/1",
+    "1/1",
+    "1/2",
+    "1/3",
+    "1/4",
+    "1/6",
+    "1/8",
+    "12",
+    "16",
+    "32"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 182,
+   "enum": "PAR_SYNC_LFO4",
+   "id": "sync_lfo4",
+   "name": "LFO Sync",
+   "group": "Snare",
+   "kind": "choice",
+   "min": 0,
+   "max": 11,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Off",
+    "4/1",
+    "2/1",
+    "1/1",
+    "1/2",
+    "1/3",
+    "1/4",
+    "1/6",
+    "1/8",
+    "12",
+    "16",
+    "32"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 183,
+   "enum": "PAR_SYNC_LFO5",
+   "id": "sync_lfo5",
+   "name": "LFO Sync",
+   "group": "Cymbal",
+   "kind": "choice",
+   "min": 0,
+   "max": 11,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Off",
+    "4/1",
+    "2/1",
+    "1/1",
+    "1/2",
+    "1/3",
+    "1/4",
+    "1/6",
+    "1/8",
+    "12",
+    "16",
+    "32"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 184,
+   "enum": "PAR_SYNC_LFO6",
+   "id": "sync_lfo6",
+   "name": "LFO Sync",
+   "group": "Hi-hat",
+   "kind": "choice",
+   "min": 0,
+   "max": 11,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Off",
+    "4/1",
+    "2/1",
+    "1/1",
+    "1/2",
+    "1/3",
+    "1/4",
+    "1/6",
+    "1/8",
+    "12",
+    "16",
+    "32"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 185,
+   "enum": "PAR_OFFSET_LFO1",
+   "id": "offset_lfo1",
+   "name": "LFO Phase",
+   "group": "Drum 1",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 186,
+   "enum": "PAR_OFFSET_LFO2",
+   "id": "offset_lfo2",
+   "name": "LFO Phase",
+   "group": "Drum 2",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 187,
+   "enum": "PAR_OFFSET_LFO3",
+   "id": "offset_lfo3",
+   "name": "LFO Phase",
+   "group": "Drum 3",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 188,
+   "enum": "PAR_OFFSET_LFO4",
+   "id": "offset_lfo4",
+   "name": "LFO Phase",
+   "group": "Snare",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 189,
+   "enum": "PAR_OFFSET_LFO5",
+   "id": "offset_lfo5",
+   "name": "LFO Phase",
+   "group": "Cymbal",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 190,
+   "enum": "PAR_OFFSET_LFO6",
+   "id": "offset_lfo6",
+   "name": "LFO Phase",
+   "group": "Hi-hat",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 191,
+   "enum": "PAR_FILTER_TYPE_1",
+   "id": "filter_type_1",
+   "name": "Filter Type",
+   "group": "Drum 1",
+   "kind": "choice",
+   "min": 0,
+   "max": 7,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Lowpass",
+    "Highpass",
+    "Bandpass",
+    "Bandpass (unity)",
+    "Notch",
+    "Peak",
+    "Lowpass (naive)",
+    "Off"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 192,
+   "enum": "PAR_FILTER_TYPE_2",
+   "id": "filter_type_2",
+   "name": "Filter Type",
+   "group": "Drum 2",
+   "kind": "choice",
+   "min": 0,
+   "max": 7,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Lowpass",
+    "Highpass",
+    "Bandpass",
+    "Bandpass (unity)",
+    "Notch",
+    "Peak",
+    "Lowpass (naive)",
+    "Off"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 193,
+   "enum": "PAR_FILTER_TYPE_3",
+   "id": "filter_type_3",
+   "name": "Filter Type",
+   "group": "Drum 3",
+   "kind": "choice",
+   "min": 0,
+   "max": 7,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Lowpass",
+    "Highpass",
+    "Bandpass",
+    "Bandpass (unity)",
+    "Notch",
+    "Peak",
+    "Lowpass (naive)",
+    "Off"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 194,
+   "enum": "PAR_FILTER_TYPE_4",
+   "id": "filter_type_4",
+   "name": "Filter Type",
+   "group": "Snare",
+   "kind": "choice",
+   "min": 0,
+   "max": 7,
+   "default": 1,
+   "bipolar": false,
+   "choices": [
+    "Lowpass",
+    "Highpass",
+    "Bandpass",
+    "Bandpass (unity)",
+    "Notch",
+    "Peak",
+    "Lowpass (naive)",
+    "Off"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 195,
+   "enum": "PAR_FILTER_TYPE_5",
+   "id": "filter_type_5",
+   "name": "Filter Type",
+   "group": "Cymbal",
+   "kind": "choice",
+   "min": 0,
+   "max": 7,
+   "default": 1,
+   "bipolar": false,
+   "choices": [
+    "Lowpass",
+    "Highpass",
+    "Bandpass",
+    "Bandpass (unity)",
+    "Notch",
+    "Peak",
+    "Lowpass (naive)",
+    "Off"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 196,
+   "enum": "PAR_FILTER_TYPE_6",
+   "id": "filter_type_6",
+   "name": "Filter Type",
+   "group": "Hi-hat",
+   "kind": "choice",
+   "min": 0,
+   "max": 7,
+   "default": 1,
+   "bipolar": false,
+   "choices": [
+    "Lowpass",
+    "Highpass",
+    "Bandpass",
+    "Bandpass (unity)",
+    "Notch",
+    "Peak",
+    "Lowpass (naive)",
+    "Off"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 197,
+   "enum": "PAR_TRANS1_VOL",
+   "id": "trans1_vol",
+   "name": "Click Level",
+   "group": "Drum 1",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 198,
+   "enum": "PAR_TRANS2_VOL",
+   "id": "trans2_vol",
+   "name": "Click Level",
+   "group": "Drum 2",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 199,
+   "enum": "PAR_TRANS3_VOL",
+   "id": "trans3_vol",
+   "name": "Click Level",
+   "group": "Drum 3",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 200,
+   "enum": "PAR_TRANS4_VOL",
+   "id": "trans4_vol",
+   "name": "Click Level",
+   "group": "Snare",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 201,
+   "enum": "PAR_TRANS5_VOL",
+   "id": "trans5_vol",
+   "name": "Click Level",
+   "group": "Cymbal",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 202,
+   "enum": "PAR_TRANS6_VOL",
+   "id": "trans6_vol",
+   "name": "Click Level",
+   "group": "Hi-hat",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 203,
+   "enum": "PAR_TRANS1_WAVE",
+   "id": "trans1_wave",
+   "name": "Click Type",
+   "group": "Drum 1",
+   "kind": "choice",
+   "min": 0,
+   "max": 13,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Snap",
+    "Offset",
+    "Click",
+    "Click 2",
+    "Tick",
+    "Kick",
+    "Rim",
+    "Drop",
+    "Hat",
+    "Clap",
+    "Kick 2",
+    "Snare",
+    "Tom",
+    "Sp2"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 204,
+   "enum": "PAR_TRANS2_WAVE",
+   "id": "trans2_wave",
+   "name": "Click Type",
+   "group": "Drum 2",
+   "kind": "choice",
+   "min": 0,
+   "max": 13,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Snap",
+    "Offset",
+    "Click",
+    "Click 2",
+    "Tick",
+    "Kick",
+    "Rim",
+    "Drop",
+    "Hat",
+    "Clap",
+    "Kick 2",
+    "Snare",
+    "Tom",
+    "Sp2"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 205,
+   "enum": "PAR_TRANS3_WAVE",
+   "id": "trans3_wave",
+   "name": "Click Type",
+   "group": "Drum 3",
+   "kind": "choice",
+   "min": 0,
+   "max": 13,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Snap",
+    "Offset",
+    "Click",
+    "Click 2",
+    "Tick",
+    "Kick",
+    "Rim",
+    "Drop",
+    "Hat",
+    "Clap",
+    "Kick 2",
+    "Snare",
+    "Tom",
+    "Sp2"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 206,
+   "enum": "PAR_TRANS4_WAVE",
+   "id": "trans4_wave",
+   "name": "Click Type",
+   "group": "Snare",
+   "kind": "choice",
+   "min": 0,
+   "max": 13,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Snap",
+    "Offset",
+    "Click",
+    "Click 2",
+    "Tick",
+    "Kick",
+    "Rim",
+    "Drop",
+    "Hat",
+    "Clap",
+    "Kick 2",
+    "Snare",
+    "Tom",
+    "Sp2"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 207,
+   "enum": "PAR_TRANS5_WAVE",
+   "id": "trans5_wave",
+   "name": "Click Type",
+   "group": "Cymbal",
+   "kind": "choice",
+   "min": 0,
+   "max": 13,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Snap",
+    "Offset",
+    "Click",
+    "Click 2",
+    "Tick",
+    "Kick",
+    "Rim",
+    "Drop",
+    "Hat",
+    "Clap",
+    "Kick 2",
+    "Snare",
+    "Tom",
+    "Sp2"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 208,
+   "enum": "PAR_TRANS6_WAVE",
+   "id": "trans6_wave",
+   "name": "Click Type",
+   "group": "Hi-hat",
+   "kind": "choice",
+   "min": 0,
+   "max": 13,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Snap",
+    "Offset",
+    "Click",
+    "Click 2",
+    "Tick",
+    "Kick",
+    "Rim",
+    "Drop",
+    "Hat",
+    "Clap",
+    "Kick 2",
+    "Snare",
+    "Tom",
+    "Sp2"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 209,
+   "enum": "PAR_TRANS1_FREQ",
+   "id": "trans1_freq",
+   "name": "Click Pitch",
+   "group": "Drum 1",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 210,
+   "enum": "PAR_TRANS2_FREQ",
+   "id": "trans2_freq",
+   "name": "Click Pitch",
+   "group": "Drum 2",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 211,
+   "enum": "PAR_TRANS3_FREQ",
+   "id": "trans3_freq",
+   "name": "Click Pitch",
+   "group": "Drum 3",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 212,
+   "enum": "PAR_TRANS4_FREQ",
+   "id": "trans4_freq",
+   "name": "Click Pitch",
+   "group": "Snare",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 213,
+   "enum": "PAR_TRANS5_FREQ",
+   "id": "trans5_freq",
+   "name": "Click Pitch",
+   "group": "Cymbal",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 214,
+   "enum": "PAR_TRANS6_FREQ",
+   "id": "trans6_freq",
+   "name": "Click Pitch",
+   "group": "Hi-hat",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 215,
+   "enum": "PAR_AUDIO_OUT1",
+   "id": "audio_out1",
+   "name": "Audio Out",
+   "group": "Drum 1",
+   "kind": "choice",
+   "min": 0,
+   "max": 6,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Stereo 1",
+    "Stereo 2",
+    "Left 1",
+    "Right 1",
+    "Left 2",
+    "Right 2",
+    "FX bus"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 216,
+   "enum": "PAR_AUDIO_OUT2",
+   "id": "audio_out2",
+   "name": "Audio Out",
+   "group": "Drum 2",
+   "kind": "choice",
+   "min": 0,
+   "max": 6,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Stereo 1",
+    "Stereo 2",
+    "Left 1",
+    "Right 1",
+    "Left 2",
+    "Right 2",
+    "FX bus"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 217,
+   "enum": "PAR_AUDIO_OUT3",
+   "id": "audio_out3",
+   "name": "Audio Out",
+   "group": "Drum 3",
+   "kind": "choice",
+   "min": 0,
+   "max": 6,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Stereo 1",
+    "Stereo 2",
+    "Left 1",
+    "Right 1",
+    "Left 2",
+    "Right 2",
+    "FX bus"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 218,
+   "enum": "PAR_AUDIO_OUT4",
+   "id": "audio_out4",
+   "name": "Audio Out",
+   "group": "Snare",
+   "kind": "choice",
+   "min": 0,
+   "max": 6,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Stereo 1",
+    "Stereo 2",
+    "Left 1",
+    "Right 1",
+    "Left 2",
+    "Right 2",
+    "FX bus"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 219,
+   "enum": "PAR_AUDIO_OUT5",
+   "id": "audio_out5",
+   "name": "Audio Out",
+   "group": "Cymbal",
+   "kind": "choice",
+   "min": 0,
+   "max": 6,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Stereo 1",
+    "Stereo 2",
+    "Left 1",
+    "Right 1",
+    "Left 2",
+    "Right 2",
+    "FX bus"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 220,
+   "enum": "PAR_AUDIO_OUT6",
+   "id": "audio_out6",
+   "name": "Audio Out",
+   "group": "Hi-hat",
+   "kind": "choice",
+   "min": 0,
+   "max": 6,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Stereo 1",
+    "Stereo 2",
+    "Left 1",
+    "Right 1",
+    "Left 2",
+    "Right 2",
+    "FX bus"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 228,
+   "enum": "PAR_PWM_1",
+   "id": "pwm_1",
+   "name": "PWM",
+   "group": "Drum 1",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 229,
+   "enum": "PAR_PWM_2",
+   "id": "pwm_2",
+   "name": "PWM",
+   "group": "Drum 2",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 230,
+   "enum": "PAR_PWM_3",
+   "id": "pwm_3",
+   "name": "PWM",
+   "group": "Drum 3",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 231,
+   "enum": "PAR_PWM_4",
+   "id": "pwm_4",
+   "name": "PWM",
+   "group": "Snare",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 232,
+   "enum": "PAR_PWM_5",
+   "id": "pwm_5",
+   "name": "PWM",
+   "group": "Cymbal",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 233,
+   "enum": "PAR_PWM_6",
+   "id": "pwm_6",
+   "name": "PWM",
+   "group": "Hi-hat",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 234,
+   "enum": "PAR_FX_TYPE",
+   "id": "fx_type",
+   "name": "FX Type",
+   "group": "FX",
+   "kind": "choice",
+   "min": 0,
+   "max": 4,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Off",
+    "Drive",
+    "Ring mod",
+    "Compressor",
+    "Delay"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 235,
+   "enum": "PAR_FX_ROUTING",
+   "id": "fx_routing",
+   "name": "FX Routing",
+   "group": "FX",
+   "kind": "choice",
+   "min": 0,
+   "max": 5,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Stereo 1",
+    "Stereo 2",
+    "Left 1",
+    "Right 1",
+    "Left 2",
+    "Right 2"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 236,
+   "enum": "PAR_FX_DRY_WET",
+   "id": "fx_dry_wet",
+   "name": "FX Dry/Wet",
+   "group": "FX",
+   "kind": "int",
+   "min": 0,
+   "max": 100,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 237,
+   "enum": "PAR_FX_DIST_TYPE",
+   "id": "fx_dist_type",
+   "name": "FX Distortion",
+   "group": "FX",
+   "kind": "choice",
+   "min": 0,
+   "max": 2,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Tube",
+    "Fold",
+    "Clip (RAT-style)"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 238,
+   "enum": "PAR_FX_P1",
+   "id": "fx_p1",
+   "name": "FX P1",
+   "group": "FX",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 239,
+   "enum": "PAR_FX_P2",
+   "id": "fx_p2",
+   "name": "FX P2",
+   "group": "FX",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 240,
+   "enum": "PAR_FX_P3",
+   "id": "fx_p3",
+   "name": "FX P3",
+   "group": "FX",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 241,
+   "enum": "PAR_FX_P4",
+   "id": "fx_p4",
+   "name": "FX P4",
+   "group": "FX",
+   "kind": "int",
+   "min": 0,
+   "max": 127,
+   "default": 0,
+   "bipolar": false,
+   "choices": null,
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 242,
+   "enum": "PAR_FX_RATIO",
+   "id": "fx_ratio",
+   "name": "FX Ratio",
+   "group": "FX",
+   "kind": "choice",
+   "min": 0,
+   "max": 5,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "1:1",
+    "2:1",
+    "3:1",
+    "4:1",
+    "6:1",
+    "8:1"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 243,
+   "enum": "PAR_FX_WAVE",
+   "id": "fx_wave",
+   "name": "FX Wave",
+   "group": "FX",
+   "kind": "choice",
+   "min": 0,
+   "max": 5,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Sine",
+    "Triangle",
+    "Saw",
+    "Rectangle",
+    "Noise",
+    "PWM"
+   ],
+   "tkind": null,
+   "tindex": null
+  },
+  {
+   "par": 245,
+   "enum": "PAR_FX_DELAY_TYPE",
+   "id": "fx_delay_type",
+   "name": "FX Delay Type",
+   "group": "FX",
+   "kind": "choice",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "bipolar": false,
+   "choices": [
+    "Delay",
+    "Ping-pong"
+   ],
+   "tkind": null,
+   "tindex": null
+  }
+ ],
+ "targets": [
+  {
+   "par": 0,
+   "label": "None"
+  },
+  {
+   "par": 114,
+   "label": "Global: Sample Rate Reducer (all)"
+  },
+  {
+   "par": 8,
+   "label": "Drum 1: Coarse"
+  },
+  {
+   "par": 9,
+   "label": "Drum 1: Fine"
+  },
+  {
+   "par": 1,
+   "label": "Drum 1: Waveform"
+  },
+  {
+   "par": 228,
+   "label": "Drum 1: PWM"
+  },
+  {
+   "par": 49,
+   "label": "Drum 1: Attack"
+  },
+  {
+   "par": 50,
+   "label": "Drum 1: Decay"
+  },
+  {
+   "par": 62,
+   "label": "Drum 1: Amp Slope"
+  },
+  {
+   "par": 70,
+   "label": "Drum 1: Pitch Decay"
+  },
+  {
+   "par": 78,
+   "label": "Drum 1: Pitch Slope"
+  },
+  {
+   "par": 74,
+   "label": "Drum 1: Pitch Mod"
+  },
+  {
+   "par": 149,
+   "label": "Drum 1: Velocity Target"
+  },
+  {
+   "par": 143,
+   "label": "Drum 1: Velocity Amount"
+  },
+  {
+   "par": 137,
+   "label": "Drum 1: Velocity > Volume"
+  },
+  {
+   "par": 82,
+   "label": "Drum 1: FM Amount"
+  },
+  {
+   "par": 83,
+   "label": "Drum 1: FM Freq"
+  },
+  {
+   "par": 20,
+   "label": "Drum 1: FM Waveform"
+  },
+  {
+   "par": 134,
+   "label": "Drum 1: FM / Mix Mode"
+  },
+  {
+   "par": 203,
+   "label": "Drum 1: Click Type"
+  },
+  {
+   "par": 197,
+   "label": "Drum 1: Click Level"
+  },
+  {
+   "par": 209,
+   "label": "Drum 1: Click Pitch"
+  },
+  {
+   "par": 37,
+   "label": "Drum 1: Filter Freq"
+  },
+  {
+   "par": 43,
+   "label": "Drum 1: Resonance"
+  },
+  {
+   "par": 191,
+   "label": "Drum 1: Filter Type"
+  },
+  {
+   "par": 128,
+   "label": "Drum 1: Filter Drive"
+  },
+  {
+   "par": 115,
+   "label": "Drum 1: LFO Rate"
+  },
+  {
+   "par": 179,
+   "label": "Drum 1: LFO Sync"
+  },
+  {
+   "par": 121,
+   "label": "Drum 1: LFO Amount"
+  },
+  {
+   "par": 155,
+   "label": "Drum 1: LFO Wave"
+  },
+  {
+   "par": 173,
+   "label": "Drum 1: LFO Retrigger"
+  },
+  {
+   "par": 185,
+   "label": "Drum 1: LFO Phase"
+  },
+  {
+   "par": 88,
+   "label": "Drum 1: Volume"
+  },
+  {
+   "par": 94,
+   "label": "Drum 1: Pan"
+  },
+  {
+   "par": 108,
+   "label": "Drum 1: Sample Rate Reducer"
+  },
+  {
+   "par": 102,
+   "label": "Drum 1: Drive"
+  },
+  {
+   "par": 238,
+   "label": "FX: FX P1"
+  },
+  {
+   "par": 239,
+   "label": "FX: FX P2"
+  },
+  {
+   "par": 240,
+   "label": "FX: FX P3"
+  },
+  {
+   "par": 241,
+   "label": "FX: FX P4"
+  },
+  {
+   "par": 10,
+   "label": "Drum 2: Coarse"
+  },
+  {
+   "par": 11,
+   "label": "Drum 2: Fine"
+  },
+  {
+   "par": 2,
+   "label": "Drum 2: Waveform"
+  },
+  {
+   "par": 229,
+   "label": "Drum 2: PWM"
+  },
+  {
+   "par": 51,
+   "label": "Drum 2: Attack"
+  },
+  {
+   "par": 52,
+   "label": "Drum 2: Decay"
+  },
+  {
+   "par": 63,
+   "label": "Drum 2: Amp Slope"
+  },
+  {
+   "par": 71,
+   "label": "Drum 2: Pitch Decay"
+  },
+  {
+   "par": 79,
+   "label": "Drum 2: Pitch Slope"
+  },
+  {
+   "par": 75,
+   "label": "Drum 2: Pitch Mod"
+  },
+  {
+   "par": 150,
+   "label": "Drum 2: Velocity Target"
+  },
+  {
+   "par": 144,
+   "label": "Drum 2: Velocity Amount"
+  },
+  {
+   "par": 138,
+   "label": "Drum 2: Velocity > Volume"
+  },
+  {
+   "par": 84,
+   "label": "Drum 2: FM Amount"
+  },
+  {
+   "par": 85,
+   "label": "Drum 2: FM Freq"
+  },
+  {
+   "par": 21,
+   "label": "Drum 2: FM Waveform"
+  },
+  {
+   "par": 135,
+   "label": "Drum 2: FM / Mix Mode"
+  },
+  {
+   "par": 204,
+   "label": "Drum 2: Click Type"
+  },
+  {
+   "par": 198,
+   "label": "Drum 2: Click Level"
+  },
+  {
+   "par": 210,
+   "label": "Drum 2: Click Pitch"
+  },
+  {
+   "par": 38,
+   "label": "Drum 2: Filter Freq"
+  },
+  {
+   "par": 44,
+   "label": "Drum 2: Resonance"
+  },
+  {
+   "par": 192,
+   "label": "Drum 2: Filter Type"
+  },
+  {
+   "par": 129,
+   "label": "Drum 2: Filter Drive"
+  },
+  {
+   "par": 116,
+   "label": "Drum 2: LFO Rate"
+  },
+  {
+   "par": 180,
+   "label": "Drum 2: LFO Sync"
+  },
+  {
+   "par": 122,
+   "label": "Drum 2: LFO Amount"
+  },
+  {
+   "par": 156,
+   "label": "Drum 2: LFO Wave"
+  },
+  {
+   "par": 174,
+   "label": "Drum 2: LFO Retrigger"
+  },
+  {
+   "par": 186,
+   "label": "Drum 2: LFO Phase"
+  },
+  {
+   "par": 89,
+   "label": "Drum 2: Volume"
+  },
+  {
+   "par": 95,
+   "label": "Drum 2: Pan"
+  },
+  {
+   "par": 109,
+   "label": "Drum 2: Sample Rate Reducer"
+  },
+  {
+   "par": 103,
+   "label": "Drum 2: Drive"
+  },
+  {
+   "par": 238,
+   "label": "FX: FX P1"
+  },
+  {
+   "par": 239,
+   "label": "FX: FX P2"
+  },
+  {
+   "par": 240,
+   "label": "FX: FX P3"
+  },
+  {
+   "par": 241,
+   "label": "FX: FX P4"
+  },
+  {
+   "par": 12,
+   "label": "Drum 3: Coarse"
+  },
+  {
+   "par": 13,
+   "label": "Drum 3: Fine"
+  },
+  {
+   "par": 3,
+   "label": "Drum 3: Waveform"
+  },
+  {
+   "par": 230,
+   "label": "Drum 3: PWM"
+  },
+  {
+   "par": 53,
+   "label": "Drum 3: Attack"
+  },
+  {
+   "par": 54,
+   "label": "Drum 3: Decay"
+  },
+  {
+   "par": 64,
+   "label": "Drum 3: Amp Slope"
+  },
+  {
+   "par": 72,
+   "label": "Drum 3: Pitch Decay"
+  },
+  {
+   "par": 80,
+   "label": "Drum 3: Pitch Slope"
+  },
+  {
+   "par": 76,
+   "label": "Drum 3: Pitch Mod"
+  },
+  {
+   "par": 151,
+   "label": "Drum 3: Velocity Target"
+  },
+  {
+   "par": 145,
+   "label": "Drum 3: Velocity Amount"
+  },
+  {
+   "par": 139,
+   "label": "Drum 3: Velocity > Volume"
+  },
+  {
+   "par": 86,
+   "label": "Drum 3: FM Amount"
+  },
+  {
+   "par": 87,
+   "label": "Drum 3: FM Freq"
+  },
+  {
+   "par": 22,
+   "label": "Drum 3: FM Waveform"
+  },
+  {
+   "par": 136,
+   "label": "Drum 3: FM / Mix Mode"
+  },
+  {
+   "par": 205,
+   "label": "Drum 3: Click Type"
+  },
+  {
+   "par": 199,
+   "label": "Drum 3: Click Level"
+  },
+  {
+   "par": 211,
+   "label": "Drum 3: Click Pitch"
+  },
+  {
+   "par": 39,
+   "label": "Drum 3: Filter Freq"
+  },
+  {
+   "par": 45,
+   "label": "Drum 3: Resonance"
+  },
+  {
+   "par": 193,
+   "label": "Drum 3: Filter Type"
+  },
+  {
+   "par": 130,
+   "label": "Drum 3: Filter Drive"
+  },
+  {
+   "par": 117,
+   "label": "Drum 3: LFO Rate"
+  },
+  {
+   "par": 181,
+   "label": "Drum 3: LFO Sync"
+  },
+  {
+   "par": 123,
+   "label": "Drum 3: LFO Amount"
+  },
+  {
+   "par": 157,
+   "label": "Drum 3: LFO Wave"
+  },
+  {
+   "par": 175,
+   "label": "Drum 3: LFO Retrigger"
+  },
+  {
+   "par": 187,
+   "label": "Drum 3: LFO Phase"
+  },
+  {
+   "par": 90,
+   "label": "Drum 3: Volume"
+  },
+  {
+   "par": 96,
+   "label": "Drum 3: Pan"
+  },
+  {
+   "par": 110,
+   "label": "Drum 3: Sample Rate Reducer"
+  },
+  {
+   "par": 104,
+   "label": "Drum 3: Drive"
+  },
+  {
+   "par": 238,
+   "label": "FX: FX P1"
+  },
+  {
+   "par": 239,
+   "label": "FX: FX P2"
+  },
+  {
+   "par": 240,
+   "label": "FX: FX P3"
+  },
+  {
+   "par": 241,
+   "label": "FX: FX P4"
+  },
+  {
+   "par": 14,
+   "label": "Snare: Coarse"
+  },
+  {
+   "par": 15,
+   "label": "Snare: Fine"
+  },
+  {
+   "par": 27,
+   "label": "Snare: Noise Freq"
+  },
+  {
+   "par": 28,
+   "label": "Snare: Noise / Osc Mix"
+  },
+  {
+   "par": 4,
+   "label": "Snare: Waveform"
+  },
+  {
+   "par": 231,
+   "label": "Snare: PWM"
+  },
+  {
+   "par": 55,
+   "label": "Snare: Attack"
+  },
+  {
+   "par": 56,
+   "label": "Snare: Decay"
+  },
+  {
+   "par": 68,
+   "label": "Snare: Repeat Count"
+  },
+  {
+   "par": 65,
+   "label": "Snare: Amp Slope"
+  },
+  {
+   "par": 73,
+   "label": "Snare: Pitch Decay"
+  },
+  {
+   "par": 81,
+   "label": "Snare: Pitch Slope"
+  },
+  {
+   "par": 77,
+   "label": "Snare: Pitch Mod"
+  },
+  {
+   "par": 152,
+   "label": "Snare: Velocity Target"
+  },
+  {
+   "par": 146,
+   "label": "Snare: Velocity Amount"
+  },
+  {
+   "par": 140,
+   "label": "Snare: Velocity > Volume"
+  },
+  {
+   "par": 206,
+   "label": "Snare: Click Type"
+  },
+  {
+   "par": 200,
+   "label": "Snare: Click Level"
+  },
+  {
+   "par": 212,
+   "label": "Snare: Click Pitch"
+  },
+  {
+   "par": 40,
+   "label": "Snare: Filter Freq"
+  },
+  {
+   "par": 46,
+   "label": "Snare: Resonance"
+  },
+  {
+   "par": 194,
+   "label": "Snare: Filter Type"
+  },
+  {
+   "par": 131,
+   "label": "Snare: Filter Drive"
+  },
+  {
+   "par": 118,
+   "label": "Snare: LFO Rate"
+  },
+  {
+   "par": 182,
+   "label": "Snare: LFO Sync"
+  },
+  {
+   "par": 124,
+   "label": "Snare: LFO Amount"
+  },
+  {
+   "par": 158,
+   "label": "Snare: LFO Wave"
+  },
+  {
+   "par": 176,
+   "label": "Snare: LFO Retrigger"
+  },
+  {
+   "par": 188,
+   "label": "Snare: LFO Phase"
+  },
+  {
+   "par": 91,
+   "label": "Snare: Volume"
+  },
+  {
+   "par": 99,
+   "label": "Snare: Pan"
+  },
+  {
+   "par": 111,
+   "label": "Snare: Sample Rate Reducer"
+  },
+  {
+   "par": 105,
+   "label": "Snare: Drive"
+  },
+  {
+   "par": 238,
+   "label": "FX: FX P1"
+  },
+  {
+   "par": 239,
+   "label": "FX: FX P2"
+  },
+  {
+   "par": 240,
+   "label": "FX: FX P3"
+  },
+  {
+   "par": 241,
+   "label": "FX: FX P4"
+  },
+  {
+   "par": 16,
+   "label": "Cymbal: Coarse"
+  },
+  {
+   "par": 17,
+   "label": "Cymbal: Fine"
+  },
+  {
+   "par": 6,
+   "label": "Cymbal: Wave 1"
+  },
+  {
+   "par": 232,
+   "label": "Cymbal: PWM"
+  },
+  {
+   "par": 57,
+   "label": "Cymbal: Attack"
+  },
+  {
+   "par": 58,
+   "label": "Cymbal: Decay"
+  },
+  {
+   "par": 69,
+   "label": "Cymbal: Repeat Count"
+  },
+  {
+   "par": 66,
+   "label": "Cymbal: Amp Slope"
+  },
+  {
+   "par": 153,
+   "label": "Cymbal: Velocity Target"
+  },
+  {
+   "par": 147,
+   "label": "Cymbal: Velocity Amount"
+  },
+  {
+   "par": 141,
+   "label": "Cymbal: Velocity > Volume"
+  },
+  {
+   "par": 29,
+   "label": "Cymbal: Mod Osc 1 Freq"
+  },
+  {
+   "par": 30,
+   "label": "Cymbal: Mod Osc 2 Freq"
+  },
+  {
+   "par": 31,
+   "label": "Cymbal: Mod Osc 1 Gain"
+  },
+  {
+   "par": 32,
+   "label": "Cymbal: Mod Osc 2 Gain"
+  },
+  {
+   "par": 23,
+   "label": "Cymbal: Wave 2"
+  },
+  {
+   "par": 24,
+   "label": "Cymbal: Wave 3"
+  },
+  {
+   "par": 207,
+   "label": "Cymbal: Click Type"
+  },
+  {
+   "par": 201,
+   "label": "Cymbal: Click Level"
+  },
+  {
+   "par": 213,
+   "label": "Cymbal: Click Pitch"
+  },
+  {
+   "par": 41,
+   "label": "Cymbal: Filter Freq"
+  },
+  {
+   "par": 47,
+   "label": "Cymbal: Resonance"
+  },
+  {
+   "par": 195,
+   "label": "Cymbal: Filter Type"
+  },
+  {
+   "par": 132,
+   "label": "Cymbal: Filter Drive"
+  },
+  {
+   "par": 119,
+   "label": "Cymbal: LFO Rate"
+  },
+  {
+   "par": 183,
+   "label": "Cymbal: LFO Sync"
+  },
+  {
+   "par": 125,
+   "label": "Cymbal: LFO Amount"
+  },
+  {
+   "par": 159,
+   "label": "Cymbal: LFO Wave"
+  },
+  {
+   "par": 177,
+   "label": "Cymbal: LFO Retrigger"
+  },
+  {
+   "par": 189,
+   "label": "Cymbal: LFO Phase"
+  },
+  {
+   "par": 92,
+   "label": "Cymbal: Volume"
+  },
+  {
+   "par": 100,
+   "label": "Cymbal: Pan"
+  },
+  {
+   "par": 112,
+   "label": "Cymbal: Sample Rate Reducer"
+  },
+  {
+   "par": 106,
+   "label": "Cymbal: Drive"
+  },
+  {
+   "par": 238,
+   "label": "FX: FX P1"
+  },
+  {
+   "par": 239,
+   "label": "FX: FX P2"
+  },
+  {
+   "par": 240,
+   "label": "FX: FX P3"
+  },
+  {
+   "par": 241,
+   "label": "FX: FX P4"
+  },
+  {
+   "par": 18,
+   "label": "Hi-hat: Coarse"
+  },
+  {
+   "par": 19,
+   "label": "Hi-hat: Fine"
+  },
+  {
+   "par": 7,
+   "label": "Hi-hat: Wave 1"
+  },
+  {
+   "par": 233,
+   "label": "Hi-hat: PWM"
+  },
+  {
+   "par": 59,
+   "label": "Hi-hat: Attack"
+  },
+  {
+   "par": 60,
+   "label": "Hi-hat: Decay (closed)"
+  },
+  {
+   "par": 61,
+   "label": "Hi-hat: Decay (open)"
+  },
+  {
+   "par": 67,
+   "label": "Hi-hat: Amp Slope"
+  },
+  {
+   "par": 154,
+   "label": "Hi-hat: Velocity Target"
+  },
+  {
+   "par": 148,
+   "label": "Hi-hat: Velocity Amount"
+  },
+  {
+   "par": 142,
+   "label": "Hi-hat: Velocity > Volume"
+  },
+  {
+   "par": 33,
+   "label": "Hi-hat: Mod Osc 1 Freq"
+  },
+  {
+   "par": 34,
+   "label": "Hi-hat: Mod Osc 2 Freq"
+  },
+  {
+   "par": 35,
+   "label": "Hi-hat: Mod Osc 1 Gain"
+  },
+  {
+   "par": 36,
+   "label": "Hi-hat: Mod Osc 2 Gain"
+  },
+  {
+   "par": 25,
+   "label": "Hi-hat: Wave 2"
+  },
+  {
+   "par": 26,
+   "label": "Hi-hat: Wave 3"
+  },
+  {
+   "par": 208,
+   "label": "Hi-hat: Click Type"
+  },
+  {
+   "par": 202,
+   "label": "Hi-hat: Click Level"
+  },
+  {
+   "par": 214,
+   "label": "Hi-hat: Click Pitch"
+  },
+  {
+   "par": 42,
+   "label": "Hi-hat: Filter Freq"
+  },
+  {
+   "par": 48,
+   "label": "Hi-hat: Resonance"
+  },
+  {
+   "par": 196,
+   "label": "Hi-hat: Filter Type"
+  },
+  {
+   "par": 133,
+   "label": "Hi-hat: Filter Drive"
+  },
+  {
+   "par": 120,
+   "label": "Hi-hat: LFO Rate"
+  },
+  {
+   "par": 184,
+   "label": "Hi-hat: LFO Sync"
+  },
+  {
+   "par": 126,
+   "label": "Hi-hat: LFO Amount"
+  },
+  {
+   "par": 160,
+   "label": "Hi-hat: LFO Wave"
+  },
+  {
+   "par": 178,
+   "label": "Hi-hat: LFO Retrigger"
+  },
+  {
+   "par": 190,
+   "label": "Hi-hat: LFO Phase"
+  },
+  {
+   "par": 93,
+   "label": "Hi-hat: Volume"
+  },
+  {
+   "par": 101,
+   "label": "Hi-hat: Pan"
+  },
+  {
+   "par": 113,
+   "label": "Hi-hat: Sample Rate Reducer"
+  },
+  {
+   "par": 107,
+   "label": "Hi-hat: Drive"
+  },
+  {
+   "par": 238,
+   "label": "FX: FX P1"
+  },
+  {
+   "par": 239,
+   "label": "FX: FX P2"
+  },
+  {
+   "par": 240,
+   "label": "FX: FX P3"
+  },
+  {
+   "par": 241,
+   "label": "FX: FX P4"
+  }
+ ]
+}

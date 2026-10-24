@@ -1,0 +1,78 @@
+// Data model shared with the plugin (see Source/Plugin/SeqBridge.*). Mirrors LXR's pattern layout:
+// 7 tracks x 64 steps; per step volume/probability/note, flam (0..5) and shift index (0..14, 7 = none).
+export const NUM_TRACKS = 7
+export const NUM_STEPS = 64
+export const SHIFT_NONE = 7
+
+export interface TrackInfo { id: number; short: string; tag: string; name: string; role: string; algo: string; note: number }
+export const TRACKS: TrackInfo[] = [
+  { id: 0, short: 'BD 1', tag: 'BD1',   name: 'DRUM 1',     role: 'FM DRUM',   algo: '2-OP FM DRUM + TRANSIENT CLICK', note: 36 },
+  { id: 1, short: 'DRUM 2', tag: 'DR2', name: 'DRUM 2',     role: 'FM DRUM',   algo: '2-OP FM DRUM + TRANSIENT CLICK', note: 41 },
+  { id: 2, short: 'DRUM 3', tag: 'DR3', name: 'DRUM 3',     role: 'FM DRUM',   algo: '2-OP FM DRUM + TRANSIENT CLICK', note: 43 },
+  { id: 3, short: 'SNARE', tag: 'SNR', name: 'SNARE',      role: 'NOISE+OSC', algo: 'OSCILLATOR + NOISE, SNAP EG',    note: 38 },
+  { id: 4, short: 'CYMBAL', tag: 'CYM', name: 'CYMBAL',     role: 'CLANG',     algo: '3-OSC FM, REPEAT ENVELOPE',      note: 49 },
+  { id: 5, short: 'CH', tag: 'CH',  name: 'CLOSED HAT', role: 'HAT',       algo: '3-OSC METALLIC, SHORT DECAY',    note: 42 },
+  { id: 6, short: 'OH', tag: 'OH',  name: 'OPEN HAT',   role: 'HAT',       algo: '3-OSC METALLIC, LONG DECAY',     note: 46 },
+]
+
+export interface TrackPattern {
+  on: boolean[]; vol: number[]; prob: number[]; note: number[]; flam: number[]; shift: number[]
+  length: number            // 1..64 steps
+  muted: boolean
+}
+export interface Pattern { tracks: TrackPattern[]; shuffle: number }
+
+export const FLAM_LABELS = ['OFF', 'x2', 'x3', 'x4', 'x6', 'x8']
+export const shiftOf = (index: number) => index - SHIFT_NONE
+
+export function emptyTrack(): TrackPattern {
+  return {
+    on: Array(NUM_STEPS).fill(false), vol: Array(NUM_STEPS).fill(100), prob: Array(NUM_STEPS).fill(100),
+    note: Array(NUM_STEPS).fill(60), flam: Array(NUM_STEPS).fill(0), shift: Array(NUM_STEPS).fill(SHIFT_NONE),
+    length: 16, muted: false,
+  }
+}
+export const emptyPattern = (): Pattern => ({ tracks: Array.from({ length: NUM_TRACKS }, emptyTrack), shuffle: 0 })
+
+// ---- commands: applied identically by the UI (optimistic) and by the plugin -----------------------------------------
+export type Cmd =
+  | ['step', track: number, idx: number, on: number]
+  | ['stepVol', track: number, idx: number, v: number]
+  | ['stepProb', track: number, idx: number, v: number]
+  | ['stepNote', track: number, idx: number, v: number]
+  | ['stepFlam', track: number, idx: number, v: number]
+  | ['stepShift', track: number, idx: number, v: number]
+  | ['trackLength', track: number, len: number]
+  | ['clearTrack', track: number]
+  | ['copyTrack', src: number, dst: number]
+  | ['mute', track: number, on: number]
+  | ['shuffle', v: number]
+
+export function applyCmd(p: Pattern, c: Cmd): Pattern {
+  const q: Pattern = { shuffle: p.shuffle, tracks: p.tracks.slice() }
+  const edit = (t: number, f: (x: TrackPattern) => void) => {
+    const x = { ...q.tracks[t], on: q.tracks[t].on.slice(), vol: q.tracks[t].vol.slice(), prob: q.tracks[t].prob.slice(),
+      note: q.tracks[t].note.slice(), flam: q.tracks[t].flam.slice(), shift: q.tracks[t].shift.slice() }
+    f(x); q.tracks[t] = x
+  }
+  switch (c[0]) {
+    case 'step': edit(c[1], x => {
+      x.on[c[2]] = !!c[3]
+      if (c[3]) { x.vol[c[2]] = x.vol[c[2]] || 100; if (!x.prob[c[2]]) x.prob[c[2]] = 100 }
+    }); break
+    case 'stepVol': edit(c[1], x => { x.vol[c[2]] = c[3] }); break
+    case 'stepProb': edit(c[1], x => { x.prob[c[2]] = c[3] }); break
+    case 'stepNote': edit(c[1], x => { x.note[c[2]] = c[3] }); break
+    case 'stepFlam': edit(c[1], x => { x.flam[c[2]] = c[3] }); break
+    case 'stepShift': edit(c[1], x => { x.shift[c[2]] = c[3] }); break
+    case 'trackLength': edit(c[1], x => { x.length = c[2] }); break
+    case 'clearTrack': q.tracks[c[1]] = { ...emptyTrack(), length: q.tracks[c[1]].length, muted: q.tracks[c[1]].muted }; break
+    case 'copyTrack': q.tracks[c[2]] = { ...q.tracks[c[1]], muted: q.tracks[c[2]].muted }; break
+    case 'mute': edit(c[1], x => { x.muted = !!c[2] }); break
+    case 'shuffle': q.shuffle = c[1]; break
+  }
+  return q
+}
+
+export interface Playhead { running: boolean; steps: number[]; bpm: number; peakL?: number; peakR?: number }
+export interface PluginState { pattern: Pattern; bpm: number; running: boolean }

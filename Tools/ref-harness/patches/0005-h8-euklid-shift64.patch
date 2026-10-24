@@ -1,0 +1,11 @@
+--- a/Src/Soundengine/Sequencer/EuklidGenerator.c	2026-10-24 15:53:15
++++ b/Src/Soundengine/Sequencer/EuklidGenerator.c	2026-10-24 15:53:15
+@@ -215,7 +215,7 @@
+ 
+ 	euklid_patternBuffer.quadword = (euklid_patternBuffer.quadword<<amount) | (euklid_patternBuffer.quadword>>(length-amount));
+ 
+-	euklid_patternBuffer.quadword &= ~(0xffffffffffffffff<<length); //Remove "leftovers"
++	if(length < 64) euklid_patternBuffer.quadword &= ~(0xffffffffffffffffULL<<length); //Remove "leftovers" (HOST-HARNESS H8: a shift by 64 is undefined; ARM EABI yields 0 here = keep all bits)
+ }
+ //-----------------------------------------------------
+ void euklid_transferPattern(uint8_t trackNr, uint8_t patternNr)

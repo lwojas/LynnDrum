@@ -1,0 +1,15 @@
+1 sub=0 cc b0 38 10
+1 sub=0 cc b0 63 33
+1 sub=0 trig 0 60 100
+4001 sub=0 cc b0 38 127
+4001 sub=0 cc b0 63 46
+4001 sub=0 cc b0 63 99
+4001 sub=0 trig 0 60 100
+8001 sub=0 cc b0 63 46
+8001 sub=0 cc b0 38 10
+8001 sub=0 cc b0 63 33
+8001 sub=0 trig 0 60 100
+12001 sub=0 cc b0 38 127
+12001 sub=0 cc b0 63 46
+12001 sub=0 cc b0 63 99
+12001 sub=0 trig 0 60 100

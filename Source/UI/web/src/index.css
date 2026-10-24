@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root { height: 100%; }
+body { background: #090b10; font-family: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; }
+button { cursor: pointer; }
+.fader-track { background: linear-gradient(180deg, #07080c 0%, #10131a 100%); box-shadow: inset 0 1px 3px rgba(0,0,0,.9), 0 1px 0 rgba(255,255,255,.05); }
+.fader-thumb { background: linear-gradient(180deg, #32384a 0%, #1c2130 50%, #121622 100%); box-shadow: 0 2px 5px rgba(0,0,0,.8), inset 0 1px 1px rgba(255,255,255,.25), inset 0 -1px 1px rgba(0,0,0,.8); }
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: #090b10; }
+::-webkit-scrollbar-thumb { background: #242a3a; border-radius: 4px; }

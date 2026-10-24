@@ -1,0 +1,20 @@
+0 mainsteps pat=0 trk=0 4891 1224 0000 0000 len=32
+1 sub=0 trig 0 60 127
+2001 sub=0 trig 0 60 127
+3501 sub=0 trig 0 60 127
+5501 sub=0 trig 0 60 127
+7001 sub=0 trig 0 60 127
+9001 sub=0 trig 0 60 127
+10501 sub=0 trig 0 60 127
+12501 sub=0 trig 0 60 127
+14001 sub=0 trig 0 60 127
+16001 sub=0 trig 0 60 127
+18001 sub=0 trig 0 60 127
+19501 sub=0 trig 0 60 127
+21501 sub=0 trig 0 60 127
+23001 sub=0 trig 0 60 127
+25001 sub=0 trig 0 60 127
+26501 sub=0 trig 0 60 127
+28501 sub=0 trig 0 60 127
+30001 sub=0 trig 0 60 127
+32001 sub=0 trig 0 60 127

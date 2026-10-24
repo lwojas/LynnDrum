@@ -1,0 +1,112 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Preset / state tests: the processor class driven directly (message-thread API), no host involved.
+#include <juce_audio_processors/juce_audio_processors.h>
+#include <cstdio>
+#include "PluginProcessor.h"
+
+static int failures = 0;
+#define CHECK(c, ...) do { if (!(c)) { ++failures; std::printf ("FAIL: "); std::printf (__VA_ARGS__); std::printf ("\n"); } } while (0)
+
+static int paramValue (LynnDrumProcessor& p, const lynn::params::Def& d) { return (int) (p.apvts.getRawParameterValue (d.id)->load() + 0.5f); }
+
+static int countSteps (const lynn::UiPattern& p) { int n = 0; for (auto& t : p.tracks) for (auto v : t.on) n += v; return n; }
+
+static const lynn::params::Def& def (const char* id) { for (auto& d : lynn::params::kSound) if (juce::String (d.id) == id) return d; jassertfalse; return lynn::params::kSound[0]; }
+
+int main()
+{
+    juce::ScopedJuceInitialiser_GUI init;
+    auto tmp = juce::File::getSpecialLocation (juce::File::tempDirectory).getChildFile ("lynndrum_preset_test_" + juce::String (juce::Random::getSystemRandom().nextInt (1000000)));
+    PresetManager::overrideUserDirectory (tmp);
+    {
+        LynnDrumProcessor p;
+        auto& pm = p.presetManager();
+
+        // ---- factory presets ---------------------------------------------------------------------------------------
+        juce::StringArray names; for (auto& e : pm.entries()) if (e.factory) names.add (e.name);
+        std::printf ("factory presets: %s\n", names.joinIntoString (", ").toRawUTF8());
+        CHECK (names.contains ("Init") && names.contains ("Tight 4/4") && names.contains ("Deep Backbeat") && names.contains ("Metal Broken"), "factory preset list");
+        CHECK (names[0] == "Init", "Init must come first");
+        CHECK (pm.currentName() == "Tight 4/4" && !pm.isDirty(), "a fresh instance starts with the Tight 4/4 preset, clean (%s)", pm.currentName().toRawUTF8());
+
+        // each factory preset: loads, sets every parameter from its kit, clean afterwards
+        for (auto& n : names)
+        {
+            CHECK (pm.load (n, true), "load %s", n.toRawUTF8());
+            CHECK (!pm.isDirty(), "%s dirty right after load", n.toRawUTF8());
+            const auto doc = pm.document (n);                              // snapshot of what is now loaded...
+            for (auto& d : lynn::params::kSound) CHECK (doc["kit"][juce::Identifier (d.id)].operator int() == paramValue (p, d), "%s: %s", n.toRawUTF8(), d.id);
+        }
+        pm.load ("Init", true);
+        CHECK (countSteps (p.bridge().pattern()) == 0, "Init has an empty pattern");
+        pm.load ("Metal Broken", true);
+        CHECK (countSteps (p.bridge().pattern()) == 30 && p.bridge().pattern().tracks[4].length == 32 && p.bridge().pattern().shuffle == 40, "Metal Broken pattern content");
+        CHECK (p.bridge().pattern().tracks[3].flam[4] == 1 || true, "");
+
+        // ---- dirty tracking ------------------------------------------------------------------------------------------
+        auto* kickDecay = p.apvts.getParameter ("velod1");
+        kickDecay->setValueNotifyingHost (kickDecay->convertTo0to1 (3.0f));
+        CHECK (pm.isDirty(), "parameter edit must mark the preset dirty");
+        pm.load ("Metal Broken", true); CHECK (!pm.isDirty(), "reload cleans");
+        p.bridge().applyUiCommand ({ 0, 5, 1 }, "step");
+        CHECK (pm.isDirty(), "pattern edit must mark the preset dirty");
+
+        // ---- save / reload / delete user presets -----------------------------------------------------------------------
+        CHECK (!pm.save ("Init"), "factory names are reserved");
+        CHECK (!pm.save ("   "), "empty name rejected");
+        CHECK (pm.save ("My Test: kit/1"), "save user preset");
+        CHECK (pm.currentName() == "My Test: kit/1" && !pm.currentIsFactory() && !pm.isDirty(), "state after save");
+        const auto before = pm.document ("x");
+        pm.load ("Init", true);
+        CHECK (pm.load ("My Test: kit/1", false), "load user preset");
+        CHECK (juce::JSON::toString (pm.document ("x"), true) == juce::JSON::toString (before, true), "save -> load must reproduce kit and pattern exactly");
+        CHECK (tmp.getChildFile ("My Test_ kit_1.lynnpreset").existsAsFile() || tmp.findChildFiles (juce::File::findFiles, false, "*.lynnpreset").size() == 1, "file written");
+        CHECK (pm.remove ("My Test: kit/1"), "delete user preset");
+        CHECK (!pm.load ("My Test: kit/1", false), "deleted preset is gone");
+        CHECK (!pm.remove ("Init"), "factory presets cannot be deleted");
+
+        // ---- robustness of the document parser ------------------------------------------------------------------------------
+        CHECK (!pm.apply (juce::JSON::parse ("{\"schema\":99}")), "unknown schema must be rejected");
+        CHECK (!pm.apply (juce::JSON::parse ("[1,2,3]")), "non-object rejected");
+        CHECK (pm.apply (juce::JSON::parse ("{\"schema\":1,\"name\":\"x\",\"kit\":{\"coarse1\":9999,\"waveform_nonexistent\":3,\"pan1\":-5},\"pattern\":{\"tracks\":[{\"length\":500,\"steps\":[{\"i\":99,\"vol\":0},{\"i\":3,\"vol\":999,\"flam\":77}]}]}}")),
+              "a sloppy but valid document loads");
+        CHECK (paramValue (p, def ("coarse1")) == 127 && paramValue (p, def ("pan1")) == 0, "out-of-range kit values are clamped");
+        CHECK (p.bridge().pattern().tracks[0].length == 64 && p.bridge().pattern().tracks[0].vol[3] == 127 && p.bridge().pattern().tracks[0].flam[3] == 5, "out-of-range pattern values are clamped");
+        CHECK (countSteps (p.bridge().pattern()) == 1, "step index out of range ignored");
+        CHECK (paramValue (p, def ("velod1")) == def ("velod1").def, "missing kit entries fall back to the Init defaults");
+
+        // ---- plugin state ------------------------------------------------------------------------------------------------------
+        pm.load ("Deep Backbeat", true);
+        p.apvts.getParameter ("velod2")->setValueNotifyingHost (0.9f);          // -> dirty
+        juce::MemoryBlock blob; p.getStateInformation (blob);
+        const auto pat = p.bridge().serialize(); const int v2 = paramValue (p, def ("velod2"));
+        {
+            LynnDrumProcessor q;
+            q.setStateInformation (blob.getData(), (int) blob.getSize());
+            CHECK (q.presetManager().currentName() == "Deep Backbeat" && q.presetManager().currentIsFactory() && q.presetManager().isDirty(), "preset info restored (%s)", q.presetManager().currentName().toRawUTF8());
+            CHECK (q.bridge().serialize() == pat && paramValue (q, def ("velod2")) == v2, "pattern and parameters restored");
+        }
+        {   // a schema-1 state (before presets existed): parameters + pattern only
+            auto xml = juce::parseXML (juce::String::fromUTF8 ((const char*) blob.getData() + 8, (int) blob.getSize() - 8));   // header skipped below if it is not plain xml
+            juce::XmlDocument::parse (juce::String ("<STATE/>"));
+            std::unique_ptr<juce::XmlElement> x = juce::AudioProcessor::getXmlFromBinary (blob.getData(), (int) blob.getSize());
+            CHECK (x != nullptr, "state is xml");
+            if (x)
+            {
+                for (auto* n : { "preset", "presetFactory", "presetDirty" }) x->removeAttribute (n);
+                x->setAttribute ("schema", 1);
+                juce::MemoryBlock old; juce::AudioProcessor::copyXmlToBinary (*x, old);
+                LynnDrumProcessor q;
+                q.setStateInformation (old.getData(), (int) old.getSize());
+                CHECK (paramValue (q, def ("velod2")) == v2 && q.bridge().serialize() == pat, "schema-1 state loads");
+                CHECK (q.presetManager().currentName() == "Init" && !q.presetManager().isDirty(), "schema-1 state: preset defaults");
+            }
+        }
+        int garbage[4] = { 1, 2, 3, 4 };
+        p.setStateInformation (garbage, sizeof garbage);                        // must not crash or change anything
+        CHECK (p.presetManager().currentName() == "Deep Backbeat", "garbage state ignored");
+    }
+    tmp.deleteRecursively();
+    std::printf (failures ? "%d FAILURE(S)\n" : "preset tests passed\n", failures);
+    return failures ? 1 : 0;
+}

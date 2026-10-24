@@ -160,7 +160,7 @@ Examples: only drum voices ramp gain across the block and smooth drive; only dru
 *Reason:* it is the shipping behaviour; any "fix" must be a deliberate, tested change.
 
 **21. P-locks written through the live parameter handler with restore-on-next-destination**
-*Original:* `autoNode_updateValue` calls `ccHandler` with the stored original unchanged; `autoNode_setDestination` restores `midiParser_originalCcValues[dest]` when the destination changes.
+*Original:* `autoNode_updateValue` calls `ccHandler` with the stored original unchanged; `autoNode_setDestination` restores `midiParser_originalCcValues[dest]` of the previous destination on every trigger (verified, S0).
 *Problem:* collides with modulation and host automation if implemented as direct writes (which value is "base"?).
 *Adaptation:* engine **override** layer (`lxr_set_override`): effective = override ?? base, then modulation as before; clearing restores base. Order: base/override → velocity/LFO modulation → transform.
 *Reason:* keeps host-visible parameters untouched and makes the interplay deterministic. **[verify]** the original's order (p-lock vs. modulation writes within a block) on the harness.

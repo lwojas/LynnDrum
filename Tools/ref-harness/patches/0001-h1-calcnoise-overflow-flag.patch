@@ -1,0 +1,20 @@
+--- a/Src/Soundengine/DSPAudio/Oscillator.c	2026-10-24 15:27:19
++++ b/Src/Soundengine/DSPAudio/Oscillator.c	2026-10-24 15:27:31
+@@ -342,12 +342,14 @@
+ //-----------------------------------------------------------
+ int16_t calcNoise(OscInfo* osc)
+ {
++	/* HOST-HARNESS H1: the original reads the APSR V flag left by an unspecified
++	 * preceding instruction. Emulated as signed overflow of this very add. */
++	const uint32_t lxr_prevPhase = osc->phase;
+ 	osc->phase += osc->phaseInc;
+ 
+ 	//check overflow flag, ( if osc->phase == osc->phaseInc a reset occured ==> retrigger, too
+-	APSR_Type apsr;
+-	apsr.w = __get_APSR();
+-	if(apsr.b.V ||  (osc->phase == osc->phaseInc))
++	const int lxr_vFlag = ((int32_t)((lxr_prevPhase ^ osc->phase) & (osc->phaseInc ^ osc->phase))) < 0;
++	if(lxr_vFlag ||  (osc->phase == osc->phaseInc))
+ 	{
+ 		//overflow happened -> phaseWrapped
+ 

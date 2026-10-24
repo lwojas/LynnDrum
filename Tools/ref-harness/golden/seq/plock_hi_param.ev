@@ -1,0 +1,8 @@
+1 sub=0 cc f4 69 50
+1 sub=0 trig 0 60 100
+4001 sub=0 cc f4 69 0
+4001 sub=0 trig 0 60 100
+8001 sub=0 cc f4 69 50
+8001 sub=0 trig 0 60 100
+12001 sub=0 cc f4 69 0
+12001 sub=0 trig 0 60 100

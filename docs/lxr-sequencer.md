@@ -68,7 +68,7 @@ Observations that matter for a faithful port: priority is **next > current > pre
 
 `seq_triggerVoice(track, vol, note)`: parse the step's p-locks → `voiceControl_noteOff(track)` → `voiceControl_noteOn(track, note, vol)` → MIDI-out bookkeeping.
 
-**P-locks (automation nodes)**: two `AutomationNode`s per track. At each trigger: `setDestination(node, step.paramNr)` — if the *previous* destination differs it is **restored to its stored original value**; then `updateValue(node, step.paramVal)` pushes the value through the same parameter handler (`ccHandler`) as a live write. So a p-lock acts from its trigger until the track's next trigger replaces or clears it, and it does not alter the stored kit value. (`param1Nr == 0xff` clears.) Port: p-lock = *per-track base-value override* applied through `lxr_apply_param` with the override mask; restoring = re-applying the base.
+**P-locks (automation nodes)**: two `AutomationNode`s per track. At each trigger: `setDestination(node, step.paramNr)` — the *previous* destination is **always restored to its stored original value** (verified on the oracle; even when unchanged); then `updateValue(node, step.paramVal)` pushes the value through the same parameter handler (`ccHandler`) as a live write. So a p-lock acts from its trigger until the track's next trigger replaces or clears it, and it does not alter the stored kit value. (`param1Nr == 0xff` clears.) Port: p-lock = *per-track base-value override* applied through `lxr_apply_param` with the override mask; restoring = re-applying the base.
 
 **Roll**: while a roll button is held, at each `seq_nextStep` the track retriggers whenever `stepIndex % seq_rollRate == 0` (`seq_rollRate` = 1/16 → every step, 1/8 → every 2nd, 1/4 → every 4th, 1/2 → every 8th, 1/1 → every 16th; the code stores `{0,1,3,7,15}+1`). So **roll granularity is whole steps at step boundaries**, not sub-ticks. Velocity is fixed `ROLL_VOLUME = 100`, the note is the step's note, and rolled notes can be recorded; with the sequencer stopped (or rate = one-shot) a press triggers once. **Euclid**: `euklid_calcRecursive(length, steps, …)` (Bjorklund) writes the main-step bitmap for the active track; rotation by `PAR_EUKLID_ROTATION`. **Track rotation** (`PAR_TRACK_ROTATION`) shifts the track.
 
@@ -153,7 +153,7 @@ Observations that matter for a faithful port: priority is **next > current > pre
 | S2 | MIDI-clock slave, MTC | removed | host transport |
 | S3 | position relative to start | anchored to host position (locate/loop-safe) | DAW workflow |
 | S4 | `GetRng()` hardware | seeded PRNG | repeatable bounces |
-| S5 | Shuffle by period lengthening | PPQ-domain offset of odd steps | same musical result in a stateless clock |
+| S5 | Shuffle by period lengthening | **Reproduced as is (decision D8): the firmware clock core is kept and polled once per engine block** | the original's flam/shift compression in odd steps is part of the sound |
 | S6 | Pattern RAM/backup buffer swap on pattern change (`copyBackupBufferToPattern`) | edits are committed immediately to the pattern; no "discard unsaved edits on pattern change" | desktop state model (confirm desired) |
 | S7 | Front-panel LEDs, MIDI-out, trigger-out | removed | n/a |
 | S8 | Tempo is an integer BPM (`seq_setBpm(uint16_t)`; also feeds LFO sync via `lfo_calcPhaseInc`) | float host tempo (e.g. 136.37) for the sequencer clock and LFO sync | host tempo is fractional; truncating would drift against the DAW grid. For reference-mode tests drive both with integer BPM (T0 stays exact). |
@@ -165,7 +165,9 @@ Observations that matter for a faithful port: priority is **next > current > pre
 - Edge cases: shift +7 on the last step wrapping into the next pattern; flam ×8 + shift −7 (mask overlap); `length` = 1; track length 64; probability 1 vs 100; mute mid-pattern; pattern switch during a flam.
 - Soak: random edits during playback (no allocation/locks; lock-free queue stress).
 
-## 9. Open items (resolve in the sequencer harness phase)
+## 9. Open items — status after stage S0 (see `ref-harness.md` §5b for evidence)
+
+*Resolved on the oracle:* 1 (coupling is real), 2 (shuffle: odd steps; delay/compress behaviour of sub-ticks documented), 3 (consistent, unverifiable), 6 partly. *Still open:* 4, 5, and the D8 decisions. Original list:
 
 1. The `chokeNext/chokeCurrent` cross-track coupling (see §3).
 2. Exact shuffle formula and which steps are "odd" (`seq_masterStepCnt % 2`), including the first step after start.

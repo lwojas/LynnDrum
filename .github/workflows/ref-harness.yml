@@ -1,0 +1,45 @@
+name: ref-harness
+on: [push, pull_request]
+jobs:
+  t0:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { submodules: recursive }
+      - name: Build harness
+        run: |
+          cmake -S Tools/ref-harness -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build -j4
+      - name: Run scenario catalogue and compare with golden manifest
+        run: |
+          python3 Tools/ref-harness/scripts/gen_scenarios.py build/scen Reference/lxr-desktop-app/Core/Inc/Parameters.h
+          sh Tools/ref-harness/scripts/run_scenarios.sh build/lxr_ref_render build/scen build/manifest.txt
+          diff -u Tools/ref-harness/golden/manifest.txt build/manifest.txt
+      - name: Sequencer oracle (stage S0) event streams
+        run: |
+          python3 Tools/ref-harness/scripts/gen_seq_scenarios.py build/seqscen
+          sh Tools/ref-harness/scripts/run_seq_scenarios.sh build/lxr_ref_seq build/seqscen build/seqev
+          diff -ru Tools/ref-harness/golden/seq build/seqev
+      - name: lxr_core null test (T0 vs harness) and instance isolation
+        run: |
+          cmake -S Tools/compare -B build-core -DCMAKE_BUILD_TYPE=Release
+          cmake --build build-core -j4
+          python3 Tools/compare/null_test.py build/lxr_ref_render build-core/lxr_render build/scen
+          build-core/test_instances
+      - name: lxr_seq (stage S1) event streams vs oracle, instance isolation
+        run: |
+          sh Tools/ref-harness/scripts/run_seq_scenarios.sh build-core/lxr_render_seq build/seqscen build-core/seqev
+          diff -ru Tools/ref-harness/golden/seq build-core/seqev
+          build-core/test_seq_instances
+      - name: Plugin build and host-layer / bundle tests
+        run: |
+          cmake -S . -B build-lynn -DCMAKE_BUILD_TYPE=Release
+          cmake --build build-lynn -j4
+          build-lynn/Tools/host_tests/host_tests
+          build-lynn/Source/Plugin/plugin_tests/plugin_smoke_artefacts/Release/plugin_smoke build-lynn/Source/Plugin/LynnDrum_artefacts/Release/VST3/LynnDrum.vst3
+          build-lynn/Source/Plugin/plugin_tests/preset_tests_artefacts/Release/preset_tests
+          build-lynn/Source/Plugin/plugin_tests/transport_tests_artefacts/Release/transport_tests

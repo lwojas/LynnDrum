@@ -1,0 +1,107 @@
+--- a/Src/Soundengine/DSPAudio/Oscillator.c	2026-10-24 15:36:57
++++ b/Src/Soundengine/DSPAudio/Oscillator.c	2026-10-24 15:36:57
+@@ -21,7 +21,7 @@
+ 
+ static __inline uint32_t freq2PhaseIncr(const float f) //4096
+ {
+-	return (((TABLESIZE*f)/REAL_FS))*1048576 ; // 1048576 <-> (<<20)
++	return lxr_f2u32((((TABLESIZE*f)/REAL_FS))*1048576); // 1048576 <-> (<<20)
+ }
+ //TODO die phaseInc berechnung kann man doch sicher per LUT machen!
+ //-----------------------------------------------------------
+@@ -32,7 +32,7 @@
+ //-----------------------------------------------------------
+ static __inline int freqToMidiNote(const float f)
+ {
+-	return (12*fast_log2((uint32_t)(f/440.f)))+70;
++	return (12*fast_log2(lxr_f2u32(f/440.f)))+70;
+ }
+ //-----------------------------------------------------------
+ static __inline uint8_t freqToTableIndex(const float f)
+@@ -44,12 +44,12 @@
+ //-----------------------------------------------------------
+ static __inline uint32_t freq2PhaseIncr1024(const float f)
+ {
+-	return (((1024*f)/REAL_FS))*4194304 ; //(<<22)
++	return lxr_f2u32((((1024*f)/REAL_FS))*4194304); //(<<22)
+ }
+ //-----------------------------------------------------------
+ static __inline uint32_t freq2PhaseIncr32767(const float f)
+ {
+-	return (((1024*f)/REAL_FS))*131072 ; //(<<17)
++	return lxr_f2u32((((1024*f)/REAL_FS))*131072); //(<<17)
+ }
+ //-----------------------------------------------------------
+ IN_ITCM_RAM void calcSineBlock(OscInfo* osc, int16_t* buf, const uint8_t size ,const float gain)
+@@ -114,7 +114,7 @@
+ 		const uint32_t oscPhase = osc->phase;
+ 		int16_t oscOut ;
+ 
+-		const uint32_t index =  oscPhase + (((uint32_t)(modBuffer[i]*osc->fmMod))<<17);
++		const uint32_t index =  oscPhase + ((lxr_f2u32(modBuffer[i]*osc->fmMod))<<17);
+ 		uint32_t  itg	= index>>20;
+ 
+ 	#if INTERPOLATE_FM_OSC
+@@ -137,7 +137,7 @@
+ 	const uint32_t oscPhase 	= osc->phase;
+ 	int16_t oscOut ;
+ 
+-	const uint32_t index =  oscPhase + (((uint32_t)(modOsc->output*osc->fmMod))<<17);
++	const uint32_t index =  oscPhase + ((lxr_f2u32(modOsc->output*osc->fmMod))<<17);
+ 	uint32_t  itg	= index>>20;
+ 
+ #if INTERPOLATE_FM_OSC
+@@ -162,7 +162,7 @@
+ 	{
+ 		const uint32_t oscPhase = osc->phase;
+ 		int16_t oscOut ;
+-		const uint32_t index =  oscPhase + (((uint32_t)(modBuffer[i]*osc->fmMod))<<19);
++		const uint32_t index =  oscPhase + ((lxr_f2u32(modBuffer[i]*osc->fmMod))<<19);
+ 
+ 		uint32_t  itg	= index>>22; //10 bit index, 22 bit fractional part
+ 
+@@ -190,7 +190,7 @@
+ 	{
+ 		const uint32_t oscPhase = osc->phase;
+ 		int16_t oscOut ;
+-		const uint32_t index =  oscPhase + (((uint32_t)(modBuffer[i]*osc->fmMod))<<19);
++		const uint32_t index =  oscPhase + ((lxr_f2u32(modBuffer[i]*osc->fmMod))<<19);
+ 		const uint32_t index2 = index + pwm * (UINT32_MAX/2);
+ 
+ 		 uint32_t  itg	 = index>>22;
+@@ -228,7 +228,7 @@
+ 	const uint32_t oscPhase = osc->phase;
+ 	int16_t oscOut ;
+ 
+-	const uint32_t index =  oscPhase + (((uint32_t)(modOsc->output*osc->fmMod))<<19);
++	const uint32_t index =  oscPhase + ((lxr_f2u32(modOsc->output*osc->fmMod))<<19);
+ 
+ 	uint32_t  itg	= index>>22;
+ 
+@@ -508,7 +508,7 @@
+ 		const uint32_t oscPhase 	= osc->phase;
+ 		int16_t oscOut ;
+ 
+-		const uint32_t index =  oscPhase + (((uint32_t)(modBuffer[i]*osc->fmMod))<<14);
++		const uint32_t index =  oscPhase + ((lxr_f2u32(modBuffer[i]*osc->fmMod))<<14);
+ 		uint32_t  itg	= index>>17;
+ 
+ 	#if INTERPOLATE_FM_OSC
+@@ -535,7 +535,7 @@
+ 	const uint32_t oscPhase 	= osc->phase;
+ 	int16_t oscOut ;
+ 
+-	const uint32_t index =  oscPhase + (((uint32_t)(modOsc->output*osc->fmMod))<<14);
++	const uint32_t index =  oscPhase + ((lxr_f2u32(modOsc->output*osc->fmMod))<<14);
+ 	uint32_t  itg	= index>>17;
+ 
+ #if INTERPOLATE_FM_OSC
+@@ -569,7 +569,7 @@
+ 		const uint32_t oscPhase 	= osc->phase;
+ 		int16_t oscOut ;
+ 
+-		const uint32_t index =  oscPhase + (((uint32_t)(modBuffer[i]*osc->fmMod))<<14);
++		const uint32_t index =  oscPhase + ((lxr_f2u32(modBuffer[i]*osc->fmMod))<<14);
+ 		uint32_t  itg	= index>>17;
+ 
+ 	#if INTERPOLATE_FM_OSC

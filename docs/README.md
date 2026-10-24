@@ -1,5 +1,7 @@
 # LynnDrum — LXR-derived VST3 prototype: study documents
 
+> **Correction (2026-10-24):** wherever these study documents say "228 sound parameters" / "228-byte kit", read **247** (`END_OF_SOUND_PARAMETERS = 247`, verified by compiling `Parameters.h`; the 228 came from a stale comment upstream). The plugin exposes 233 of them as host parameters (`DEVIATIONS.md` P1).
+
 Source: `Reference/lxr-desktop-app` (pinned at `a43cd4f`, 2026-10-23). UI inputs: `concept/stitch_lxr_02_vst_ui_design/` (mockup) and `../guidelines.md` (design guideline; inspiration only, see `lxr-ui-architecture.md` §7).
 Scope of this stage: **study and plan only. No plugin code has been written. webdsp was not touched and was not read.**
 Revised 2026-10-24 after the first round of decisions (below).

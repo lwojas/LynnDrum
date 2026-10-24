@@ -1,0 +1,12 @@
+# smoke test: init kit, one kick, one snare, one closed hat, one open hat
+seed 1
+bpm 120
+kit init
+trig 0 60 100
+render 100
+trig 3 60 100
+render 100
+trig 5 60 100
+render 60
+trig 6 60 100
+render 100

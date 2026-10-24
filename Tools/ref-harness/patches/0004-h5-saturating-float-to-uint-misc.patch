@@ -1,0 +1,63 @@
+--- a/Src/Soundengine/MIDI/MidiParser.c	2026-10-24 15:36:57
++++ b/Src/Soundengine/MIDI/MidiParser.c	2026-10-24 15:36:57
+@@ -1296,16 +1296,16 @@
+ 			case CC2_OFFSET_LFO1:
+ 			case CC2_OFFSET_LFO2:
+ 			case CC2_OFFSET_LFO3:
+-				voiceArray[msg.data1-CC2_OFFSET_LFO1].lfo.phaseOffset = value.flt * 0xffffffff;
++				voiceArray[msg.data1-CC2_OFFSET_LFO1].lfo.phaseOffset = lxr_f2u32(value.flt * 0xffffffff);
+ 				break;
+ 			case CC2_OFFSET_LFO4:
+-				snareVoice.lfo.phaseOffset = value.flt * 0xffffffff;
++				snareVoice.lfo.phaseOffset = lxr_f2u32(value.flt * 0xffffffff);
+ 				break;
+ 			case CC2_OFFSET_LFO5:
+-				cymbalVoice.lfo.phaseOffset = value.flt * 0xffffffff;
++				cymbalVoice.lfo.phaseOffset = lxr_f2u32(value.flt * 0xffffffff);
+ 				break;
+ 			case CC2_OFFSET_LFO6:
+-				hatVoice.lfo.phaseOffset = value.flt * 0xffffffff;
++				hatVoice.lfo.phaseOffset = lxr_f2u32(value.flt * 0xffffffff);
+ 				break;
+ 
+ 			case CC2_AUDIO_OUT1:
+--- a/Src/Soundengine/DSPAudio/DrumVoice.c	2026-10-24 15:36:57
++++ b/Src/Soundengine/DSPAudio/DrumVoice.c	2026-10-24 15:36:57
+@@ -35,7 +35,7 @@
+ //---------------------------------------------------
+ void drum_setPhase(const uint8_t phase, const uint8_t voiceNr)
+ {
+-	const uint32_t startPhase = (phase/127.f)*0xffffffff;
++	const uint32_t startPhase = lxr_f2u32((phase/127.f)*0xffffffff);
+ 	voiceArray[voiceNr].osc.startPhase = startPhase;
+ 	voiceArray[voiceNr].modOsc.startPhase = startPhase;
+ }
+--- a/Src/Soundengine/DSPAudio/lfo.c	2026-10-24 15:36:57
++++ b/Src/Soundengine/DSPAudio/lfo.c	2026-10-24 15:36:57
+@@ -115,7 +115,7 @@
+ {
+ 	if(sync==0)//no sync
+ 	{
+-		return freq/(LFO_SR) * 0xffffffff;
++		return lxr_f2u32(freq/(LFO_SR) * 0xffffffff);
+ 	}
+ 
+ 	//sync is on
+@@ -130,7 +130,7 @@
+ 	{
+ 		default: //no sync
+ 
+-		return freq/(LFO_SR) * 0xffffffff;
++		return lxr_f2u32(freq/(LFO_SR) * 0xffffffff);
+ 		break;
+ 
+ 		case 1: // 4/1
+@@ -179,7 +179,7 @@
+ 	}
+ 
+ 	float lfoSyncfreq = tempoAsFrequency * scaler;
+-	return (lfoSyncfreq / (LFO_SR)) * 0xffffffff;
++	return lxr_f2u32((lfoSyncfreq / (LFO_SR)) * 0xffffffff);
+ }
+ //-------------------------------------------------------------
+ IN_ITCM_RAM void lfo_setFreq(Lfo *lfo, float f)

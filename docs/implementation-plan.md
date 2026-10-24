@@ -31,21 +31,21 @@ P0 ✔ ─► P1 Ref harness ─► P2 Engine extraction ───────�
 ### Phase 0 — Source and licence analysis *(✔ study done; actions remain)*
 Deliverables: the docs (now ten, incl. `lxr-sequencer.md`). Remaining non-engineering actions: verify the CC-BY page by hand and prepare the attribution text; draft the NOTICE/CREDITS and About text; add `LICENSE` (GPL-3.0-only, matching upstream) and per-file headers policy for `lxr_core`/`lxr_seq`.
 
-### Phase 1 — Reference environment (host harness) *(M1)*
+### Phase 1 — Reference environment (host harness) *(M1) — implemented on macOS arm64; Linux dropped for now, see `ref-harness.md`*
 **Goal:** build the *unmodified* upstream DSP + CC handler on the host and render audio from a script, deterministically.
 - `Tools/ref-harness/`: shim headers first on the include path (`stm32f7xx_hal.h`, `main.h`; `__QADD16/__SSAT/__PKHBT/__CLZ/APSR`, `__fp16` or software half, `FPU->FPDSCR`, `HAL_RNG_*` → seeded xorshift), plus a stub TU for the menu/UART/USB/preset/adc symbols that `MidiParser.c`, `MidiVoiceControl.c`, `DrumVoice.c` etc. reference (≈ 40–60 symbols; the `lxr_dsp` OBJECT-library boundary in `Core/CMakeLists.txt` is the natural cut).
 - CLI `lxr_ref_render`: script (kit bytes, `ccHandler` writes, notes by block index, faders, BPM) → calls `midiParser_ccHandler` / `voiceControl_noteOn` / `mixer_calcNextSampleBlock` as the firmware does → 44 140 Hz stereo WAV (int16 + float) + per-block parameter trace.
 - Only edits to upstream bytes: `.patch` files for the padded wavetable guard and the PRNG seed.
 **Exit:** identical WAVs on macOS arm64 and Linux x86-64, or a documented difference (the negative-float cast, fixed by an explicit saturating helper and registered). **Complexity:** M (4–7 d). **Risks:** hidden hardware dependencies (GPIO reads in the mixer, `adc_*`, `systick_ticks`), ARM-only constructs. **Dependencies:** none.
 
-### Stage S0 — Sequencer harness *(M1b, right after P1; overlaps P2)*
+### Stage S0 — Sequencer harness *(M1b) — implemented 2026-10-24: `lxr_ref_seq`, 75 golden event streams, see `ref-harness.md` §5b*
 **Goal:** a deterministic oracle for the sequencer, and answers to the open items in `lxr-sequencer.md` §9.
 - Extend the harness to compile `sequencer.c`, `clockSync.c`, `EuklidGenerator.c`, `automationNode.c` with stubs for LEDs/UART/menu/trigger-out and an **injected** `systick_ticks` (advanced explicitly) and injected RNG.
 - CLI `lxr_ref_seq`: script (pattern data, track lengths, shuffle, BPM, mute, roll, pattern switches) → logical event stream `(sub-tick index, track, note, vol, p-lock writes)` + the audio via the engine path.
 - Resolve: systick unit (0.25 ms), shuffle formula and "odd step", `choke*` coupling, roll mapping, pattern-switch semantics, p-lock vs modulation ordering.
 **Exit:** golden event streams for ≥ 30 scripted scenarios; the open items are answered (or explicitly accepted as unknown). **Complexity:** M (4–6 d). **Risks:** more hardware entanglement (menu/LED calls inside `seq_nextStep`) than expected → mitigated by stubs; resist editing upstream.
 
-### Phase 2 — Engine extraction / adaptation *(M2)*
+### Phase 2 — Engine extraction / adaptation *(M2) — core done 2026-10-24 (T0 on 818 scenarios, multi-instance test); modulation/override split still open, see `DEVIATIONS.md`*
 **Goal:** the instrument produces sound without JUCE, via a clean C API, bit-exact to the harness.
 1. Copy files per porting §1.1 into `Source/Engine/lxr_core` (headers intact, one commit per group).
 2. Introduce `LxrEngine` (globals → members; voices as an array of 6 type-tagged descriptors where it removes duplication, per-type code paths kept). Mechanical changes only: engine pointer, remove `INDTCM/ITCM`, VLAs → `[64]`, intrinsics/PRNG/fp16 → `Platform/`.
@@ -53,22 +53,22 @@ Deliverables: the docs (now ten, incl. `lxr-sequencer.md`). Remaining non-engine
 4. `Tools/compare` null tester; CLI `lxr_render`.
 **Exit:** **max |diff| = 0** vs the harness for every golden scenario (T0), reference mode, 44 140 Hz; registered deviations pinned by tests. **Complexity:** L (10–15 d). **Risks:** control-tick ordering; the modulation/override rewrite; instance-ising touches every file. **Dependencies:** P1.
 
-### Stage S1 — Sequencer core (`lxr_seq`) *(M2b)*
+### Stage S1 — Sequencer core (`lxr_seq`) *(M2b) — done 2026-10-24: all 75 oracle event streams bit-identical, UBSan-clean, instance-isolation test; the clock is the firmware's own (`DEVIATIONS.md` Q2) so S2 only wraps it*
 **Goal:** the sequencer *logic* as an instance-based, JUCE-free library, bit-exact (in logical events) to S0's oracle.
 - Port `PatternSet`, step/timing structs, main-step bitmaps, flam/shift mask builders, 3-slot probability window, `seq_nextStep`/`seq_processFlam` driven by an explicit **sub-tick index**, p-lock node logic against the override API, track lengths (incl. polymetric master track), Euclid, rotation, mute, roll. Pattern/song switching stubs (S3).
 - API sketch: `seq_create/destroy/reset`, `seq_set_*` edit calls, `seq_advance(state, subTickIndex, TriggerSink*)`, `seq_start/stop/locate(stepCounter)`.
 **Exit:** T0 on the event streams for all S0 scenarios (reference mode includes the shared `choke*` state); property tests for flam/shift mask algebra; fuzz (random patterns/edits, no UB under ASan/UBSan). **Complexity:** M (6–9 d). **Dependencies:** S0 (oracle), P2 steps 1–3 (override API).
 
-### Phase 3 — JUCE plugin shell *(M3, parallel with late P2)*
+### Phase 3 — JUCE plugin shell *(M3) — done 2026-10-24 except pluginval/DAW runs (`docs/plugin.md`)*
 Minimal VST3: stereo out, MIDI in, APVTS with 2 dummy params, a sine "engine", `pluginval` ≥ 5, state save/load, bypass, multiple instances; JUCE 8.x, CMake. **Exit:** passes pluginval; loads in target DAW(s); no allocations in `processBlock` (malloc-trap build). **Complexity:** S (2–3 d).
 
-### Stage S2 — Sequencer clock, transport, edits, bridge *(M4b, with P4)*
+### Stage S2 — Sequencer clock, transport, edits, bridge *(M4b, with P4) — clock, tempo, run/stop, locate/loop anchoring, edit queue, state done; pattern bank/song/Euclid/roll UI and p-lock editing still open*
 - `SeqClock`: `AudioPlayHead` PPQ → 96-PPQ sub-tick boundaries with sample offsets (tempo changes, loops, locates, time-signature agnostic, hosts without position info → free-run); `SeqTransport`: host-sync + free-run, position anchoring (`lxr-sequencer.md` §4.2); shuffle in the PPQ domain.
 - Sequencer triggers + p-lock overrides into the `EventScheduler`; latency compensation identical to MIDI.
 - `SeqBridge`: lock-free edit-command queue (UI → audio), mirrored UI copy, playhead telemetry; state serialisation of the `PatternSet`; host-automatable sequencer controls (run/hold, pattern select, shuffle, mutes, roll hold).
 **Exit:** (T0) with the clock fed the S0 sub-tick stream, plugin-rendered audio equals the harness; (T2) trigger sample-offset error ≤ 1 engine tick vs host PPQ at 44.1/48/96 kHz, block sizes 1…4096, tempo ramps, loop/locate/stop/start; no allocation/locks; state round-trip. **Complexity:** M–L (7–10 d). **Risks:** hosts with irregular `AudioPlayHead` data; position-anchoring bugs on locate/loop; shuffle-in-PPQ equivalence (S5). **Dependencies:** S1, P3, P4.
 
-### Phase 4 — Engine integration *(M4)*
+### Phase 4 — Engine integration *(M4) — done for the audio path: EngineHost + resampler + sample-offset events (`docs/plugin.md`); latency/bypass polish open*
 `EngineHost`: tick loop, output FIFO, resampler (44 140 → host), `EventScheduler` with tick-quantised timestamps, note map / channel mode, tempo, bypass, latency reporting.
 **Exit:** at host 44 140 Hz (resampler bypassed) plugin output equals `lxr_render` bit-exactly; at 44.1/48/88.2/96/192 kHz metrics within tolerance (T2); note-on-to-sound latency documented. **Complexity:** M (5–8 d; resampler selection dominates). **Risks:** resampler quality/latency; block sizes not multiples of 64; timestamp mapping with latency compensation. **Dependencies:** P2, P3.
 
@@ -76,7 +76,7 @@ Minimal VST3: stereo out, MIDI in, APVTS with 2 dummy params, a sine "engine", `
 Generated parameter table (from Appendix A) + display functions + defaults; APVTS layout (127-step floats, choices, bools); audio-thread polling → `lxr_set_param`; generated modulation-destination lists (also used for p-lock destinations); per-voice `fader`/`mute`; automation round-trip tests; kit snapshot.
 **Exit:** all ≈200 parameters automatable and audible; each parameter verified by a sweep test against the harness (T0 per parameter); pluginval automation tests pass. **Complexity:** M (5–8 d). **Risk:** table errors → generate and test, never hand-write.
 
-### Phase 6 — State and presets *(M6)*
+### Phase 6 — State and presets *(M6) — done 2026-10-24 for the plugin (clean-room factory presets, JSON preset format, user presets, dirty tracking, schema-2 state, preset bar); LXR file import, morph, kit-only load still open (`docs/plugin.md`)*
 Versioned state (`ValueTree`): params, faders, mutes, note map, **sequencer `PatternSet`** (S2), UI size; `KitSnapshot` double-buffered hand-off; kit save/load (`.lynnkit` = 228 bytes + name + schema); **clean-room** factory kits and a few factory patterns; preset-browser data model. Optional: LXR kit/pattern importer (needs `presetManager.c` reading — unresolved #6).
 **Exit:** save → reload → render bit-identical (including patterns); old-schema states load; DAW project reload. **Complexity:** S–M (3–5 d).
 
