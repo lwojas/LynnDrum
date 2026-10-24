@@ -1,0 +1,3 @@
+[submodule "Reference/lxr-desktop-app"]
+	path = Reference/lxr-desktop-app
+	url = https://github.com/erica-synths/lxr-desktop-app.git

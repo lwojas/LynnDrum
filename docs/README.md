@@ -1,0 +1,78 @@
+# LynnDrum — LXR-derived VST3 prototype: study documents
+
+Source: `Reference/lxr-desktop-app` (pinned at `a43cd4f`, 2026-10-23). UI input: `concept/stitch_lxr_02_vst_ui_design/` (no `guideline.md` yet).
+Scope of this stage: **study and plan only. No plugin code has been written. webdsp was not touched and was not read.**
+Revised 2026-10-24 after the first round of decisions (below).
+
+## Decisions so far
+
+| Topic | Decision |
+|---|---|
+| Name | **LynnDrum** for now. No "LXR"/"Erica Synths" in name, header or window title; truthful derivation statement in About/credits. |
+| Licence | Free and open source → whole plugin GPL-3 (accepted). |
+| Third-party assets | Keep the CC-BY transient samples **and attribute** them. Initial kit data (unknown provenance) is not shipped; clean-room factory kits instead. |
+| Validation | No hardware unit. Validate against the *source* (host reference harness, bit-exact where possible); online references only for plausibility. |
+| Sequencer | **In scope — part of the main USP, in the first playable** (`lxr-sequencer.md`). |
+| UI | React/Tailwind WebView; fixed window acceptable to start, but **fluid/responsive from the first component** (`lxr-ui-architecture.md` §6). |
+
+| Doc | Content |
+|---|---|
+| [lxr-architecture.md](lxr-architecture.md) | Licence/source boundary, repo map, build switches, execution/thread model, the parameter-layer problem |
+| [lxr-dsp.md](lxr-dsp.md) | Oscillators, FM, filter, envelopes, click control, transients, voices, modulation, FX — what the code does, with measured numbers |
+| [lxr-sequencer.md](lxr-sequencer.md) | **New.** Step sequencer: original data model and timing, flam/shift/probability/p-lock logic, plugin design (host-PPQ clock, transport, edits), UI mapping, tests, open items |
+| [lxr-parameter-map.md](lxr-parameter-map.md) | PAR/CC numbering, transforms, rate classes, full generated 254-row table |
+| [lxr-audio-flow.md](lxr-audio-flow.md) | Event → voice → mixer → FX bus → output; timing model; stage inventory |
+| [lxr-vst-architecture.md](lxr-vst-architecture.md) | Layering, C API (incl. override API for p-locks), parameter/event flow, sample-rate strategy, platform adaptation, project structure, sequencer module |
+| [lxr-ui-architecture.md](lxr-ui-architecture.md) | React/WebView vs native vs hybrid; mockup-vs-engine gap table; UI↔DSP boundary; fluid layout rules |
+| [lxr-porting-notes.md](lxr-porting-notes.md) | Direct ports / adaptations / replacements / omissions; found problems (original → problem → adaptation → reason); unresolved questions |
+| [lxr-dsp-lessons.md](lxr-dsp-lessons.md) | Observations for webdsp (not applied) |
+| [implementation-plan.md](implementation-plan.md) | Phases incl. sequencer stages S0–S3, milestones, risks, test strategy, order |
+
+---
+
+# Recommended approach
+
+### 1. What should we actually port?
+The **voice DSP and the mixer/FX-bus topology, unchanged in behaviour**: `DrumVoice`, `Snare`, `HiHat`, `CymbalVoice`; table oscillators + FM + noise; `SlopeEg2`/`Decay`/`snapEg`; the ZDF SVF; transient generator; per-voice LFO and velocity modulation; the 6-voice mixer with routing/pan/decimator; the single FX slot (drive, ring-mod, compressor, delay); the **parameter transforms** from `midiParser_ccHandler` (228 sound parameters); and the **sequencer logic** (7 tracks × 64 steps, per-track length, flam ×2…×8, shift ±7, probability, p-locks, shuffle, pattern/song switching, Euclid, roll) as a separate derived library driven by sub-ticks.
+
+### 2. What should we adapt?
+- Global state → one `LxrEngine` (and one sequencer state) per plugin instance.
+- `ccHandler` → a clean `lxr_set_param(PAR, 0..127)` (transforms only); modulation **and sequencer p-locks** re-hosted on a base/override/effective split.
+- Intrinsics, fp16 delay storage, RNG, denormals → a platform shim.
+- Fixed 44 140 Hz / 64-frame engine → kept, with a **high-quality resampler at the edge** and a block FIFO.
+- **Sequencer clock → host PPQ** (96 PPQ, 24 sub-ticks per 16th, sample-offset boundaries), host-sync and free-run modes, position anchoring for loops/locates; events quantised to the engine tick (as in the original).
+- MIDI → note-map (default) or channel mode; faders → per-voice `fader` parameters; mute in engine, solo in the shell.
+- Undefined behaviours (negative-float → uint cast in FM, table over-read, VLAs) → explicit, test-pinned equivalents that **preserve the original result**.
+
+### 3. What should we leave behind?
+Everything hardware: HAL, DMA/I2S ISRs, ADC pots/faders, jack-detect routing, LCD/menu/LEDs/buttons/encoder, front-panel UART, DIN/USB MIDI stacks, SD/FatFs, bootloader tooling, MTC/MIDI-clock slave, trigger-out, sequencer LED/MIDI-out bookkeeping. Also: reverb (compiled out upstream), the crash sample (dead), the `initKit` data (unknown provenance).
+
+### 4. What should the first playable prototype contain?
+Six voices + open hat triggered from **MIDI and the step sequencer**; all ≈200 sound parameters automatable (127-step) and saved with the patterns; sequencer with 7 tracks × 64 steps, per-track length, probability, flam, shift, p-locks, shuffle, host-sync/free-run, one active pattern (switching by command); one global FX slot; stereo out at any host rate; bypass; reference (int16-exact) numeric mode; fluid React UI with mixer rack, synth modules and the **sequencer deck**. Patterns 2–64, song mode, Euclid and live roll follow immediately in stage S3.
+
+### 5. Project structure
+See `lxr-vst-architecture.md` §9: `Reference/` (pristine) · `Source/{Plugin, Parameters, Engine, Engine/lxr_core, Platform, MIDI, Sequencer/{lxr_seq, SeqClock, SeqTransport, SeqBridge}}` · `WebUI/` · `Tests/` · `Tools/{ref-harness, paramgen, compare}` · `docs/`. `lxr_core` and `lxr_seq` are the only GPL-derived code and are the derivation boundary (all of it is GPL-3 in the end by decision).
+
+### 6. JUCE/DSP boundary
+A **C API** (`lxr_create / reset / load_kit / set_param / set_override / clear_override / set_fader / set_mute / set_bpm / trigger / render_block`) in a library with no JUCE header; a separate JUCE-free `lxr_seq` library (`seq_advance(subTick, sink)`). The plugin owns `EngineHost` (tick loop, resampler, FIFO), `EventScheduler` (MIDI + sequencer + parameter + UI events), `SeqClock/SeqTransport`, and the APVTS; `PluginProcessor` is glue only.
+
+### 7. UI boundary
+UI = a replaceable view. Three channels only: **parameters** (relays ⇄ APVTS ⇄ host), **UI events/edit commands** (lock-free SPSC to the audio thread, including pattern edits), **telemetry** (atomics polled at 30–60 Hz: meters, voice activity, playhead). Technology: **React/Vite/Tailwind compiled into a JUCE 8 WebView**, gated by an early host-compatibility spike; fluid layout rules (design size 1300×860, rem scaling, container queries, tiered layouts, resizable window with remembered size). The mockup has controls the engine does not (24 dB filter, feedback, sends, dual FX, accents, dB saturation) and omits sequencer features the engine has (probability, shift, track length, rotation, pattern/song) — per-control decisions are in the UI doc.
+
+### 8. Biggest technical risks
+1. **Sequencer port fidelity and clock replacement** (host transport variety; unresolved original quirks such as the shared `choke*` state and the shuffle formula) — mitigated by a sequencer oracle (stage S0) before porting.
+2. **Instance-ising and re-hosting modulation/p-locks** without changing the sound.
+3. **Resampler quality/latency** (the engine cannot run at host rate without redesign).
+4. **Undefined behaviour in the original** producing platform-dependent sound.
+5. **WebView stability across DAWs** and **responsive-layout regressions**.
+6. **No hardware ground truth** → "sounds like the LXR" can only mean "matches the source".
+7. Licensing housekeeping (NOTICE §7 terms, CC-BY attribution text, initKit provenance) — now routine rather than blocking.
+
+### 9. What should we implement first?
+Phase 1: the **host reference harness** (unmodified upstream DSP + CC handler + shims + deterministic CLI renderer), immediately followed by stage S0 (sequencer harness/oracle). Then extract `lxr_core` voice-by-voice behind a bit-exact null test, with `lxr_seq` in parallel behind an event-stream test.
+
+### 10. What should explicitly NOT be implemented yet?
+Morph, kit/pattern-file import from real LXR devices, reverb, FX chains or tempo sync, aux/multi-out buses, float "plugin mode", native-rate (no resampler) mode, sample-accurate trigger offsets, external MIDI-clock/MTC sync, MIDI-record into patterns, any DSP or sequencer "improvement" before the reference is validated, and UI elements with no engine counterpart.
+
+### Assumptions to validate before implementation
+1. Shipping firmware = this source with these build flags. 2. Half-wave FM (negative → 0) is real. 3. True I2S rate is 44 140 Hz (no hardware to measure — accept the code's claim). 4. `systick_ticks` = 0.25 ms (sequencer harness). 5. The CC-BY attribution requirements as reported (check the page manually). 6. JUCE 8 WebView behaves in the target hosts. 7. 7-bit parameter resolution is acceptable for automation. 8. Hosts provide usable `AudioPlayHead` data; free-run is the fallback. 9. `guideline.md` (still to come) does not change the UI scope materially.
